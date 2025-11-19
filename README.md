@@ -87,7 +87,7 @@ A modern inventory management system built with Next.js 15, TypeScript, and Tail
 1. **Clone the repository**
 
    ```bash
-   git clone <repository-url>
+   git clone <https://github.com/windme2/withme>
    cd withme
    ```
 
@@ -191,48 +191,6 @@ The application includes comprehensive mock data for development and demonstrati
 - **Customers**: 20 customer profiles
 - **Suppliers**: 20 supplier profiles
 - **Orders**: Sales and purchase orders with various statuses
-
-## 🌐 API Integration
-
-This project is currently frontend-only with mock data. For backend integration:
-
-1. Replace mock data imports with API calls
-2. Implement authentication (NextAuth.js recommended)
-3. Add data fetching with SWR or TanStack Query
-4. Set up environment variables for API endpoints
-5. Implement server actions for mutations
-
-See `API_INTEGRATION_GUIDE.md` for detailed integration instructions.
-
-## 🎯 Future Enhancements
-
-- [ ] Real-time notifications with WebSocket
-- [ ] Advanced reporting and analytics
-- [ ] Export functionality (PDF, Excel)
-- [ ] Barcode scanning integration
-- [ ] Multi-warehouse support
-- [ ] Mobile app (React Native)
-- [ ] Email notifications
-- [ ] Document attachment support
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**Port already in use**
-
-```bash
-# Kill process on port 3000
-npx kill-port 3000
-```
-
-**Module not found errors**
-
-```bash
-# Clear cache and reinstall
-rm -rf node_modules .next
-npm install
-```
 
 **TypeScript errors**
 
