@@ -6,7 +6,6 @@ import { useRouter, usePathname } from "next/navigation";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { useSidebar } from "@/contexts/sidebar-context";
-import { LoadingSpinner } from "@/components/ui/loading";
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();

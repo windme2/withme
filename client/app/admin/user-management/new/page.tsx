@@ -27,7 +27,6 @@ import {
   Key,
   Shield,
   Mail,
-  CheckCircle2,
   Info,
 } from "lucide-react";
 import { toast } from "sonner";

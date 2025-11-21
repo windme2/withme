@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,19 +31,23 @@ import {
 import {
   Plus,
   Search,
-  User, // Icon for Customers
-  Users, // Icon for Total Customers
-  TrendingUp, // Icon for Total Spent
+  User,
+  Users,
+  TrendingUp,
   CheckCircle2,
   Clock,
-  XCircle,
   ChevronLeft,
   ChevronRight,
   Phone,
-  Briefcase, // Icon for Total Orders
+  Briefcase,
   X,
-  Mail, // Icon for Contact
+  Mail,
+  Edit,
+  Save,
+  MapPin,
 } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 // --- Mock Data ---
 const mockCustomers = [
@@ -106,7 +109,10 @@ const mockCustomers = [
     totalOrders: 18,
     totalSpent: 920000,
     status: "Active",
-    details: { email: "robert@techsolutions.co", address: "156 Phahonyothin, Bangkok" },
+    details: {
+      email: "robert@techsolutions.co",
+      address: "156 Phahonyothin, Bangkok",
+    },
   },
   {
     id: "C-2025-007",
@@ -116,7 +122,10 @@ const mockCustomers = [
     totalOrders: 22,
     totalSpent: 1150000,
     status: "Active",
-    details: { email: "lisa@officesupplies.com", address: "88 Rama 4 Rd, City" },
+    details: {
+      email: "lisa@officesupplies.com",
+      address: "88 Rama 4 Rd, City",
+    },
   },
   {
     id: "C-2025-008",
@@ -146,7 +155,10 @@ const mockCustomers = [
     totalOrders: 14,
     totalSpent: 780000,
     status: "Active",
-    details: { email: "kevin@digitalworld.co.th", address: "77 Sathorn Rd, Bangkok" },
+    details: {
+      email: "kevin@digitalworld.co.th",
+      address: "77 Sathorn Rd, Bangkok",
+    },
   },
   {
     id: "C-2025-011",
@@ -166,7 +178,10 @@ const mockCustomers = [
     totalOrders: 3,
     totalSpent: 85000,
     status: "Active",
-    details: { email: "chris@expressdelivery.th", address: "55 Lat Phrao, Bangkok" },
+    details: {
+      email: "chris@expressdelivery.th",
+      address: "55 Lat Phrao, Bangkok",
+    },
   },
   {
     id: "C-2025-013",
@@ -176,7 +191,10 @@ const mockCustomers = [
     totalOrders: 1,
     totalSpent: 15000,
     status: "Inactive",
-    details: { email: "patricia@primeretail.net", address: "99 Petchburi Rd, City" },
+    details: {
+      email: "patricia@primeretail.net",
+      address: "99 Petchburi Rd, City",
+    },
   },
   {
     id: "C-2025-014",
@@ -186,7 +204,10 @@ const mockCustomers = [
     totalOrders: 25,
     totalSpent: 1420000,
     status: "Active",
-    details: { email: "daniel@supermart.co.th", address: "188 Bangna, Bangkok" },
+    details: {
+      email: "daniel@supermart.co.th",
+      address: "188 Bangna, Bangkok",
+    },
   },
   {
     id: "C-2025-015",
@@ -196,7 +217,10 @@ const mockCustomers = [
     totalOrders: 11,
     totalSpent: 630000,
     status: "Active",
-    details: { email: "jennifer@qualityproducts.com", address: "42 Charoenkrung, City" },
+    details: {
+      email: "jennifer@qualityproducts.com",
+      address: "42 Charoenkrung, City",
+    },
   },
   {
     id: "C-2025-016",
@@ -206,7 +230,10 @@ const mockCustomers = [
     totalOrders: 7,
     totalSpent: 390000,
     status: "Active",
-    details: { email: "mark@bizsolutions.th", address: "111 Vibhavadi, Bangkok" },
+    details: {
+      email: "mark@bizsolutions.th",
+      address: "111 Vibhavadi, Bangkok",
+    },
   },
   {
     id: "C-2025-017",
@@ -246,26 +273,41 @@ const mockCustomers = [
     totalOrders: 13,
     totalSpent: 740000,
     status: "Active",
-    details: { email: "paul@urbansupply.com", address: "155 Phaya Thai, Bangkok" },
+    details: {
+      email: "paul@urbansupply.com",
+      address: "155 Phaya Thai, Bangkok",
+    },
   },
 ];
 
+type CustomerFormData = {
+  id: string | null;
+  name: string;
+  contactPerson: string;
+  phone: string;
+  email: string;
+  address: string;
+  status: string;
+};
+
 export default function CustomerPage() {
-  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isNew, setIsNew] = useState(false);
+  const [formData, setFormData] = useState<CustomerFormData | null>(null);
+  const [customers, setCustomers] = useState(mockCustomers);
 
   // --- Pagination State ---
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
   // --- Data Processing ---
-  const totalValueSum = mockCustomers.reduce((sum, c) => sum + c.totalSpent, 0);
+  const totalValueSum = customers.reduce((sum, c) => sum + c.totalSpent, 0);
 
   // --- Filter Logic ---
-  const filteredCustomers = mockCustomers.filter((customer) => {
+  const filteredCustomers = customers.filter((customer) => {
     const matchesSearch =
       customer.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -290,9 +332,93 @@ export default function CustomerPage() {
     setCurrentPage(1);
   };
 
-  const handleRowClick = (customer: any) => {
-    setSelectedCustomer(customer);
+  // Handlers
+  const handleAddClick = () => {
+    setFormData({
+      id: null,
+      name: "",
+      contactPerson: "",
+      phone: "",
+      email: "",
+      address: "",
+      status: "New",
+    });
+    setIsNew(true);
+    setIsEditing(true);
     setIsSheetOpen(true);
+  };
+
+  const handleRowClick = (customer: (typeof mockCustomers)[0]) => {
+    setFormData({
+      id: customer.id,
+      name: customer.name,
+      contactPerson: customer.contactPerson,
+      phone: customer.phone,
+      email: customer.details.email,
+      address: customer.details.address,
+      status: customer.status,
+    });
+    setIsNew(false);
+    setIsEditing(false);
+    setIsSheetOpen(true);
+  };
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleInputChange = (field: keyof CustomerFormData, value: string) => {
+    setFormData((prev) => (prev ? { ...prev, [field]: value } : null));
+  };
+
+  const handleSave = () => {
+    if (!formData?.name || !formData?.contactPerson) {
+      toast.error("Please fill in required fields (Name, Contact Person).");
+      return;
+    }
+
+    if (isNew) {
+      const newId = `C-2025-${String(customers.length + 1).padStart(3, "0")}`;
+      const newCustomer = {
+        id: newId,
+        name: formData.name,
+        contactPerson: formData.contactPerson,
+        phone: formData.phone,
+        totalOrders: 0,
+        totalSpent: 0,
+        status: formData.status,
+        details: { email: formData.email, address: formData.address },
+      };
+      setCustomers([newCustomer, ...customers]);
+      toast.success("New customer added successfully.");
+    } else {
+      setCustomers(
+        customers.map((c) =>
+          c.id === formData.id
+            ? {
+                ...c,
+                name: formData.name,
+                contactPerson: formData.contactPerson,
+                phone: formData.phone,
+                status: formData.status,
+                details: { email: formData.email, address: formData.address },
+              }
+            : c
+        )
+      );
+      toast.success("Customer details updated.");
+    }
+
+    setIsSheetOpen(false);
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    if (isNew) {
+      setIsSheetOpen(false);
+    } else {
+      setIsEditing(false);
+    }
   };
 
   // Helper for formatting large currency values
@@ -317,7 +443,7 @@ export default function CustomerPage() {
           </div>
           <Button
             className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
-            onClick={() => router.push("/sales/customers/new")}
+            onClick={handleAddClick}
           >
             <Plus className="h-4 w-4 mr-2" />
             เพิ่มลูกค้าใหม่
@@ -328,21 +454,21 @@ export default function CustomerPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <StatCard
             title="Total Customers"
-            value={mockCustomers.length}
+            value={customers.length}
             icon={Users}
             color="text-blue-600"
             bg="bg-blue-50"
           />
           <StatCard
             title="Active Accounts"
-            value={mockCustomers.filter((c) => c.status === "Active").length}
+            value={customers.filter((c) => c.status === "Active").length}
             icon={CheckCircle2}
             color="text-emerald-600"
             bg="bg-emerald-50"
           />
           <StatCard
             title="Total Orders"
-            value={mockCustomers.reduce((sum, c) => sum + c.totalOrders, 0)}
+            value={customers.reduce((sum, c) => sum + c.totalOrders, 0)}
             icon={Briefcase}
             color="text-purple-600"
             bg="bg-purple-50"
@@ -388,7 +514,6 @@ export default function CustomerPage() {
                     <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="Active">Active</SelectItem>
                     <SelectItem value="Inactive">Inactive</SelectItem>
-                    <SelectItem value="New">New</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -522,8 +647,16 @@ export default function CustomerPage() {
       {/* --- Detail Sheet (Customer) --- */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
-          {selectedCustomer && (
-            <CustomerDetailSheet customer={selectedCustomer} />
+          {formData && (
+            <CustomerDetailSheet
+              formData={formData}
+              isEditing={isEditing}
+              isNew={isNew}
+              onEdit={handleEditClick}
+              onSave={handleSave}
+              onCancel={handleCancel}
+              onChange={handleInputChange}
+            />
           )}
         </SheetContent>
       </Sheet>
@@ -532,50 +665,178 @@ export default function CustomerPage() {
 }
 
 // --- Detail Sheet Component ---
-function CustomerDetailSheet({ customer }: { customer: any }) {
+type CustomerDetailSheetProps = {
+  formData: CustomerFormData;
+  isEditing: boolean;
+  isNew: boolean;
+  onEdit: () => void;
+  onSave: () => void;
+  onCancel: () => void;
+  onChange: (field: keyof CustomerFormData, value: string) => void;
+};
+
+function CustomerDetailSheet({
+  formData,
+  isEditing,
+  isNew,
+  onEdit,
+  onSave,
+  onCancel,
+  onChange,
+}: CustomerDetailSheetProps) {
   return (
     <>
       <SheetHeader className="mb-6 border-b pb-4">
-        <SheetTitle className="text-2xl font-bold flex items-center gap-2">
-          <User className="h-6 w-6 text-blue-600" />
-          {customer.name}
-        </SheetTitle>
+        <div className="flex items-center justify-between">
+          <SheetTitle className="text-2xl font-bold flex items-center gap-2">
+            <User className="h-6 w-6 text-blue-600" />
+            {isNew ? "New Customer" : formData.name}
+          </SheetTitle>
+          {!isNew && !isEditing && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onEdit}
+              title="Edit Customer"
+            >
+              <Edit className="h-5 w-5 text-slate-500 hover:text-blue-600" />
+            </Button>
+          )}
+        </div>
         <SheetDescription>
-          Customer ID: {customer.id} | Status:{" "}
-          <StatusBadge status={customer.status} />
+          {!isNew && `Customer ID: ${formData.id} | Status: `}
+          {!isNew && <StatusBadge status={formData.status} />}
         </SheetDescription>
       </SheetHeader>
 
-      <div className="space-y-6">
-        {/* Contact Info Block */}
-        <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 space-y-3">
-          <InfoRow
-            label="Contact Person"
-            value={customer.contactPerson}
-            icon={Mail}
-          />
-          <InfoRow label="Email" value={customer.details.email} icon={Mail} />
-          <InfoRow label="Phone" value={customer.phone} icon={Phone} />
-          <InfoRow label="Address" value={customer.details.address} />
+      <div className="space-y-4">
+        {/* Customer Name */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-slate-700">
+            Customer Name <span className="text-red-500">*</span>
+          </Label>
+          {isEditing ? (
+            <Input
+              value={formData.name}
+              onChange={(e) => onChange("name", e.target.value)}
+              placeholder="Enter customer name"
+            />
+          ) : (
+            <p className="text-slate-900 font-medium">{formData.name}</p>
+          )}
         </div>
 
-        {/* Financial Summary */}
-        <div className="border rounded-lg p-4 space-y-3">
-          <h4 className="font-medium text-slate-900 mb-2">Sales Summary</h4>
-          <InfoRow label="Total Orders" value={customer.totalOrders} />
-          <div className="flex justify-between font-bold text-lg pt-2 border-t border-slate-100">
-            <span>Total Value Spent</span>
-            <span className="text-blue-600">
-              ฿{customer.totalSpent.toLocaleString()}
-            </span>
-          </div>
+        {/* Contact Person */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-slate-700">
+            Contact Person <span className="text-red-500">*</span>
+          </Label>
+          {isEditing ? (
+            <Input
+              value={formData.contactPerson}
+              onChange={(e) => onChange("contactPerson", e.target.value)}
+              placeholder="Enter contact person name"
+            />
+          ) : (
+            <p className="text-slate-900">{formData.contactPerson}</p>
+          )}
+        </div>
+
+        {/* Phone */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+            <Phone className="h-4 w-4" /> Phone
+          </Label>
+          {isEditing ? (
+            <Input
+              value={formData.phone}
+              onChange={(e) => onChange("phone", e.target.value)}
+              placeholder="Enter phone number"
+            />
+          ) : (
+            <p className="text-slate-900">{formData.phone}</p>
+          )}
+        </div>
+
+        {/* Email */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+            <Mail className="h-4 w-4" /> Email
+          </Label>
+          {isEditing ? (
+            <Input
+              type="email"
+              value={formData.email}
+              onChange={(e) => onChange("email", e.target.value)}
+              placeholder="Enter email address"
+            />
+          ) : (
+            <p className="text-slate-900">{formData.email}</p>
+          )}
+        </div>
+
+        {/* Address */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+            <MapPin className="h-4 w-4" /> Address
+          </Label>
+          {isEditing ? (
+            <Input
+              value={formData.address}
+              onChange={(e) => onChange("address", e.target.value)}
+              placeholder="Enter address"
+            />
+          ) : (
+            <p className="text-slate-900">{formData.address}</p>
+          )}
+        </div>
+
+        {/* Status */}
+        <div className="space-y-2">
+          <Label className="text-sm font-medium text-slate-700">Status</Label>
+          {isEditing ? (
+            <Select
+              value={formData.status}
+              onValueChange={(val) => onChange("status", val)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Active">Active</SelectItem>
+                <SelectItem value="Inactive">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
+          ) : (
+            <StatusBadge status={formData.status} />
+          )}
         </div>
       </div>
 
-      <SheetFooter className="mt-8 border-t pt-4">
-        <Button className="w-full bg-blue-600 hover:bg-blue-700">
-          View All Orders
-        </Button>
+      <SheetFooter className="mt-8 border-t pt-4 flex gap-2">
+        {isEditing ? (
+          <>
+            <Button variant="outline" onClick={onCancel} className="flex-1">
+              <X className="h-4 w-4 mr-2" />
+              Cancel
+            </Button>
+            <Button
+              onClick={onSave}
+              className="flex-1 bg-blue-600 hover:bg-blue-700"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Save
+            </Button>
+          </>
+        ) : (
+          <Button
+            onClick={onEdit}
+            className="w-full bg-blue-600 hover:bg-blue-700"
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Edit Customer
+          </Button>
+        )}
       </SheetFooter>
     </>
   );
@@ -583,7 +844,15 @@ function CustomerDetailSheet({ customer }: { customer: any }) {
 
 // --- Sub-Components ---
 
-function StatCard({ title, value, icon: Icon, color, bg }: any) {
+type StatCardProps = {
+  title: string;
+  value: number | string;
+  icon: React.ElementType;
+  color: string;
+  bg: string;
+};
+
+function StatCard({ title, value, icon: Icon, color, bg }: StatCardProps) {
   return (
     <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all">
       <CardContent className="p-6 flex items-center justify-between">
@@ -616,24 +885,5 @@ function StatusBadge({ status }: { status: string }) {
       {status === "New" && <Clock className="w-3 h-3 mr-1" />}
       {status}
     </span>
-  );
-}
-
-function InfoRow({
-  label,
-  value,
-  icon: Icon,
-}: {
-  label: string;
-  value: React.ReactNode;
-  icon?: React.ElementType;
-}) {
-  return (
-    <div className="flex justify-between items-center py-1 border-b border-slate-100 last:border-b-0">
-      <span className="text-sm text-slate-500 flex items-center gap-2">
-        {Icon && <Icon className="h-4 w-4" />} {label}
-      </span>
-      <span className="font-medium text-slate-900">{value}</span>
-    </div>
   );
 }

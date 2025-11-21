@@ -69,7 +69,7 @@ export default function NewPurchaseRequisitionPage() {
     }
   };
 
-  const updateItem = (id: number, field: string, value: any) => {
+  const updateItem = (id: number, field: string, value: string | number) => {
     setItems(
       items.map((item) => {
         if (item.id === id) {

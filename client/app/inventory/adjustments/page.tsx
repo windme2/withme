@@ -39,9 +39,7 @@ import {
   Activity,
   ChevronLeft,
   ChevronRight,
-  Clock,
 } from "lucide-react";
-import { toast } from "sonner";
 
 // --- Mock Data (15 items) ---
 const adjustmentList = [
@@ -201,7 +199,7 @@ export default function StockAdjustmentPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState("all");
-  const [selectedAdjustment, setSelectedAdjustment] = useState<any>(null); // State for row click
+  const [selectedAdjustment, setSelectedAdjustment] = useState<{ id: string; [key: string]: unknown } | null>(null); // State for row click
   const [isSheetOpen, setIsSheetOpen] = useState(false); // State for sheet visibility
 
   // --- Pagination State ---
@@ -237,7 +235,7 @@ export default function StockAdjustmentPage() {
   };
 
   // Handler for row click to show details
-  const handleRowClick = (adj: any) => {
+  const handleRowClick = (adj: { id: string; [key: string]: unknown }) => {
     setSelectedAdjustment(adj);
     setIsSheetOpen(true);
   };
@@ -526,7 +524,9 @@ export default function StockAdjustmentPage() {
 
 // --- Sub-Components ---
 
-function StatCard({ title, value, icon: Icon, color, bg }: any) {
+import type { StatCardProps } from "@/lib/types";
+
+function StatCard({ title, value, icon: Icon, color, bg }: StatCardProps) {
   return (
     <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all">
       <CardContent className="p-6 flex items-center justify-between">

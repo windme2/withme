@@ -33,16 +33,13 @@ import {
   Plus,
   Search,
   Truck,
-  CheckCircle2,
-  Clock,
   XCircle,
   ChevronLeft,
   ChevronRight,
-  PackageOpen, // For Shipments Icon
-  Package, // For total packages
-  ClipboardCheck, // For Delivered
-  Clock3, // For Pending
-  Calendar,
+  PackageOpen,
+  Package,
+  ClipboardCheck,
+  Clock3,
   X,
 } from "lucide-react";
 
@@ -108,7 +105,6 @@ const mockShipments = [
     status: "Delivered",
     details: [{ name: "Office Desk", qty: 2, price: 15000 }],
   },
-  // Add more mock data for better pagination demo
   {
     id: "SH-2025-009",
     orderRef: "SO-2025-024",
@@ -155,12 +151,15 @@ export default function SalesShipmentsPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedShipment, setSelectedShipment] = useState<any>(null);
+  const [selectedShipment, setSelectedShipment] = useState<{
+    id: string;
+    [key: string]: unknown;
+  } | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   // --- Pagination State ---
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 10;
 
   // --- Data Processing ---
   const totalValueSum = mockShipments.reduce((sum, s) => sum + s.totalValue, 0);
@@ -190,7 +189,7 @@ export default function SalesShipmentsPage() {
     setCurrentPage(1);
   };
 
-  const handleRowClick = (shipment: any) => {
+  const handleRowClick = (shipment: { id: string; [key: string]: unknown }) => {
     setSelectedShipment(shipment);
     setIsSheetOpen(true);
   };
@@ -202,7 +201,7 @@ export default function SalesShipmentsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-              รายการส่งสินค้า (Sales Shipments)
+              Sales Shipments
             </h1>
             <p className="text-slate-500 mt-1">
               ติดตามสถานะและจัดการคำสั่งจัดส่งสินค้าให้ลูกค้า
@@ -213,7 +212,7 @@ export default function SalesShipmentsPage() {
             onClick={() => router.push("/sales/shipments/new")}
           >
             <Plus className="h-4 w-4 mr-2" />
-            สร้างคำสั่งจัดส่งใหม่
+            New Shipment
           </Button>
         </div>
 
@@ -430,7 +429,15 @@ export default function SalesShipmentsPage() {
 }
 
 // --- Detail Sheet Component ---
-function ShipmentDetailSheet({ shipment }: { shipment: any }) {
+function ShipmentDetailSheet({
+  shipment,
+}: {
+  shipment: {
+    id: string;
+    details?: { name: string; [key: string]: unknown }[];
+    [key: string]: unknown;
+  } | null;
+}) {
   // Mock function to update status
   const handleUpdateStatus = (newStatus: string) => {
     if (newStatus === "Delivered") {
@@ -471,17 +478,22 @@ function ShipmentDetailSheet({ shipment }: { shipment: any }) {
           <div className="border rounded-lg overflow-hidden">
             <div className="divide-y">
               {shipment.details && shipment.details.length > 0 ? (
-                shipment.details.map((item: any, idx: number) => (
-                  <div
-                    key={idx}
-                    className="px-4 py-3 flex justify-between items-center text-sm"
-                  >
-                    <div className="font-medium text-slate-900">
-                      {item.name}
+                shipment.details.map(
+                  (
+                    item: { name: string; [key: string]: unknown },
+                    idx: number
+                  ) => (
+                    <div
+                      key={idx}
+                      className="px-4 py-3 flex justify-between items-center text-sm"
+                    >
+                      <div className="font-medium text-slate-900">
+                        {item.name}
+                      </div>
+                      <div className="text-slate-500">Qty: {item.qty}</div>
                     </div>
-                    <div className="text-slate-500">Qty: {item.qty}</div>
-                  </div>
-                ))
+                  )
+                )
               ) : (
                 <div className="px-4 py-3 text-sm text-slate-500 italic">
                   No detailed items recorded.
@@ -525,7 +537,9 @@ function ShipmentDetailSheet({ shipment }: { shipment: any }) {
 
 // --- Sub-Components ---
 
-function StatCard({ title, value, icon: Icon, color, bg }: any) {
+import type { StatCardProps } from "@/lib/types";
+
+function StatCard({ title, value, icon: Icon, color, bg }: StatCardProps) {
   return (
     <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all">
       <CardContent className="p-6 flex items-center justify-between">

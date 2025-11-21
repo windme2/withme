@@ -308,7 +308,7 @@ export default function EditProfilePage() {
               </div>
             </div>
             <p className="text-sm text-gray-500">
-              Leave password fields empty if you don't want to change your
+              Leave password fields empty if you don&apos;t want to change your
               password.
             </p>
           </CardContent>

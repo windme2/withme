@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { MainLayout } from "@/components/layout/main-layout";
+import type { PurchaseRequisition } from "@/lib/types";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -47,11 +47,10 @@ import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { toast } from "sonner";
 
 export default function PurchasingStatusPage() {
-  const router = useRouter();
   const [userRole, setUserRole] = useState<string>("user");
   const [approveDialog, setApproveDialog] = useState(false);
   const [rejectDialog, setRejectDialog] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [selectedRequest, setSelectedRequest] = useState<PurchaseRequisition | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -284,7 +283,7 @@ export default function PurchasingStatusPage() {
   );
 
   // --- Handlers ---
-  const handleRowClick = (req: any) => {
+  const handleRowClick = (req: PurchaseRequisition) => {
     setSelectedRequest(req);
     setIsSheetOpen(true);
   };
@@ -322,10 +321,10 @@ export default function PurchasingStatusPage() {
     setCurrentPage(1);
   };
 
-  // Stats Calculation
-  const pendingCount = requests.filter((i) => i.status === "Pending").length;
-  const approvedCount = requests.filter((i) => i.status === "Approved").length;
-  const rejectedCount = requests.filter((i) => i.status === "Rejected").length;
+  // Stats Calculation (prepared for future dashboard cards)
+ // const pendingCount = requests.filter((i) => i.status === "Pending").length;
+  // const approvedCount = requests.filter((i) => i.status === "Approved").length;
+ /// const rejectedCount = requests.filter((i) => i.status === "Rejected").length;
 
   return (
     <MainLayout>
@@ -456,7 +455,7 @@ export default function PurchasingStatusPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedRequests.map((req, index) => (
+                  {paginatedRequests.map((req) => (
                     <TableRow
                       key={req.id}
                       className="hover:bg-slate-50/60 transition-colors cursor-pointer group"
@@ -606,7 +605,7 @@ export default function PurchasingStatusPage() {
                     </div>
                     <div className="divide-y max-h-[300px] overflow-y-auto">
                       {selectedRequest.itemsList.map(
-                        (item: any, idx: number) => (
+                        (item: { name?: string; [key: string]: unknown }, idx: number) => (
                           <div
                             key={idx}
                             className="px-4 py-3 text-sm grid grid-cols-12 gap-2 items-center"

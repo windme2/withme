@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   User,
   Settings,
@@ -16,11 +15,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { useRouter, usePathname } from "next/navigation";
 import { useSidebar } from "@/contexts/sidebar-context";
 import Link from "next/link";
@@ -32,7 +26,7 @@ import { cn } from "@/lib/utils";
 const pathNameMap: Record<string, string> = {
   dashboard: "DASHBOARD",
   inventory: "INVENTORY",
-  items: "All Products",
+  items: "Items Management",
   "goods-received": "Goods Received Note (GRN)",
   adjustments: "Stock Adjustment",
   purchasing: "PURCHASING",
@@ -42,7 +36,7 @@ const pathNameMap: Record<string, string> = {
   supplier : "Suppliers",
   sales: "SALES",
   orders: "Sales Orders",
-  shipment: "Sales Shipment",
+  shipments: "Sales Shipments",
   returns: "Sales Returns",
   customers: "Customers",
   transactions: "TRANSACTIONS",
@@ -70,7 +64,7 @@ const pathModuleMap: Record<string, string> = {
   requisition: "PURCHASING",
   status: "PURCHASING",
   sales: "SALES",
-  shipment: "SALES",
+  shipments: "SALES",
   returns: "SALES",
   transactions: "TRANSACTIONS",
   movements: "TRANSACTIONS",
@@ -121,43 +115,6 @@ export function Header() {
     localStorage.removeItem("isAuthenticated");
     router.push("/login");
   };
-
-  const handleNotificationClick = (type: string) => {
-    switch (type) {
-      case "low-stock":
-        router.push("/stock-remaining");
-        break;
-      case "purchase-order":
-        router.push("/requisition");
-        break;
-      case "shipment":
-        router.push("/shipment");
-        break;
-      default:
-        router.push("/dashboard");
-    }
-  };
-
-  const notifications = [
-    {
-      id: 1,
-      message: "แจ้งเตือน Stock ต่ำ: Notebook (เหลือ 5 หน่วย)",
-      time: "2 นาทีที่แล้ว",
-      type: "low-stock",
-    },
-    {
-      id: 2,
-      message: "ได้รับ Purchase Order ใหม่",
-      time: "1 ชั่วโมงที่แล้ว",
-      type: "purchase-order",
-    },
-    {
-      id: 3,
-      message: "จัดส่งเสร็จสิ้น: Order #1234",
-      time: "3 ชั่วโมงที่แล้ว",
-      type: "shipment",
-    },
-  ];
 
   const showBreadcrumb = pathname !== "/login" && pathname !== "/";
 

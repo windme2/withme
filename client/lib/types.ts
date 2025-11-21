@@ -1,4 +1,5 @@
 // Core Types for Withme Inventory System
+import type React from "react";
 
 export interface User {
   id: string;
@@ -147,3 +148,48 @@ export interface StatusBadgeProps {
 }
 
 export type StatusStyleMap = Record<string, string>;
+
+// --- Component Props Types ---
+export interface StatCardProps {
+  title: string;
+  value: string | number;
+  icon: React.ComponentType<{ className?: string }>;
+  color?: string;
+  bg?: string;
+  iconColor?: string;
+  bgIcon?: string;
+}
+
+// --- Purchasing Types ---
+export interface PurchaseRequisitionItem {
+  id: string | number;
+  name: string;
+  quantity: number;
+  qty?: number;
+  unit: string;
+  sku?: string;
+  price?: number;
+  estimatedPrice?: number;
+  purpose?: string;
+}
+
+export interface PurchaseRequisition {
+  id: string | number;
+  prNo?: string;
+  requestDate: string;
+  requiredDate?: string;
+  date?: string;
+  department?: string;
+  requestedBy?: string;
+  requester?: string;
+  items?: PurchaseRequisitionItem[];
+  itemsList?: PurchaseRequisitionItem[];
+  details?: PurchaseRequisitionItem[];
+  status: "pending" | "approved" | "rejected" | "converted" | "Pending" | "Approved" | "Rejected";
+  priority?: "low" | "medium" | "high";
+  notes?: string;
+  approvedBy?: string;
+  approvedDate?: string;
+  total?: number;
+  [key: string]: unknown; // Allow additional dynamic fields
+}

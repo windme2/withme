@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MainLayout } from "@/components/layout/main-layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   CheckCircle2,
@@ -50,7 +50,7 @@ export default function PurchaseOrderPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [selectedOrder, setSelectedOrder] = useState<{ id: string; details: { [key: string]: unknown }[]; [key: string]: unknown } | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   // --- Pagination State ---
@@ -236,7 +236,7 @@ export default function PurchaseOrderPage() {
     setCurrentPage(1);
   };
 
-  const handleRowClick = (order: any) => {
+  const handleRowClick = (order: { id: string; details: { [key: string]: unknown }[]; [key: string]: unknown }) => {
     setSelectedOrder(order);
     setIsSheetOpen(true);
   };
@@ -266,7 +266,7 @@ export default function PurchaseOrderPage() {
       printWindow.document.write(
         '<br/><table><thead><tr><th>Item</th><th>Qty</th><th class="text-right">Total</th></tr></thead><tbody>'
       );
-      selectedOrder.details.forEach((item: any) => {
+      selectedOrder.details.forEach((item: { name?: string; [key: string]: unknown }) => {
         printWindow.document.write(
           `<tr><td>${item.name}</td><td>${
             item.qty
@@ -587,7 +587,7 @@ export default function PurchaseOrderPage() {
                     </div>
                     <div className="divide-y max-h-[300px] overflow-y-auto">
                       {selectedOrder.details &&
-                        selectedOrder.details.map((item: any, idx: number) => (
+                        selectedOrder.details.map((item: { name?: string; [key: string]: unknown }, idx: number) => (
                           <div
                             key={idx}
                             className="px-4 py-3 text-sm grid grid-cols-12 gap-2 items-center"
@@ -645,7 +645,9 @@ export default function PurchaseOrderPage() {
 
 // --- Sub-Components ---
 
-function StatCard({ title, value, icon: Icon, color, bg }: any) {
+import type { StatCardProps } from "@/lib/types";
+
+function StatCard({ title, value, icon: Icon, color, bg }: StatCardProps) {
   return (
     <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all">
       <CardContent className="p-6 flex items-center justify-between">

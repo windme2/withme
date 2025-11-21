@@ -34,9 +34,7 @@ import {
   Trash2,
   Save,
   ArrowLeft,
-  FileText,
   Package,
-  Info,
   Truck,
   ListOrdered, // New Icon for PR Ref selection
 } from "lucide-react";
@@ -142,7 +140,7 @@ export default function NewPurchaseOrderPage() {
     }
   };
 
-  const updateItem = (id: number, field: string, value: any) => {
+  const updateItem = (id: number, field: string, value: string | number) => {
     setItems(
       items.map((item) => {
         if (item.id === id) {

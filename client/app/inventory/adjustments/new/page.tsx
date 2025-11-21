@@ -62,7 +62,7 @@ export default function NewAdjustmentPage() {
   };
 
   // Function to update row
-  const updateRow = (id: number, field: string, value: any) => {
+  const updateRow = (id: number, field: string, value: string | number) => {
     setItems(
       items.map((item) => {
         if (item.id === id) {

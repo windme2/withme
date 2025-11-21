@@ -32,19 +32,15 @@ import {
 import {
   Plus,
   Search,
-  Truck,
   CheckCircle2,
-  Clock,
   XCircle,
   ChevronLeft,
   ChevronRight,
   PackageOpen,
   ClipboardCheck,
   RotateCcw, // Icon for Returns/Goods Return
-  Calendar,
   X,
   FileText,
-  Package,
   ListRestart, // Icon for Pending Inspection
 } from "lucide-react";
 
@@ -111,12 +107,12 @@ export default function SalesReturnsPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedReturn, setSelectedReturn] = useState<any>(null);
+  const [selectedReturn, setSelectedReturn] = useState<{ id: string; [key: string]: unknown } | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   // --- Pagination State ---
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8;
+  const itemsPerPage = 10;
 
   // --- Data Processing ---
   const totalValueSum = mockReturns.reduce((sum, s) => sum + s.totalValue, 0);
@@ -146,7 +142,7 @@ export default function SalesReturnsPage() {
     setCurrentPage(1);
   };
 
-  const handleRowClick = (returnItem: any) => {
+  const handleRowClick = (returnItem: { id: string; [key: string]: unknown }) => {
     setSelectedReturn(returnItem);
     setIsSheetOpen(true);
   };
@@ -382,7 +378,7 @@ export default function SalesReturnsPage() {
 }
 
 // --- Detail Sheet Component ---
-function ReturnDetailSheet({ returnItem }: { returnItem: any }) {
+function ReturnDetailSheet({ returnItem }: { returnItem: { id: string; details?: { name: string; [key: string]: unknown }[]; [key: string]: unknown } | null }) {
   // Mock function to update status
   const handleUpdateStatus = (newStatus: string) => {
     if (newStatus === "Completed") {
@@ -425,7 +421,7 @@ function ReturnDetailSheet({ returnItem }: { returnItem: any }) {
           <div className="border rounded-lg overflow-hidden">
             <div className="divide-y">
               {returnItem.details && returnItem.details.length > 0 ? (
-                returnItem.details.map((item: any, idx: number) => (
+                returnItem.details.map((item: { name: string; [key: string]: unknown }, idx: number) => (
                   <div
                     key={idx}
                     className="px-4 py-3 flex justify-between items-center text-sm"
@@ -479,7 +475,9 @@ function ReturnDetailSheet({ returnItem }: { returnItem: any }) {
 
 // --- Sub-Components ---
 
-function StatCard({ title, value, icon: Icon, color, bg }: any) {
+import type { StatCardProps } from "@/lib/types";
+
+function StatCard({ title, value, icon: Icon, color, bg }: StatCardProps) {
   return (
     <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all">
       <CardContent className="p-6 flex items-center justify-between">

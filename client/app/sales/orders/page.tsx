@@ -42,12 +42,9 @@ import {
   ChevronRight,
   FileText,
   User,
-  Calendar,
   PackageOpen,
   X,
   DollarSign,
-  Package,
-  AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 

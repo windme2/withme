@@ -33,7 +33,7 @@ export const TRANSACTION_STATUS = {
 
 export const TRANSACTION_TYPES = {
   GOODS_RECEIVED: "Goods Received",
-  SALES_SHIPMENT: "Sales Shipment",
+  SALES_SHIPMENTS: "Sales Shipments",
   ADJUSTMENT: "Adjustment",
   PURCHASE_REQUISITION: "Purchase Requisition",
   TRANSFER: "Transfer",

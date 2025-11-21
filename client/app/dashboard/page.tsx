@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Card,
@@ -23,20 +22,12 @@ import {
   FileText,
   Truck,
   RotateCcw,
-  Calendar,
   ArrowRight,
 } from "lucide-react";
 
 import { MainLayout } from "@/components/layout/main-layout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   BarChart,
   Bar,
@@ -162,14 +153,14 @@ export default function DashboardPage() {
     { month: "Jul", sales: 3490 },
   ];
 
-  // Data 3: Pending Approvals (Pie Chart) - เปลี่ยนใหม่ตามสั่ง
+  // Data 3: Pending Approvals (Pie Chart)
   const approvalStatusData = [
     { name: "รออนุมัติ (Pending)", value: 12, color: "#f59e0b" }, // Amber-500
     { name: "อนุมัติแล้ว (Approved)", value: 45, color: "#10b981" }, // Emerald-500
     { name: "ไม่อนุมัติ (Rejected)", value: 3, color: "#ef4444" }, // Red-500
   ];
 
-  // Low Stock Items (เพิ่มเป็น 8 รายการ)
+  // Low Stock Items
   const lowStockItems = [
     {
       name: "Notebook A4",
@@ -229,6 +220,8 @@ export default function DashboardPage() {
     },
   ];
 
+  // Note: topProducts is prepared for future use in dashboard charts
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const topProducts = [
     { name: "A4 Paper 80gsm", sales: 450, revenue: "฿12,500", trend: "up" },
     { name: "Blue Ink Pen", sales: 320, revenue: "฿8,900", trend: "up" },
@@ -474,7 +467,9 @@ export default function DashboardPage() {
         {/* Quick Actions */}
         <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
+            <CardTitle className="text-lg font-semibold">
+              Quick Actions
+            </CardTitle>
             <CardDescription>ทำงานที่ใช้บ่อยได้อย่างรวดเร็ว</CardDescription>
           </CardHeader>
           <CardContent>
@@ -545,7 +540,7 @@ export default function DashboardPage() {
                       if (transaction.type === "receipt")
                         router.push("/inventory/goods-received");
                       else if (transaction.type === "shipment")
-                        router.push("/sales/shipment");
+                        router.push("/sales/shipments");
                       else if (transaction.type === "adjustment")
                         router.push("/inventory/adjustments");
                       else if (transaction.type === "return")

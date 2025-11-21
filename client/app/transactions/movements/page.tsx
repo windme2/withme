@@ -24,14 +24,10 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
-  ClipboardList, // Main icon for Activity Log
-  ArrowUpRight, // Icon for positive movement
-  ArrowDownLeft, // Icon for negative movement
-  PackageOpen,
-  ShoppingBag,
-  RotateCcw,
+  ClipboardList,
+  ArrowUpRight,
+  ArrowDownLeft,
   ListOrdered,
-  X,
 } from "lucide-react";
 
 // --- Mock Data ---
@@ -331,11 +327,12 @@ export default function InventoryMovementLogPage() {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedLog = filteredLog.slice(startIndex, startIndex + itemsPerPage);
 
-  const clearFilters = () => {
-    setSearchTerm("");
-    setFilterType("all");
-    setCurrentPage(1);
-  };
+  // Note: clearFilters prepared for future filter reset button
+  // const clearFilters = () => {
+  //   setSearchTerm("");
+  //   setFilterType("all");
+  //   setCurrentPage(1);
+  // };
 
   // Define Movement Type Icons and colors
   const getMovementStyle = (type: string, qty: number) => {

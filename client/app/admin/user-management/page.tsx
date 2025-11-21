@@ -46,6 +46,24 @@ import {
   Clock,
 } from "lucide-react";
 
+// --- Types ---
+type UserType = {
+  id: number;
+  name: string;
+  username: string;
+  role: string;
+  status: string;
+  lastLogin: string;
+};
+
+type StatCardProps = {
+  title: string;
+  value: number;
+  icon: React.ElementType;
+  color: string;
+  bg: string;
+};
+
 // --- Mock Data ---
 // Note: 'email' field is used as 'username' in the application logic
 const mockUsers = [
@@ -80,7 +98,7 @@ export default function UserManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   // --- Pagination State ---
@@ -116,7 +134,7 @@ export default function UserManagementPage() {
     setCurrentPage(1);
   };
 
-  const handleRowClick = (user: any) => {
+  const handleRowClick = (user: UserType) => {
     setSelectedUser(user);
     setIsSheetOpen(true);
   };
@@ -352,7 +370,7 @@ export default function UserManagementPage() {
 }
 
 // --- Detail/Edit Sheet Component (Simplified) ---
-function UserDetailSheet({ user }: { user: any }) {
+function UserDetailSheet({ user }: { user: UserType }) {
   // Mock function to simulate editing
   const handleEdit = () => {
     alert(`Simulating edit fields for user: ${user.name}`);
@@ -378,7 +396,7 @@ function UserDetailSheet({ user }: { user: any }) {
         </SheetTitle>
         <SheetDescription>
           {/* Username in Description */}
-          Username: {user.email}
+          Username: {user.username}
         </SheetDescription>
       </SheetHeader>
 
@@ -386,7 +404,7 @@ function UserDetailSheet({ user }: { user: any }) {
         {/* Info Block */}
         <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 space-y-3">
           {/* Added Username Row */}
-          <InfoRow label="Username" value={user.email} icon={User} />
+          <InfoRow label="Username" value={user.username} icon={User} />
           <InfoRow
             label="Access Role"
             value={<RoleBadge role={user.role} />}
@@ -415,7 +433,7 @@ function UserDetailSheet({ user }: { user: any }) {
 
 // --- Sub-Components ---
 
-function StatCard({ title, value, icon: Icon, color, bg }: any) {
+function StatCard({ title, value, icon: Icon, color, bg }: StatCardProps) {
   return (
     <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all">
       <CardContent className="p-6 flex items-center justify-between">

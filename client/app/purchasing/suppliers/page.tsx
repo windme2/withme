@@ -229,7 +229,15 @@ export default function SuppliersPage() {
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isNew, setIsNew] = useState(false);
-  const [formData, setFormData] = useState<any>(null);
+  const [formData, setFormData] = useState<{
+    id: string | number | null;
+    name: string;
+    contact: string;
+    products: string;
+    phone: string;
+    email: string;
+    address: string;
+  } | null>(null);
 
   // --- Handlers ---
 
@@ -250,7 +258,7 @@ export default function SuppliersPage() {
   };
 
   // 2. Open Sheet for Viewing (Row Click)
-  const handleRowClick = (supplier: any) => {
+  const handleRowClick = (supplier: { id: string | number; name: string; contact: string; products: string; phone: string; email: string; address: string }) => {
     setFormData({ ...supplier });
     setIsNew(false);
     setIsEditing(false);
@@ -264,7 +272,7 @@ export default function SuppliersPage() {
 
   // 4. Handle Input Changes
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev: any) => ({ ...prev, [field]: value }));
+    setFormData((prev) => prev ? { ...prev, [field]: value } : null);
   };
 
   // 5. Save Data

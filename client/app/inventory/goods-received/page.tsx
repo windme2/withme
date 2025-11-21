@@ -6,7 +6,6 @@ import { MainLayout } from "@/components/layout/main-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -604,7 +603,9 @@ function GRNDetailSheetContent({
 
 // --- Sub-Components (Unchanged) ---
 
-function StatCard({ title, value, icon: Icon, color, bg }: any) {
+import type { StatCardProps } from "@/lib/types";
+
+function StatCard({ title, value, icon: Icon, color, bg }: StatCardProps) {
   return (
     <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
       <CardContent className="p-6 flex items-center justify-between">

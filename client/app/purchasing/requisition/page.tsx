@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { MainLayout } from "@/components/layout/main-layout";
+import type { PurchaseRequisition, StatCardProps } from "@/lib/types";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,10 +42,8 @@ import {
 } from "@/components/ui/sheet";
 
 export default function PurchaseRequisitionPage() {
-  const router = useRouter();
-
   // --- Data States ---
-  const [selectedRequest, setSelectedRequest] = useState<any>(null);
+  const [selectedRequest, setSelectedRequest] = useState<PurchaseRequisition | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -55,6 +53,7 @@ export default function PurchaseRequisitionPage() {
   const itemsPerPage = 10;
 
   // --- Mock Data (15 Items) ---
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [requests, setRequests] = useState([
     {
       id: "PR-2025-015",
@@ -223,7 +222,7 @@ export default function PurchaseRequisitionPage() {
   );
 
   // --- Handlers ---
-  const handleRowClick = (req: any) => {
+  const handleRowClick = (req: PurchaseRequisition) => {
     setSelectedRequest(req);
     setIsSheetOpen(true);
   };
@@ -367,7 +366,6 @@ export default function PurchaseRequisitionPage() {
                       className="hover:bg-slate-50/60 transition-colors cursor-pointer group"
                       onClick={() => handleRowClick(req)}
                     >
-                      {/* Body cells: Added py-4 for vertical padding */}
 
                       {/* PR No. */}
                       <TableCell className="pl-6 py-4">
@@ -501,7 +499,7 @@ export default function PurchaseRequisitionPage() {
                     </div>
                     <div className="divide-y max-h-[300px] overflow-y-auto">
                       {selectedRequest.itemsList.map(
-                        (item: any, idx: number) => (
+                        (item: { name?: string; [key: string]: unknown }, idx: number) => (
                           <div
                             key={idx}
                             className="px-4 py-3 text-sm grid grid-cols-12 gap-2 items-center"
@@ -570,7 +568,7 @@ export default function PurchaseRequisitionPage() {
 
 // --- Sub-components ---
 
-function StatCard({ title, value, icon: Icon, color, bg }: any) {
+function StatCard({ title, value, icon: Icon, color, bg }: StatCardProps) {
   return (
     <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all">
       <CardContent className="p-6 flex items-center justify-between">

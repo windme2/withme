@@ -9,7 +9,7 @@ import {
   Package,
   Truck,
   ShoppingCart,
-  Receipt,
+  History,
   Users,
   ChevronLeft,
   ChevronRight,
@@ -32,6 +32,7 @@ interface SidebarModule {
   items: MenuItem[];
   defaultOpen?: boolean;
   adminOnly?: boolean;
+  noCollapse?: boolean;
 }
 
 const sidebarModules: SidebarModule[] = [
@@ -40,6 +41,7 @@ const sidebarModules: SidebarModule[] = [
     icon: LayoutDashboard,
     emoji: "📊",
     items: [{ name: "Dashboard", path: "/dashboard" }],
+    noCollapse: true,
   },
   {
     label: "Inventory",
@@ -59,7 +61,7 @@ const sidebarModules: SidebarModule[] = [
     items: [
       { name: "รายการใบขอซื้อ (PR)", path: "/purchasing/requisition" },
       { name: "สถานะคำขอ (PR)", path: "/purchasing/status" },
-      { name: "รายการใบสั่งซื้อ (PO)", path: "/purchasing/order" },
+      { name: "รายการใบสั่งซื้อ (PO)", path: "/purchasing/orders" },
       { name: "รายชื่อ Suppliers", path: "/purchasing/suppliers" },
     ],
     defaultOpen: true,
@@ -70,7 +72,7 @@ const sidebarModules: SidebarModule[] = [
     emoji: "🚚",
     items: [
       { name: "รายการขายสินค้า", path: "/sales/orders" },
-      { name: "รายการจัดส่งขาย", path: "/sales/shipment" },
+      { name: "รายการจัดส่งขาย", path: "/sales/shipments" },
       { name: "รายการคืนสินค้า", path: "/sales/returns" },
       { name: "รายชื่อลูกค้า", path: "/sales/customers" },
     ],
@@ -78,9 +80,11 @@ const sidebarModules: SidebarModule[] = [
   },
   {
     label: "Transactions",
-    icon: Receipt,
+    icon: History,
     emoji: "🔄",
-    items: [{ name: "การเคลื่อนไหวสินค้า", path: "/transactions/movements" }],
+    items: [
+      { name: "การเคลื่อนไหวสินค้า", path: "/transactions/movements" }
+    ],
     defaultOpen: true,
   },
   {
@@ -223,6 +227,7 @@ export function Sidebar() {
           const isActive = isModuleActive(module);
           const isOpen = expandedModules.has(module.label);
           const Icon = module.icon;
+          const shouldShowAsButton = module.noCollapse === true;
 
           if (collapsed) {
             return (
@@ -238,7 +243,7 @@ export function Sidebar() {
                   className={cn(
                     "w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-200",
                     isActive
-                      ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-900/50" // ปรับสีตรงนี้
+                      ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-900/50"
                       : "text-slate-400 hover:bg-slate-800 hover:text-white"
                   )}
                 >
@@ -253,6 +258,41 @@ export function Sidebar() {
             );
           }
 
+          // Module without collapse (e.g., Dashboard)
+          if (shouldShowAsButton) {
+            return (
+              <Link
+                key={module.label}
+                href={module.items[0].path}
+                className="mb-1 block"
+              >
+                <button
+                  className={cn(
+                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 group",
+                    isActive
+                      ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-md"
+                      : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "p-1.5 rounded-lg transition-colors flex-shrink-0",
+                      isActive
+                        ? "bg-white/10"
+                        : "bg-slate-800/50 group-hover:bg-slate-800"
+                    )}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </div>
+                  <span className="font-medium text-sm truncate">
+                    {module.label}
+                  </span>
+                </button>
+              </Link>
+            );
+          }
+
+          // Other modules: With collapse
           return (
             <div key={module.label} className="mb-1">
               <button
@@ -269,7 +309,7 @@ export function Sidebar() {
                     className={cn(
                       "p-1.5 rounded-lg transition-colors flex-shrink-0",
                       isActive
-                        ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-md" // ปรับสีตรงนี้
+                        ? "bg-gradient-to-br from-blue-600 to-blue-700 text-white shadow-md"
                         : "bg-slate-800/50 group-hover:bg-slate-800"
                     )}
                   >

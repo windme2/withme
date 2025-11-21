@@ -24,8 +24,6 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
-  ListFilter,
-  Clock,
   User,
   ShoppingBag,
   Package,

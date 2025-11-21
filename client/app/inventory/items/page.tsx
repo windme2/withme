@@ -188,7 +188,7 @@ export default function InventoryItemsPage() {
 
   // --- Edit Modal State ---
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<{ id: string; [key: string]: unknown } | null>(null);
 
   const itemsPerPage = 10;
 
@@ -240,7 +240,7 @@ export default function InventoryItemsPage() {
     setCurrentPage(1);
   };
 
-  const handleEditClick = (item: any) => {
+  const handleEditClick = (item: { id: string; [key: string]: unknown }) => {
     setEditingItem(item);
     setIsEditOpen(true);
   };
@@ -259,7 +259,7 @@ export default function InventoryItemsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-              All Products
+              Items Management
             </h1>
             <p className="text-slate-500 mt-1">
               ตรวจสอบรายการสินค้าและสถานะคงคลังทั้งหมด ({totalItems} Items)
@@ -634,7 +634,9 @@ export default function InventoryItemsPage() {
 
 // --- Sub-Components ---
 
-function StatCard({ title, value, icon: Icon, iconColor, bgIcon }: any) {
+import type { StatCardProps } from "@/lib/types";
+
+function StatCard({ title, value, icon: Icon, iconColor, bgIcon }: StatCardProps) {
   return (
     <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
       <CardContent className="p-6 flex items-center justify-between">

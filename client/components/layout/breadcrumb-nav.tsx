@@ -7,33 +7,60 @@ import { cn } from "@/lib/utils";
 
 // Map paths to readable names
 const pathNameMap: Record<string, string> = {
+  // Main modules
   dashboard: "Dashboard",
-  "goods-received": "รับสินค้า",
-  "sales-shipment": "จัดส่งขาย",
-  "purchase-requisition": "ใบขอซื้อ (PR)",
-  "inventory-adjustment": "ปรับปรุง Stock",
-  "stock-remaining": "Stock คงเหลือ",
-  transaction: "Transaction",
-  "user-management": "จัดการ User",
-  "activity-log": "Activity Log",
-  reports: "Reports",
-  settings: "Settings",
-  profile: "Profile",
+  inventory: "คลังสินค้า",
+  purchasing: "จัดซื้อ",
+  sales: "ขาย",
+  transactions: "รายการเคลื่อนไหว",
+  admin: "จัดการระบบ",
+  settings: "ตั้งค่า",
+  profile: "โปรไฟล์",
+  
+  // Inventory sub-pages
+  "goods-received": "รับสินค้า (GRN)",
+  adjustments: "ปรับปรุง Stock",
+  items: "รายการสินค้า",
+  
+  // Purchasing sub-pages
+  orders: "ใบสั่งซื้อ (PO)",
+  requisition: "ใบขอซื้อ (PR)",
+  status: "สถานะการอนุมัติ",
+  suppliers: "ซัพพลายเออร์",
+  
+  // Sales sub-pages
+  customers: "ลูกค้า",
+  shipments: "จัดส่งสินค้า",
+  returns: "รับคืนสินค้า",
+  
+  // Transactions sub-pages
+  movements: "Stock Movement",
+  
+  // Admin sub-pages
+  "user-management": "จัดการผู้ใช้",
+  "activity-log": "ประวัติการใช้งาน",
+  
+  // Actions
   new: "เพิ่มใหม่",
   edit: "แก้ไข",
 };
 
-// Map paths to their module/category
+// Map paths to their module/category (for first-level breadcrumb)
 const pathModuleMap: Record<string, string> = {
-  "goods-received": "Inventory",
-  "inventory-adjustment": "Inventory",
-  "stock-remaining": "Inventory",
-  "sales-shipment": "Sales",
-  "purchase-requisition": "Purchasing",
-  transaction: "Transactions",
-  reports: "Reports",
-  "user-management": "Admin",
-  "activity-log": "Admin",
+  // Inventory module paths
+  inventory: "คลังสินค้า",
+  
+  // Purchasing module paths
+  purchasing: "จัดซื้อ",
+  
+  // Sales module paths
+  sales: "ขาย",
+  
+  // Transactions module paths
+  transactions: "รายการเคลื่อนไหว",
+  
+  // Admin module paths
+  admin: "จัดการระบบ",
 };
 
 export function BreadcrumbNav() {
@@ -48,12 +75,12 @@ export function BreadcrumbNav() {
     const name = pathNameMap[segment] || segment;
 
     // Add module name for first level if it exists
-    const module = index === 0 ? pathModuleMap[segment] : null;
+    const moduleName = index === 0 ? pathModuleMap[segment] : null;
 
     return {
       name,
       path,
-      module,
+      moduleName,
       isLast: index === segments.length - 1,
     };
   });
@@ -77,10 +104,10 @@ export function BreadcrumbNav() {
         <div key={crumb.path} className="flex items-center space-x-1">
           <ChevronRight className="h-4 w-4 text-gray-300 dark:text-gray-600" />
 
-          {crumb.module && index === 0 && (
+          {crumb.moduleName && index === 0 && (
             <>
               <span className="text-xs text-gray-400 dark:text-gray-500 font-medium uppercase tracking-wider px-2">
-                {crumb.module}
+                {crumb.moduleName}
               </span>
               <ChevronRight className="h-4 w-4 text-gray-300 dark:text-gray-600" />
             </>
