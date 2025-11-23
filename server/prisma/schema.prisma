@@ -1,0 +1,302 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model activity_logs {
+  id          String   @id
+  user_id     String
+  action_type String
+  entity_type String
+  entity_id   String
+  description String?
+  created_at  DateTime @default(now())
+  users       users    @relation(fields: [user_id], references: [id])
+}
+
+model adjustment_items {
+  id                    String                @id
+  adjustment_id         String
+  product_id            String
+  quantity_before       Int
+  quantity_after        Int
+  reason                String?
+  inventory_adjustments inventory_adjustments @relation(fields: [adjustment_id], references: [id])
+  products              products              @relation(fields: [product_id], references: [id])
+}
+
+model categories {
+  id               String       @id
+  name             String
+  description      String?
+  parent_id        String?
+  created_at       DateTime     @default(now())
+  categories       categories?  @relation("categoriesTocategories", fields: [parent_id], references: [id])
+  other_categories categories[] @relation("categoriesTocategories")
+  products         products[]
+}
+
+model goods_received {
+  id                   String                 @id
+  grn_number           String                 @unique
+  supplier_id          String
+  received_date        DateTime
+  received_by          String
+  status               GoodsReceivedStatus
+  total_amount         Decimal                @db.Decimal(10, 2)
+  notes                String?
+  created_at           DateTime               @default(now())
+  updated_at           DateTime
+  users                users                  @relation(fields: [received_by], references: [id])
+  suppliers            suppliers              @relation(fields: [supplier_id], references: [id])
+  goods_received_items goods_received_items[]
+}
+
+model goods_received_items {
+  id             String         @id
+  grn_id         String
+  product_id     String
+  quantity       Int
+  unit_price     Decimal        @db.Decimal(10, 2)
+  total_price    Decimal        @db.Decimal(10, 2)
+  goods_received goods_received @relation(fields: [grn_id], references: [id])
+  products       products       @relation(fields: [product_id], references: [id])
+}
+
+model inventory_adjustments {
+  id                                             String                    @id
+  adjustment_number                              String                    @unique
+  adjustment_type                                InventoryAdjustmentType
+  status                                         InventoryAdjustmentStatus
+  adjusted_by                                    String
+  approved_by                                    String?
+  adjustment_date                                DateTime
+  notes                                          String?
+  created_at                                     DateTime                  @default(now())
+  updated_at                                     DateTime
+  adjustment_items                               adjustment_items[]
+  users_inventory_adjustments_adjusted_byTousers users                     @relation("inventory_adjustments_adjusted_byTousers", fields: [adjusted_by], references: [id])
+  users_inventory_adjustments_approved_byTousers users?                    @relation("inventory_adjustments_approved_byTousers", fields: [approved_by], references: [id])
+}
+
+model inventory_levels {
+  product_id      String    @id
+  quantity        Int       @default(0)
+  last_counted_at DateTime?
+  last_counted_by String?
+  updated_at      DateTime
+  users           users?    @relation(fields: [last_counted_by], references: [id])
+  products        products  @relation(fields: [product_id], references: [id])
+}
+
+model inventory_transactions {
+  id               String          @id
+  transaction_type TransactionType
+  reference_id     String
+  product_id       String
+  quantity         Int
+  unit_price       Decimal?        @db.Decimal(10, 2)
+  total_amount     Decimal?        @db.Decimal(10, 2)
+  transaction_date DateTime
+  user_id          String
+  notes            String?
+  created_at       DateTime        @default(now())
+  products         products        @relation(fields: [product_id], references: [id])
+  users            users           @relation(fields: [user_id], references: [id])
+}
+
+model products {
+  id                         String                       @id
+  sku                        String                       @unique
+  name                       String
+  description                String?
+  category_id                String?
+  unit                       String
+  minimum_stock              Int                          @default(0)
+  maximum_stock              Int?
+  reorder_point              Int?
+  created_at                 DateTime                     @default(now())
+  updated_at                 DateTime
+  adjustment_items           adjustment_items[]
+  goods_received_items       goods_received_items[]
+  inventory_levels           inventory_levels?
+  inventory_transactions     inventory_transactions[]
+  categories                 categories?                  @relation(fields: [category_id], references: [id])
+  purchase_requisition_items purchase_requisition_items[]
+  shipment_items             shipment_items[]
+}
+
+model purchase_requisition_items {
+  id                    String                        @id
+  pr_id                 String
+  product_id            String
+  quantity              Int
+  required_date         DateTime?                     @db.Date
+  status                PurchaseRequisitionItemStatus
+  notes                 String?
+  purchase_requisitions purchase_requisitions         @relation(fields: [pr_id], references: [id])
+  products              products                      @relation(fields: [product_id], references: [id])
+}
+
+model purchase_requisitions {
+  id                                              String                       @id
+  pr_number                                       String                       @unique
+  requested_by                                    String
+  department                                      String
+  status                                          PurchaseRequisitionStatus
+  requested_date                                  DateTime
+  approved_by                                     String?
+  approved_date                                   DateTime?
+  notes                                           String?
+  created_at                                      DateTime                     @default(now())
+  updated_at                                      DateTime
+  purchase_requisition_items                      purchase_requisition_items[]
+  users_purchase_requisitions_approved_byTousers  users?                       @relation("purchase_requisitions_approved_byTousers", fields: [approved_by], references: [id])
+  users_purchase_requisitions_requested_byTousers users                        @relation("purchase_requisitions_requested_byTousers", fields: [requested_by], references: [id])
+}
+
+model sales_shipments {
+  id               String              @id
+  shipment_number  String              @unique
+  customer_name    String
+  shipping_address String
+  status           SalesShipmentStatus
+  shipment_date    DateTime?
+  delivered_date   DateTime?
+  handled_by       String
+  tracking_number  String?
+  notes            String?
+  created_at       DateTime            @default(now())
+  updated_at       DateTime
+  users            users               @relation(fields: [handled_by], references: [id])
+  shipment_items   shipment_items[]
+}
+
+model shipment_items {
+  id              String          @id
+  shipment_id     String
+  product_id      String
+  quantity        Int
+  unit_price      Decimal         @db.Decimal(10, 2)
+  total_price     Decimal         @db.Decimal(10, 2)
+  products        products        @relation(fields: [product_id], references: [id])
+  sales_shipments sales_shipments @relation(fields: [shipment_id], references: [id])
+}
+
+model suppliers {
+  id             String           @id
+  name           String
+  contact_person String?
+  email          String?
+  phone          String?
+  address        String?
+  tax_id         String?
+  payment_terms  Int?
+  created_at     DateTime         @default(now())
+  updated_at     DateTime
+  goods_received goods_received[]
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model test_connection {
+  x Int?
+
+  @@ignore
+}
+
+model user_permissions {
+  id                                       String    @id
+  user_id                                  String
+  permission                               String
+  granted_by                               String
+  granted_at                               DateTime  @default(now())
+  expires_at                               DateTime?
+  users_user_permissions_granted_byTousers users     @relation("user_permissions_granted_byTousers", fields: [granted_by], references: [id])
+  users_user_permissions_user_idTousers    users     @relation("user_permissions_user_idTousers", fields: [user_id], references: [id])
+
+  @@unique([user_id, permission], map: "userId_permission")
+}
+
+model users {
+  id                                                              String                   @id
+  username                                                        String                   @unique
+  email                                                           String                   @unique
+  password_hash                                                   String
+  first_name                                                      String
+  last_name                                                       String
+  role                                                            Role
+  department                                                      String?
+  is_active                                                       Boolean                  @default(true)
+  last_login_at                                                   DateTime?
+  created_at                                                      DateTime                 @default(now())
+  updated_at                                                      DateTime
+  activity_logs                                                   activity_logs[]
+  goods_received                                                  goods_received[]
+  inventory_adjustments_inventory_adjustments_adjusted_byTousers  inventory_adjustments[]  @relation("inventory_adjustments_adjusted_byTousers")
+  inventory_adjustments_inventory_adjustments_approved_byTousers  inventory_adjustments[]  @relation("inventory_adjustments_approved_byTousers")
+  inventory_levels                                                inventory_levels[]
+  inventory_transactions                                          inventory_transactions[]
+  purchase_requisitions_purchase_requisitions_approved_byTousers  purchase_requisitions[]  @relation("purchase_requisitions_approved_byTousers")
+  purchase_requisitions_purchase_requisitions_requested_byTousers purchase_requisitions[]  @relation("purchase_requisitions_requested_byTousers")
+  sales_shipments                                                 sales_shipments[]
+  user_permissions_user_permissions_granted_byTousers             user_permissions[]       @relation("user_permissions_granted_byTousers")
+  user_permissions_user_permissions_user_idTousers                user_permissions[]       @relation("user_permissions_user_idTousers")
+}
+
+enum GoodsReceivedStatus {
+  pending
+  completed
+  cancelled
+}
+
+enum InventoryAdjustmentStatus {
+  pending
+  approved
+  rejected
+  completed
+}
+
+enum InventoryAdjustmentType {
+  count
+  damage
+  loss
+  other
+}
+
+enum PurchaseRequisitionItemStatus {
+  pending
+  ordered
+  received
+}
+
+enum PurchaseRequisitionStatus {
+  draft
+  pending
+  approved
+  rejected
+  completed
+}
+
+enum Role {
+  admin
+  manager
+  staff
+}
+
+enum SalesShipmentStatus {
+  pending
+  shipped
+  delivered
+  cancelled
+}
+
+enum TransactionType {
+  received
+  shipped
+  adjusted
+  returned
+}

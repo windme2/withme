@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Layers } from "lucide-react";
 import { CustomLoadingScreen } from "@/components/ui/custom-loading";
+import { authApi } from "@/lib/api";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -25,34 +26,26 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    // --- Mock Login Logic ---
-    const mockCredentials = [
-      { email: "wind", password: "admin123", role: "admin" },
-      { email: "jame", password: "admin123", role: "admin" },
-    ];
+    try {
+      // Call Real API
+      const response = await authApi.login({ email, password });
 
-    // Simulate API Delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+      if (response && response.token) {
+        localStorage.setItem("isAuthenticated", "true");
+        localStorage.setItem("userEmail", response.user.email);
+        localStorage.setItem("userRole", response.user.role);
+        localStorage.setItem("token", response.token);
 
-    const user = mockCredentials.find(
-      (cred) =>
-        (cred.email === email || cred.email === email.toLowerCase()) &&
-        cred.password === password
-    );
+        setIsLoading(false);
+        setShowLoadingScreen(true);
 
-    if (user) {
-      localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("userEmail", user.email);
-      localStorage.setItem("userRole", user.role);
+        // Simulate System Loading for transition effect
+        await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      setIsLoading(false);
-      setShowLoadingScreen(true);
-
-      // Simulate System Loading
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      router.push("/dashboard");
-    } else {
+        router.push("/dashboard");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
       alert("Invalid email or password. Please try again.");
       setIsLoading(false);
     }

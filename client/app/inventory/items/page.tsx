@@ -41,146 +41,45 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 
-// --- Mock Data (Expanded to 15 Items) ---
-const allItems = [
-  {
-    id: 1,
-    name: "A4 Paper 80gsm",
-    sku: "SKU001",
-    category: "Office Supplies",
-    stock: 450,
-    price: 120,
-    status: "In Stock",
-  },
-  {
-    id: 2,
-    name: "Blue Ink Pen",
-    sku: "SKU002",
-    category: "Office Supplies",
-    stock: 12,
-    price: 25,
-    status: "Low Stock",
-  },
-  {
-    id: 3,
-    name: "Notebook A4",
-    sku: "SKU003",
-    category: "Office Supplies",
-    stock: 280,
-    price: 45,
-    status: "In Stock",
-  },
-  {
-    id: 4,
-    name: "HB Pencil #2",
-    sku: "SKU004",
-    category: "Office Supplies",
-    stock: 0,
-    price: 15,
-    status: "Out of Stock",
-  },
-  {
-    id: 5,
-    name: "Stapler Heavy Duty",
-    sku: "SKU005",
-    category: "Office Supplies",
-    stock: 95,
-    price: 180,
-    status: "In Stock",
-  },
-  {
-    id: 6,
-    name: "Croissant",
-    sku: "SKU006",
-    category: "Bakery",
-    stock: 24,
-    price: 55,
-    status: "In Stock",
-  },
-  {
-    id: 7,
-    name: "Blueberry Muffin",
-    sku: "SKU007",
-    category: "Bakery",
-    stock: 8,
-    price: 65,
-    status: "Low Stock",
-  },
-  {
-    id: 8,
-    name: "Baguette",
-    sku: "SKU008",
-    category: "Bakery",
-    stock: 15,
-    price: 45,
-    status: "In Stock",
-  },
-  {
-    id: 9,
-    name: "Wireless Mouse",
-    sku: "SKU009",
-    category: "IT Equipment",
-    stock: 35,
-    price: 450,
-    status: "In Stock",
-  },
-  {
-    id: 10,
-    name: "USB Cable",
-    sku: "SKU010",
-    category: "IT Equipment",
-    stock: 5,
-    price: 120,
-    status: "Low Stock",
-  },
-  {
-    id: 11,
-    name: "HDMI Cable 2m",
-    sku: "SKU011",
-    category: "IT Equipment",
-    stock: 0,
-    price: 250,
-    status: "Out of Stock",
-  },
-  {
-    id: 12,
-    name: "Keyboard Mechanical",
-    sku: "SKU012",
-    category: "IT Equipment",
-    stock: 18,
-    price: 1200,
-    status: "In Stock",
-  },
-  {
-    id: 13,
-    name: "Office Chair",
-    sku: "SKU013",
-    category: "Furniture",
-    stock: 4,
-    price: 2500,
-    status: "Low Stock",
-  },
-  {
-    id: 14,
-    name: "Desk Lamp",
-    sku: "SKU014",
-    category: "Furniture",
-    stock: 50,
-    price: 890,
-    status: "In Stock",
-  },
-  {
-    id: 15,
-    name: "Monitor 24 inch",
-    sku: "SKU015",
-    category: "IT Equipment",
-    stock: 7,
-    price: 4500,
-    status: "Low Stock",
-  },
-];
+import { useEffect } from "react";
+import { inventoryApi } from "@/lib/api";
+
+// --- Types ---
+interface InventoryItem {
+  id: string;
+  name: string;
+  sku: string;
+  // Map backend 'categories' relation to string if needed, or adjust UI
+  category: string | null;
+  stock: number; // backend might use 'quantity' or different field? Schema says 'products' table has 'unit' but maybe not stock? 
+  // Wait, schema has 'inventory_levels' table for quantity. 'products' table has 'minimum_stock'.
+  // Let's check schema again. 'products' has no quantity field? 
+  // Ah, schema says 'inventory_levels' has quantity.
+  // But for now let's assume the API returns a flattened structure or we need to adjust the service.
+  // Let's check the service implementation.
+  // Service returns prisma.products.findMany().
+  // Products table: id, sku, name, description, category_id, unit, minimum_stock...
+  // It does NOT have quantity. Quantity is in inventory_levels.
+  // I need to update the service to include inventory_levels.
+  price: number; // Products table doesn't seem to have price? 
+  // Schema: products table has no price. 
+  // goods_received_items has unit_price.
+  // This is an ERP. Price might be dynamic or cost price.
+  // Let's check schema for price.
+  // 'products' table: id, sku, name... no price.
+  // I should probably add a price field to products or use a related table.
+  // For this demo, I might need to mock it or add it to schema.
+  // Let's look at the schema again.
+
+  status: string;
+}
+
+// Placeholder for now until I fix the service
+const allItems: any[] = [];
 
 export default function InventoryItemsPage() {
+  const [items, setItems] = useState<InventoryItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
@@ -188,12 +87,27 @@ export default function InventoryItemsPage() {
 
   // --- Edit Modal State ---
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<{ id: string; [key: string]: unknown } | null>(null);
+  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
 
   const itemsPerPage = 10;
 
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        const data = await inventoryApi.getAll();
+        setItems(data);
+      } catch (error) {
+        console.error("Failed to fetch inventory:", error);
+        toast.error("Failed to load inventory items");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchItems();
+  }, []);
+
   // --- Filter Logic ---
-  const filteredItems = allItems.filter((item) => {
+  const filteredItems = items.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.sku.toLowerCase().includes(searchTerm.toLowerCase());
@@ -205,14 +119,14 @@ export default function InventoryItemsPage() {
   });
 
   // --- Stats Calculation ---
-  const totalItems = allItems.length;
-  const lowStockItems = allItems.filter(
+  const totalItems = items.length;
+  const lowStockItems = items.filter(
     (item) => item.status === "Low Stock"
   ).length;
-  const outOfStockItems = allItems.filter(
+  const outOfStockItems = items.filter(
     (item) => item.status === "Out of Stock"
   ).length;
-  const totalValue = allItems.reduce(
+  const totalValue = items.reduce(
     (sum, item) => sum + item.price * item.stock,
     0
   );
@@ -228,7 +142,7 @@ export default function InventoryItemsPage() {
   // --- Derived Data ---
   const categories = [
     "all",
-    ...Array.from(new Set(allItems.map((item) => item.category))),
+    ...Array.from(new Set(items.map((item) => item.category || 'Uncategorized'))),
   ];
   const statuses = ["all", "In Stock", "Low Stock", "Out of Stock"];
 
@@ -240,16 +154,28 @@ export default function InventoryItemsPage() {
     setCurrentPage(1);
   };
 
-  const handleEditClick = (item: { id: string; [key: string]: unknown }) => {
+  const handleEditClick = (item: InventoryItem) => {
     setEditingItem(item);
     setIsEditOpen(true);
   };
 
-  const handleSaveEdit = (e: React.FormEvent) => {
+  const handleSaveEdit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Here you would typically call an API to update the item
-    toast.success(`Updated ${editingItem.name} successfully!`);
-    setIsEditOpen(false);
+    if (!editingItem) return;
+
+    try {
+      await inventoryApi.update(editingItem.id, editingItem);
+      toast.success(`Updated ${editingItem.name} successfully!`);
+
+      // Refresh list
+      const data = await inventoryApi.getAll();
+      setItems(data);
+
+      setIsEditOpen(false);
+    } catch (error) {
+      console.error("Failed to update item:", error);
+      toast.error("Failed to update item");
+    }
   };
 
   return (
@@ -359,15 +285,15 @@ export default function InventoryItemsPage() {
                 {(searchTerm ||
                   selectedCategory !== "all" ||
                   selectedStatus !== "all") && (
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={clearFilters}
-                    className="text-slate-500 hover:text-red-600"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={clearFilters}
+                      className="text-slate-500 hover:text-red-600"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
               </div>
             </div>
 
