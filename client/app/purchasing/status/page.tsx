@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { MainLayout } from "@/components/layout/main-layout";
-import type { PurchaseRequisition } from "@/lib/types";
+import type { PurchaseRequisition, PurchaseRequisitionItem } from "@/lib/types";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -45,6 +45,7 @@ import {
 } from "@/components/ui/sheet";
 import { ConfirmationDialog } from "@/components/ui/confirmation-dialog";
 import { toast } from "sonner";
+import { purchasingApi } from "@/lib/api";
 
 export default function PurchasingStatusPage() {
   const [userRole, setUserRole] = useState<string>("user");
@@ -64,18 +65,31 @@ export default function PurchasingStatusPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  const [requests, setRequests] = useState<PurchaseRequisition[]>([]);
+
+  // Fetch Data
+  const fetchRequests = async () => {
+    try {
+      const data = await purchasingApi.getAll();
+      setRequests(data);
+    } catch (error) {
+      toast.error("Failed to fetch requests");
+    }
+  };
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       const role = localStorage.getItem("userRole") || "user";
       setUserRole(role);
     }
+    fetchRequests();
   }, []);
 
   // Batch Selection Handlers
   const handleSelectAll = () => {
     const pendingIds = paginatedRequests
       .filter((r) => r.status === "Pending")
-      .map((r) => r.id);
+      .map((r) => String(r.id));
     if (selectedIds.length === pendingIds.length) {
       setSelectedIds([]);
     } else {
@@ -97,179 +111,43 @@ export default function PurchasingStatusPage() {
     setBulkRejectDialog(true);
   };
 
-  const confirmBulkApprove = () => {
-    setRequests((prev) =>
-      prev.map((r) =>
-        selectedIds.includes(r.id) ? { ...r, status: "Approved" } : r
-      )
-    );
-    toast.success(`อนุมัติ ${selectedIds.length} รายการเรียบร้อย!`);
-    setSelectedIds([]);
-    setBulkApproveDialog(false);
+  const confirmBulkApprove = async () => {
+    try {
+      await Promise.all(selectedIds.map(id => purchasingApi.updateStatus(id, "approved")));
+      toast.success(`Approved ${selectedIds.length} requests.`);
+      fetchRequests();
+      setSelectedIds([]);
+      setBulkApproveDialog(false);
+    } catch (error) {
+      toast.error("Failed to approve some requests");
+    }
   };
 
-  const confirmBulkReject = () => {
-    setRequests((prev) =>
-      prev.map((r) =>
-        selectedIds.includes(r.id) ? { ...r, status: "Rejected" } : r
-      )
-    );
-    toast.error(`ไม่อนุมัติ ${selectedIds.length} รายการ`);
-    setSelectedIds([]);
-    setBulkRejectDialog(false);
+  const confirmBulkReject = async () => {
+    try {
+      await Promise.all(selectedIds.map(id => purchasingApi.updateStatus(id, "rejected")));
+      toast.success(`Rejected ${selectedIds.length} requests.`);
+      fetchRequests();
+      setSelectedIds([]);
+      setBulkRejectDialog(false);
+    } catch (error) {
+      toast.error("Failed to reject some requests");
+    }
   };
-
-  // --- Mock Data (15 Items) ---
-  const [requests, setRequests] = useState([
-    {
-      id: "PR-2025-015",
-      itemsList: [{ name: 'Monitor 24"', sku: "IT-005", qty: 5, price: 4500 }],
-      total: 22500,
-      status: "Pending",
-      date: "2025-01-15",
-      requester: "Admin",
-    },
-    {
-      id: "PR-2025-014",
-      itemsList: [{ name: "Office Desk", sku: "FUR-002", qty: 2, price: 3500 }],
-      total: 7000,
-      status: "Approved",
-      date: "2025-01-14",
-      requester: "Mike",
-    },
-    {
-      id: "PR-2025-013",
-      itemsList: [{ name: "Laptop Pro", sku: "IT-001", qty: 1, price: 45000 }],
-      total: 45000,
-      status: "Rejected",
-      date: "2025-01-13",
-      requester: "Sarah",
-    },
-    {
-      id: "PR-2025-012",
-      itemsList: [
-        { name: "File Cabinet", sku: "OFF-003", qty: 3, price: 2500 },
-      ],
-      total: 7500,
-      status: "Approved",
-      date: "2025-01-12",
-      requester: "Jane",
-    },
-    {
-      id: "PR-2025-011",
-      itemsList: [
-        { name: "Mech Keyboard", sku: "IT-004", qty: 10, price: 1200 },
-      ],
-      total: 12000,
-      status: "Pending",
-      date: "2025-01-11",
-      requester: "John",
-    },
-    {
-      id: "PR-2025-010",
-      itemsList: [{ name: "Sticky Notes", sku: "PAP-002", qty: 50, price: 25 }],
-      total: 1250,
-      status: "Approved",
-      date: "2025-01-10",
-      requester: "Mike",
-    },
-    {
-      id: "PR-2025-009",
-      itemsList: [
-        { name: "Marker Pen Set", sku: "PEN-003", qty: 20, price: 150 },
-      ],
-      total: 3000,
-      status: "Approved",
-      date: "2025-01-09",
-      requester: "Sarah",
-    },
-    {
-      id: "PR-2025-008",
-      itemsList: [{ name: "Stapler HD", sku: "OFF-001", qty: 15, price: 180 }],
-      total: 2700,
-      status: "Pending",
-      date: "2025-01-08",
-      requester: "Jane",
-    },
-    {
-      id: "PR-2025-007",
-      itemsList: [{ name: "Webcam 1080p", sku: "IT-003", qty: 5, price: 1500 }],
-      total: 7500,
-      status: "Rejected",
-      date: "2025-01-07",
-      requester: "John",
-    },
-    {
-      id: "PR-2025-006",
-      itemsList: [
-        { name: "Cleaning Kit", sku: "CLE-001", qty: 10, price: 350 },
-      ],
-      total: 3500,
-      status: "Approved",
-      date: "2025-01-06",
-      requester: "Mike",
-    },
-    {
-      id: "PR-2025-005",
-      itemsList: [
-        { name: "A4 Paper 80gsm", sku: "PAP-001", qty: 500, price: 120 },
-      ],
-      total: 60000,
-      status: "Approved",
-      date: "2025-01-05",
-      requester: "Wind",
-    },
-    {
-      id: "PR-2025-004",
-      itemsList: [{ name: "Notebook A4", sku: "NB-004", qty: 200, price: 45 }],
-      total: 9000,
-      status: "Pending",
-      date: "2025-01-04",
-      requester: "Jame",
-    },
-    {
-      id: "PR-2025-003",
-      itemsList: [
-        { name: "Blue Ink Pen", sku: "PEN-001", qty: 100, price: 250 },
-      ],
-      total: 25000,
-      status: "Ordered",
-      date: "2025-01-03",
-      requester: "Wind",
-    },
-    {
-      id: "PR-2025-002",
-      itemsList: [
-        { name: "HB Pencil #2", sku: "PEN-002", qty: 300, price: 120 },
-      ],
-      total: 36000,
-      status: "Rejected",
-      date: "2025-01-02",
-      requester: "Jame",
-    },
-    {
-      id: "PR-2025-001",
-      itemsList: [{ name: "Croissant", sku: "BAK-001", qty: 50, price: 55 }],
-      total: 2750,
-      status: "Pending",
-      date: "2025-01-01",
-      requester: "Wind",
-    },
-  ]);
 
   // Helper to process data for table view
   const processedRequests = requests.map((req) => {
-    const itemsSummary = req.itemsList.map((i) => i.name).join(", "); // Simple join or truncate
-    const totalQty = req.itemsList.reduce((sum, i) => sum + i.qty, 0);
+    const itemsSummary = (req.itemsList || []).map((i) => i.name).join(", ");
+    const totalQty = (req.itemsList || []).reduce((sum, i) => sum + (i.qty || i.quantity || 0), 0);
     return { ...req, itemsSummary, totalQty };
   });
 
   // --- Filter Logic ---
   const filteredRequests = processedRequests.filter((req) => {
     const matchesSearch =
-      req.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      req.itemsSummary.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      req.requester.toLowerCase().includes(searchTerm.toLowerCase());
+      String(req.id).toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (req.itemsSummary || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (req.requester || "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "all" || req.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
@@ -291,28 +169,30 @@ export default function PurchasingStatusPage() {
   const handleApproveClick = () => setApproveDialog(true);
   const handleRejectClick = () => setRejectDialog(true);
 
-  const confirmApprove = () => {
+  const confirmApprove = async () => {
     if (!selectedRequest) return;
-    const updatedRequests = requests.map((req) =>
-      req.id === selectedRequest.id ? { ...req, status: "Approved" } : req
-    );
-    setRequests(updatedRequests);
-    setSelectedRequest({ ...selectedRequest, status: "Approved" });
-    toast.success(`Approved PR ${selectedRequest.id}.`);
-    setApproveDialog(false);
-    setIsSheetOpen(false);
+    try {
+      await purchasingApi.updateStatus(String(selectedRequest.id), "approved");
+      toast.success(`Approved PR ${selectedRequest.id}.`);
+      fetchRequests();
+      setApproveDialog(false);
+      setIsSheetOpen(false);
+    } catch (error) {
+      toast.error("Failed to approve request");
+    }
   };
 
-  const confirmReject = () => {
+  const confirmReject = async () => {
     if (!selectedRequest) return;
-    const updatedRequests = requests.map((req) =>
-      req.id === selectedRequest.id ? { ...req, status: "Rejected" } : req
-    );
-    setRequests(updatedRequests);
-    setSelectedRequest({ ...selectedRequest, status: "Rejected" });
-    toast.error(`Rejected PR ${selectedRequest.id}.`);
-    setRejectDialog(false);
-    setIsSheetOpen(false);
+    try {
+      await purchasingApi.updateStatus(String(selectedRequest.id), "rejected");
+      toast.error(`Rejected PR ${selectedRequest.id}.`);
+      fetchRequests();
+      setRejectDialog(false);
+      setIsSheetOpen(false);
+    } catch (error) {
+      toast.error("Failed to reject request");
+    }
   };
 
   const clearFilters = () => {
@@ -320,11 +200,6 @@ export default function PurchasingStatusPage() {
     setFilterStatus("all");
     setCurrentPage(1);
   };
-
-  // Stats Calculation (prepared for future dashboard cards)
- // const pendingCount = requests.filter((i) => i.status === "Pending").length;
-  // const approvedCount = requests.filter((i) => i.status === "Approved").length;
- /// const rejectedCount = requests.filter((i) => i.status === "Rejected").length;
 
   return (
     <MainLayout>
@@ -426,8 +301,8 @@ export default function PurchasingStatusPage() {
                           paginatedRequests.filter((r) => r.status === "Pending")
                             .length > 0 &&
                           selectedIds.length ===
-                            paginatedRequests.filter((r) => r.status === "Pending")
-                              .length
+                          paginatedRequests.filter((r) => r.status === "Pending")
+                            .length
                         }
                         onCheckedChange={handleSelectAll}
                         aria-label="Select all pending items"
@@ -464,8 +339,8 @@ export default function PurchasingStatusPage() {
                       {/* Checkbox Column */}
                       <TableCell className="pl-6 py-4" onClick={(e) => e.stopPropagation()}>
                         <Checkbox
-                          checked={selectedIds.includes(req.id)}
-                          onCheckedChange={() => handleSelectOne(req.id)}
+                          checked={selectedIds.includes(String(req.id))}
+                          onCheckedChange={() => handleSelectOne(String(req.id))}
                           disabled={req.status !== "Pending"}
                           aria-label={`Select ${req.id}`}
                         />
@@ -489,14 +364,14 @@ export default function PurchasingStatusPage() {
 
                       {/* Amount */}
                       <TableCell className="text-right font-medium text-slate-700 py-4">
-                        ฿{req.total.toLocaleString()}
+                        ฿{(req.total || 0).toLocaleString()}
                       </TableCell>
 
                       {/* Requester */}
                       <TableCell className="pl-8 py-4">
                         <div className="flex items-center gap-2">
                           <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600 border border-slate-200">
-                            {req.requester.charAt(0)}
+                            {(req.requester || "?").charAt(0)}
                           </div>
                           <span className="text-sm text-slate-600">
                             {req.requester}
@@ -604,8 +479,8 @@ export default function PurchasingStatusPage() {
                       <div className="col-span-4 text-right">Total</div>
                     </div>
                     <div className="divide-y max-h-[300px] overflow-y-auto">
-                      {selectedRequest.itemsList.map(
-                        (item: { name?: string; [key: string]: unknown }, idx: number) => (
+                      {(selectedRequest.itemsList || []).map(
+                        (item: PurchaseRequisitionItem, idx: number) => (
                           <div
                             key={idx}
                             className="px-4 py-3 text-sm grid grid-cols-12 gap-2 items-center"
@@ -622,17 +497,17 @@ export default function PurchasingStatusPage() {
 
                             {/* Column 2: Quantity */}
                             <div className="col-span-2 text-right text-slate-600">
-                              {item.qty}
+                              {item.qty || item.quantity}
                             </div>
 
                             {/* Column 3: Total Price */}
                             <div className="col-span-4 text-right font-medium text-slate-900">
-                              ฿{(item.price * item.qty).toLocaleString()}
+                              ฿{((item.price || 0) * (item.qty || item.quantity || 0)).toLocaleString()}
                             </div>
                           </div>
                         )
                       )}
-                    </div>  
+                    </div>
 
                     {/* Grand Total Footer */}
                     <div className="bg-slate-50 p-3 border-t flex justify-between items-center">
@@ -640,7 +515,7 @@ export default function PurchasingStatusPage() {
                         Grand Total
                       </span>
                       <span className="text-lg font-bold text-blue-600">
-                        ฿{selectedRequest.total.toLocaleString()}
+                        ฿{(selectedRequest.total || 0).toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -653,7 +528,7 @@ export default function PurchasingStatusPage() {
                   </h4>
                   <div className="flex items-center gap-3 p-3 border rounded-lg">
                     <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600">
-                      {selectedRequest.requester.charAt(0)}
+                      {(selectedRequest.requester || "?").charAt(0)}
                     </div>
                     <div>
                       <div className="font-medium">
@@ -667,7 +542,7 @@ export default function PurchasingStatusPage() {
 
               <SheetFooter className="mt-8 border-t pt-4">
                 {userRole === "admin" &&
-                selectedRequest.status === "Pending" ? (
+                  selectedRequest.status === "Pending" ? (
                   <div className="flex gap-3 w-full">
                     <Button
                       variant="outline"

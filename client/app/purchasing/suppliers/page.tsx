@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,213 +31,49 @@ import {
   Edit,
   Save,
   User,
-  Package,
   MapPin,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-
-// --- Mock Data ---
-const initialSuppliers = [
-  {
-    id: 1,
-    name: "ABC Stationery Co.",
-    contact: "John Doe",
-    products: "Pens, Notebooks",
-    phone: "02-123-4567",
-    email: "sales@abc.com",
-    address: "Bangkok",
-  },
-  {
-    id: 2,
-    name: "Paper Plus Ltd.",
-    contact: "Jane Smith",
-    products: "A4 Paper, Envelopes",
-    phone: "02-987-6543",
-    email: "contact@paperplus.com",
-    address: "Nonthaburi",
-  },
-  {
-    id: 3,
-    name: "Tech Solutions Hub",
-    contact: "Mike Tech",
-    products: "Laptops, Peripherals",
-    phone: "02-555-0199",
-    email: "support@techhub.co.th",
-    address: "Pathum Thani",
-  },
-  {
-    id: 4,
-    name: "Office Comfort Furniture",
-    contact: "Sarah Seat",
-    products: "Chairs, Desks",
-    phone: "02-444-3322",
-    email: "sales@officecomfort.com",
-    address: "Samut Prakan",
-  },
-  {
-    id: 5,
-    name: "Clean Master Supplies",
-    contact: "Tom Cleaner",
-    products: "Cleaning Kits, Tissue",
-    phone: "02-888-7777",
-    email: "info@cleanmaster.com",
-    address: "Bangkok",
-  },
-  {
-    id: 6,
-    name: "Digital World Co.",
-    contact: "Robert Chen",
-    products: "USB Drives, Cables",
-    phone: "02-333-4444",
-    email: "sales@digitalworld.co.th",
-    address: "Bangkok",
-  },
-  {
-    id: 7,
-    name: "Premium Office Supplies",
-    contact: "Lisa Taylor",
-    products: "Files, Binders, Labels",
-    phone: "02-555-6666",
-    email: "info@premiumoffice.com",
-    address: "Nonthaburi",
-  },
-  {
-    id: 8,
-    name: "Smart Tech Industries",
-    contact: "Tom Anderson",
-    products: "Printers, Scanners",
-    phone: "02-777-8888",
-    email: "support@smarttech.th",
-    address: "Samut Prakan",
-  },
-  {
-    id: 9,
-    name: "Global Paper Trading",
-    contact: "Nancy Brown",
-    products: "Printing Paper, Cardboard",
-    phone: "02-222-3333",
-    email: "orders@globalpaper.net",
-    address: "Pathum Thani",
-  },
-  {
-    id: 10,
-    name: "Express Delivery Supplies",
-    contact: "Kevin White",
-    products: "Packaging Materials",
-    phone: "02-999-0000",
-    email: "contact@expressdelivery.co.th",
-    address: "Bangkok",
-  },
-  {
-    id: 11,
-    name: "Modern Workspace Solutions",
-    contact: "Amy Garcia",
-    products: "Ergonomic Chairs, Desks",
-    phone: "02-111-2222",
-    email: "sales@modernworkspace.com",
-    address: "Bangkok",
-  },
-  {
-    id: 12,
-    name: "Quality Print Co.",
-    contact: "Chris Moore",
-    products: "Ink Cartridges, Toner",
-    phone: "02-444-5555",
-    email: "info@qualityprint.th",
-    address: "Nonthaburi",
-  },
-  {
-    id: 13,
-    name: "Professional Office Equipment",
-    contact: "Patricia Lewis",
-    products: "Shredders, Laminators",
-    phone: "02-666-7777",
-    email: "sales@proequipment.net",
-    address: "Samut Prakan",
-  },
-  {
-    id: 14,
-    name: "Elite Stationery Mart",
-    contact: "Daniel Hall",
-    products: "Writing Tools, Erasers",
-    phone: "02-888-9999",
-    email: "orders@elitestationary.com",
-    address: "Bangkok",
-  },
-  {
-    id: 15,
-    name: "Tech World Distributors",
-    contact: "Jennifer King",
-    products: "Monitors, Keyboards",
-    phone: "02-000-1111",
-    email: "support@techworld.co.th",
-    address: "Pathum Thani",
-  },
-  {
-    id: 16,
-    name: "Supreme Office Supply",
-    contact: "Mark Allen",
-    products: "Staplers, Punches",
-    phone: "02-333-2222",
-    email: "info@supremeoffice.th",
-    address: "Nonthaburi",
-  },
-  {
-    id: 17,
-    name: "Advanced Tech Solutions",
-    contact: "Linda Young",
-    products: "Network Equipment",
-    phone: "02-555-4444",
-    email: "sales@advancedtech.net",
-    address: "Bangkok",
-  },
-  {
-    id: 18,
-    name: "Fresh Print Materials",
-    contact: "Steven Scott",
-    products: "Photo Paper, Canvas",
-    phone: "02-777-6666",
-    email: "orders@freshprint.com",
-    address: "Samut Prakan",
-  },
-  {
-    id: 19,
-    name: "Mega Storage Solutions",
-    contact: "Michelle Wright",
-    products: "Filing Cabinets, Shelves",
-    phone: "02-999-8888",
-    email: "contact@megastorage.co.th",
-    address: "Pathum Thani",
-  },
-  {
-    id: 20,
-    name: "Prime Electronics Co.",
-    contact: "Paul Martinez",
-    products: "Batteries, Power Banks",
-    phone: "02-111-0000",
-    email: "sales@primeelectronics.th",
-    address: "Bangkok",
-  },
-];
+import { suppliersApi } from "@/lib/api";
 
 export default function SuppliersPage() {
   // Data State
-  const [suppliers, setSuppliers] = useState(initialSuppliers);
+  const [suppliers, setSuppliers] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   // Sheet & Edit State
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isNew, setIsNew] = useState(false);
   const [formData, setFormData] = useState<{
-    id: string | number | null;
+    id: string | null;
     name: string;
-    contact: string;
-    products: string;
+    contactPerson: string;
     phone: string;
     email: string;
     address: string;
+    taxId: string;
+    paymentTerms: string;
   } | null>(null);
+
+  const fetchSuppliers = async () => {
+    try {
+      setIsLoading(true);
+      const data = await suppliersApi.getAll();
+      setSuppliers(data);
+    } catch (error) {
+      toast.error("Failed to fetch suppliers");
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSuppliers();
+  }, []);
 
   // --- Handlers ---
 
@@ -246,11 +82,12 @@ export default function SuppliersPage() {
     setFormData({
       id: null,
       name: "",
-      contact: "",
-      products: "",
+      contactPerson: "",
       phone: "",
       email: "",
       address: "",
+      taxId: "",
+      paymentTerms: "",
     });
     setIsNew(true);
     setIsEditing(true);
@@ -258,8 +95,17 @@ export default function SuppliersPage() {
   };
 
   // 2. Open Sheet for Viewing (Row Click)
-  const handleRowClick = (supplier: { id: string | number; name: string; contact: string; products: string; phone: string; email: string; address: string }) => {
-    setFormData({ ...supplier });
+  const handleRowClick = (supplier: any) => {
+    setFormData({
+      id: supplier.id,
+      name: supplier.name,
+      contactPerson: supplier.contact_person || "",
+      phone: supplier.phone || "",
+      email: supplier.email || "",
+      address: supplier.address || "",
+      taxId: supplier.tax_id || "",
+      paymentTerms: supplier.payment_terms ? String(supplier.payment_terms) : "",
+    });
     setIsNew(false);
     setIsEditing(false);
     setIsSheetOpen(true);
@@ -272,29 +118,41 @@ export default function SuppliersPage() {
 
   // 4. Handle Input Changes
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => prev ? { ...prev, [field]: value } : null);
+    setFormData((prev) => (prev ? { ...prev, [field]: value } : null));
   };
 
   // 5. Save Data
-  const handleSave = () => {
-    if (!formData.name || !formData.contact) {
-      toast.error("Please fill in required fields (Name, Contact).");
+  const handleSave = async () => {
+    if (!formData?.name) {
+      toast.error("Please fill in required fields (Name).");
       return;
     }
 
-    if (isNew) {
-      const newId =
-        suppliers.length > 0 ? Math.max(...suppliers.map((s) => s.id)) + 1 : 1;
-      const newSupplier = { ...formData, id: newId };
-      setSuppliers([newSupplier, ...suppliers]);
-      toast.success("New supplier added successfully.");
-    } else {
-      setSuppliers(suppliers.map((s) => (s.id === formData.id ? formData : s)));
-      toast.success("Supplier details updated.");
-    }
+    try {
+      const payload = {
+        name: formData.name,
+        contactPerson: formData.contactPerson,
+        phone: formData.phone,
+        email: formData.email,
+        address: formData.address,
+        taxId: formData.taxId,
+        paymentTerms: formData.paymentTerms ? parseInt(formData.paymentTerms) : null,
+      };
 
-    setIsSheetOpen(false);
-    setIsEditing(false);
+      if (isNew) {
+        await suppliersApi.create(payload);
+        toast.success("New supplier added successfully.");
+      } else if (formData.id) {
+        await suppliersApi.update(formData.id, payload);
+        toast.success("Supplier details updated.");
+      }
+      fetchSuppliers();
+      setIsSheetOpen(false);
+      setIsEditing(false);
+    } catch (error) {
+      toast.error("Failed to save supplier");
+      console.error(error);
+    }
   };
 
   // 6. Cancel Edit
@@ -302,9 +160,35 @@ export default function SuppliersPage() {
     if (isNew) {
       setIsSheetOpen(false);
     } else {
-      const originalData = suppliers.find((s) => s.id === formData.id);
-      setFormData(originalData);
+      const originalData = suppliers.find((s) => s.id === formData?.id);
+      if (originalData) {
+        setFormData({
+          id: originalData.id,
+          name: originalData.name,
+          contactPerson: originalData.contact_person || "",
+          phone: originalData.phone || "",
+          email: originalData.email || "",
+          address: originalData.address || "",
+          taxId: originalData.tax_id || "",
+          paymentTerms: originalData.payment_terms ? String(originalData.payment_terms) : "",
+        });
+      }
       setIsEditing(false);
+    }
+  };
+
+  // 7. Delete Supplier
+  const handleDelete = async () => {
+    if (!formData?.id) return;
+    if (!confirm("Are you sure you want to delete this supplier?")) return;
+
+    try {
+      await suppliersApi.delete(formData.id);
+      toast.success("Supplier deleted successfully");
+      fetchSuppliers();
+      setIsSheetOpen(false);
+    } catch (error) {
+      toast.error("Failed to delete supplier. Ensure no related transactions exist.");
     }
   };
 
@@ -312,7 +196,7 @@ export default function SuppliersPage() {
   const filteredSuppliers = suppliers.filter(
     (s) =>
       s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      s.products.toLowerCase().includes(searchTerm.toLowerCase())
+      (s.contact_person && s.contact_person.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -344,7 +228,7 @@ export default function SuppliersPage() {
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
-                  placeholder="Search supplier or products..."
+                  placeholder="Search supplier or contact..."
                   className="pl-10 border-slate-200"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -357,14 +241,11 @@ export default function SuppliersPage() {
               <Table>
                 <TableHeader className="bg-slate-50">
                   <TableRow>
-                    <TableHead className="pl-6 h-12 font-semibold text-slate-700 w-[200px]">
+                    <TableHead className="pl-6 h-12 font-semibold text-slate-700 w-[250px]">
                       Supplier Name
                     </TableHead>
                     <TableHead className="h-12 font-semibold text-slate-700">
                       Contact Person
-                    </TableHead>
-                    <TableHead className="h-12 font-semibold text-slate-700">
-                      Products
                     </TableHead>
                     <TableHead className="h-12 font-semibold text-slate-700">
                       Phone
@@ -372,46 +253,53 @@ export default function SuppliersPage() {
                     <TableHead className="h-12 font-semibold text-slate-700">
                       Email
                     </TableHead>
-                    {/* Adjusted Address Header: Added pr-6 */}
                     <TableHead className="h-12 font-semibold text-slate-700 pr-6">
                       Address
                     </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredSuppliers.map((s) => (
-                    <TableRow
-                      key={s.id}
-                      className="hover:bg-slate-50/60 transition-colors cursor-pointer"
-                      onClick={() => handleRowClick(s)}
-                    >
-                      <TableCell className="font-medium text-blue-600 pl-6 py-4">
-                        {s.name}
-                      </TableCell>
-                      <TableCell className="text-slate-900 py-4">
-                        {s.contact}
-                      </TableCell>
-                      <TableCell className="py-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
-                          {s.products}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-slate-600 py-4">
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-3 w-3 text-slate-400" /> {s.phone}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-slate-600 py-4">
-                        <div className="flex items-center gap-2">
-                          <Mail className="h-3 w-3 text-slate-400" /> {s.email}
-                        </div>
-                      </TableCell>
-                      {/* Adjusted Address Cell: Added pr-6 */}
-                      <TableCell className="text-slate-600 py-4 truncate max-w-[200px] pr-6">
-                        {s.address}
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                        Loading suppliers...
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : filteredSuppliers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-8 text-slate-500">
+                        No suppliers found.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredSuppliers.map((s) => (
+                      <TableRow
+                        key={s.id}
+                        className="hover:bg-slate-50/60 transition-colors cursor-pointer"
+                        onClick={() => handleRowClick(s)}
+                      >
+                        <TableCell className="font-medium text-blue-600 pl-6 py-4">
+                          {s.name}
+                        </TableCell>
+                        <TableCell className="text-slate-900 py-4">
+                          {s.contact_person || "-"}
+                        </TableCell>
+                        <TableCell className="text-slate-600 py-4">
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-3 w-3 text-slate-400" /> {s.phone || "-"}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-slate-600 py-4">
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-3 w-3 text-slate-400" /> {s.email || "-"}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-slate-600 py-4 truncate max-w-[200px] pr-6">
+                          {s.address || "-"}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -474,16 +362,16 @@ export default function SuppliersPage() {
                     </Label>
                     {isEditing ? (
                       <Input
-                        value={formData.contact}
+                        value={formData.contactPerson}
                         onChange={(e) =>
-                          handleInputChange("contact", e.target.value)
+                          handleInputChange("contactPerson", e.target.value)
                         }
                         placeholder="Name"
                       />
                     ) : (
                       <div className="flex items-center gap-2 text-slate-900">
                         <User className="h-4 w-4 text-slate-400" />{" "}
-                        {formData.contact}
+                        {formData.contactPerson || "-"}
                       </div>
                     )}
                   </div>
@@ -502,7 +390,7 @@ export default function SuppliersPage() {
                     ) : (
                       <div className="flex items-center gap-2 text-slate-900">
                         <Phone className="h-4 w-4 text-slate-400" />{" "}
-                        {formData.phone}
+                        {formData.phone || "-"}
                       </div>
                     )}
                   </div>
@@ -524,30 +412,50 @@ export default function SuppliersPage() {
                   ) : (
                     <div className="flex items-center gap-2 text-slate-900">
                       <Mail className="h-4 w-4 text-slate-400" />{" "}
-                      {formData.email}
+                      {formData.email || "-"}
                     </div>
                   )}
                 </div>
 
-                {/* Products */}
-                <div className="space-y-2">
-                  <Label className="text-slate-500 text-xs uppercase font-semibold">
-                    Products / Services
-                  </Label>
-                  {isEditing ? (
-                    <Input
-                      value={formData.products}
-                      onChange={(e) =>
-                        handleInputChange("products", e.target.value)
-                      }
-                      placeholder="e.g. Pens, Paper, Laptops"
-                    />
-                  ) : (
-                    <div className="flex items-center gap-2 text-slate-900">
-                      <Package className="h-4 w-4 text-slate-400" />{" "}
-                      {formData.products}
-                    </div>
-                  )}
+                {/* Tax ID & Payment Terms */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="text-slate-500 text-xs uppercase font-semibold">
+                      Tax ID
+                    </Label>
+                    {isEditing ? (
+                      <Input
+                        value={formData.taxId}
+                        onChange={(e) =>
+                          handleInputChange("taxId", e.target.value)
+                        }
+                        placeholder="Tax ID"
+                      />
+                    ) : (
+                      <div className="text-slate-900">
+                        {formData.taxId || "-"}
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-slate-500 text-xs uppercase font-semibold">
+                      Payment Terms (Days)
+                    </Label>
+                    {isEditing ? (
+                      <Input
+                        type="number"
+                        value={formData.paymentTerms}
+                        onChange={(e) =>
+                          handleInputChange("paymentTerms", e.target.value)
+                        }
+                        placeholder="e.g. 30"
+                      />
+                    ) : (
+                      <div className="text-slate-900">
+                        {formData.paymentTerms ? `${formData.paymentTerms} Days` : "-"}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Address */}
@@ -569,7 +477,7 @@ export default function SuppliersPage() {
                     <div className="flex items-start gap-2 text-slate-900">
                       <MapPin className="h-4 w-4 text-slate-400 mt-1" />
                       <span className="leading-relaxed">
-                        {formData.address}
+                        {formData.address || "-"}
                       </span>
                     </div>
                   )}
@@ -595,13 +503,22 @@ export default function SuppliersPage() {
                     </Button>
                   </div>
                 ) : (
-                  <Button
-                    variant="outline"
-                    className="w-full border-blue-200 text-blue-600 hover:bg-blue-50"
-                    onClick={handleEditClick}
-                  >
-                    <Edit className="h-4 w-4 mr-2" /> Edit Supplier
-                  </Button>
+                  <div className="flex gap-3 w-full">
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
+                      onClick={handleDelete}
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" /> Delete
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-blue-200 text-blue-600 hover:bg-blue-50"
+                      onClick={handleEditClick}
+                    >
+                      <Edit className="h-4 w-4 mr-2" /> Edit Supplier
+                    </Button>
+                  </div>
                 )}
               </SheetFooter>
             </>

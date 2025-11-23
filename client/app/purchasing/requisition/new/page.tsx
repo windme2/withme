@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MainLayout } from "@/components/layout/main-layout";
 import {
@@ -39,14 +39,35 @@ import {
   Info,
 } from "lucide-react";
 import { toast } from "sonner";
+import { inventoryApi, purchasingApi } from "@/lib/api";
 
 export default function NewPurchaseRequisitionPage() {
   const router = useRouter();
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // --- State Management ---
+  // --- Form State ---
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [requester, setRequester] = useState("");
+  const [priority, setPriority] = useState("medium");
+  const [notes, setNotes] = useState("");
+
   const [items, setItems] = useState([
-    { id: 1, name: "", sku: "", quantity: 0, unitPrice: 0, total: 0 },
+    { id: 1, productId: "", name: "", sku: "", quantity: 0, unitPrice: 0, total: 0 },
   ]);
+
+  // --- Fetch Products ---
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await inventoryApi.getAll();
+        setProducts(data);
+      } catch (error) {
+        toast.error("Failed to load products");
+      }
+    };
+    fetchProducts();
+  }, []);
 
   // --- Event Handlers ---
   const addItem = () => {
@@ -54,6 +75,7 @@ export default function NewPurchaseRequisitionPage() {
       ...items,
       {
         id: Date.now(),
+        productId: "",
         name: "",
         sku: "",
         quantity: 0,
@@ -74,9 +96,22 @@ export default function NewPurchaseRequisitionPage() {
       items.map((item) => {
         if (item.id === id) {
           const updated = { ...item, [field]: value };
-          // Auto-calculate total when qty or price changes
-          if (field === "quantity" || field === "unitPrice") {
-            updated.total = updated.quantity * updated.unitPrice;
+
+          // If product selected, update details
+          if (field === "productId") {
+            const product = products.find(p => p.id === value);
+            if (product) {
+              updated.name = product.name;
+              updated.sku = product.sku;
+              // PR usually estimates price. Let's assume 0 or last price if we had it.
+              // For now, let user input price or default to 0.
+              updated.unitPrice = 0;
+            }
+          }
+
+          // Auto-calculate total
+          if (field === "quantity" || field === "unitPrice" || field === "productId") {
+            updated.total = (updated.quantity || 0) * (updated.unitPrice || 0);
           }
           return updated;
         }
@@ -85,9 +120,38 @@ export default function NewPurchaseRequisitionPage() {
     );
   };
 
-  const handleSave = () => {
-    toast.success("Purchase Requisition created successfully!");
-    setTimeout(() => router.back(), 1000);
+  const handleSave = async () => {
+    if (!requester) {
+      toast.error("Please enter requester name");
+      return;
+    }
+    if (items.some(i => !i.productId || i.quantity <= 0)) {
+      toast.error("Please fill in all item details correctly");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await purchasingApi.create({
+        date,
+        requester, // Note: Backend currently uses hardcoded userId, but we can pass this in notes or update backend to use it if needed.
+        // Actually, backend uses hardcoded userId for `requested_by`.
+        // Let's pass requester name in notes for now or just rely on the hardcoded user.
+        priority,
+        notes: `${notes} (Requested by: ${requester})`,
+        items: items.map(i => ({
+          productId: i.productId,
+          quantity: i.quantity,
+          unitPrice: i.unitPrice
+        }))
+      });
+      toast.success("Purchase Requisition created successfully!");
+      setTimeout(() => router.push("/purchasing/requisition"), 1000);
+    } catch (error) {
+      toast.error("Failed to create PR");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // --- Calculations ---
@@ -143,25 +207,28 @@ export default function NewPurchaseRequisitionPage() {
                     <Input
                       id="date"
                       type="date"
-                      defaultValue={new Date().toISOString().split("T")[0]}
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
                     />
                   </div>
                 </div>
 
-                {/* Combined Requested By and Priority into one row (SWAPPED ORDER) */}
+                {/* Combined Requested By and Priority into one row */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  {/* REQUESTED BY (First Column) */}
+                  {/* REQUESTED BY */}
                   <div className="space-y-2">
                     <Label htmlFor="requested-by">Requested By</Label>
                     <Input
                       id="requested-by"
                       placeholder="Enter requester name"
+                      value={requester}
+                      onChange={(e) => setRequester(e.target.value)}
                     />
                   </div>
-                  {/* PRIORITY (Second Column) */}
+                  {/* PRIORITY */}
                   <div className="space-y-2">
                     <Label htmlFor="priority">Priority</Label>
-                    <Select>
+                    <Select value={priority} onValueChange={setPriority}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select priority" />
                       </SelectTrigger>
@@ -175,7 +242,7 @@ export default function NewPurchaseRequisitionPage() {
                   </div>
                 </div>
 
-                {/* Justification/Notes consolidated inside this card */}
+                {/* Notes */}
                 <div className="space-y-2">
                   <Label htmlFor="notes">Notes</Label>
                   <Textarea
@@ -183,6 +250,8 @@ export default function NewPurchaseRequisitionPage() {
                     placeholder="Reason for this purchase request..."
                     rows={3}
                     className="resize-none min-h-[80px]"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
                   />
                 </div>
               </CardContent>
@@ -225,13 +294,13 @@ export default function NewPurchaseRequisitionPage() {
                 </div>
 
                 <div className="space-y-3 mt-auto">
-                  {/* mt-auto pushes this group to the bottom if container is full height */}
                   <Button
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white shadow-md h-11 text-base transition-all hover:scale-[1.02]"
                     onClick={handleSave}
+                    disabled={loading}
                   >
                     <Save className="h-4 w-4 mr-2" />
-                    Submit PR
+                    {loading ? "Submitting..." : "Submit PR"}
                   </Button>
                   <div className="flex items-start gap-2 text-xs text-slate-400 px-1">
                     <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
@@ -275,13 +344,13 @@ export default function NewPurchaseRequisitionPage() {
                       <TableHead className="pl-6 w-[50px] text-center">
                         #
                       </TableHead>
-                      <TableHead className="min-w-[200px]">Item Name</TableHead>
+                      <TableHead className="min-w-[250px]">Product</TableHead>
                       <TableHead className="w-[150px]">SKU</TableHead>
                       <TableHead className="w-[100px] text-right">
                         Qty
                       </TableHead>
                       <TableHead className="w-[140px] text-right">
-                        Unit Price
+                        Est. Unit Price
                       </TableHead>
                       <TableHead className="w-[140px] text-right">
                         Amount
@@ -298,23 +367,26 @@ export default function NewPurchaseRequisitionPage() {
                           {index + 1}
                         </TableCell>
                         <TableCell className="py-3">
-                          <Input
-                            placeholder="Item Name"
-                            value={item.name}
-                            onChange={(e) =>
-                              updateItem(item.id, "name", e.target.value)
-                            }
-                            className="border-slate-200 focus:border-blue-500 h-9"
-                          />
+                          <Select
+                            value={item.productId}
+                            onValueChange={(val) => updateItem(item.id, "productId", val)}
+                          >
+                            <SelectTrigger className="h-9">
+                              <SelectValue placeholder="Select Product" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {products.map(p => (
+                                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </TableCell>
                         <TableCell className="py-3">
                           <Input
                             placeholder="SKU"
                             value={item.sku}
-                            onChange={(e) =>
-                              updateItem(item.id, "sku", e.target.value)
-                            }
-                            className="border-slate-200 focus:border-blue-500 h-9"
+                            disabled
+                            className="bg-slate-50 border-slate-200 h-9"
                           />
                         </TableCell>
                         <TableCell className="py-3">

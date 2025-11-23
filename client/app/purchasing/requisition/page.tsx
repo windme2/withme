@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { MainLayout } from "@/components/layout/main-layout";
-import type { PurchaseRequisition, StatCardProps } from "@/lib/types";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Clock,
@@ -16,6 +16,7 @@ import {
   ChevronRight,
   PackageOpen,
   Plus,
+  Loader2,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -40,10 +41,16 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { purchasingApi } from "@/lib/api";
+import { toast } from "sonner";
 
 export default function PurchaseRequisitionPage() {
+  const router = useRouter();
+
   // --- Data States ---
-  const [selectedRequest, setSelectedRequest] = useState<PurchaseRequisition | null>(null);
+  const [requests, setRequests] = useState<any[]>([]);
+  const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -52,177 +59,48 @@ export default function PurchaseRequisitionPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // --- Mock Data (15 Items) ---
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [requests, setRequests] = useState([
-    {
-      id: "PR-2025-015",
-      itemsList: [{ name: 'Monitor 24"', sku: "IT-005", qty: 5, price: 4500 }],
-      total: 22500,
-      status: "Pending",
-      date: "2025-01-15",
-      requester: "John Doe",
-    },
-    {
-      id: "PR-2025-014",
-      itemsList: [{ name: "Office Desk", sku: "FUR-002", qty: 2, price: 3500 }],
-      total: 7000,
-      status: "Approved",
-      date: "2025-01-14",
-      requester: "Mike Johnson",
-    },
-    {
-      id: "PR-2025-013",
-      itemsList: [{ name: "Laptop Pro", sku: "IT-001", qty: 1, price: 45000 }],
-      total: 45000,
-      status: "Rejected",
-      date: "2025-01-13",
-      requester: "Sarah Smith",
-    },
-    {
-      id: "PR-2025-012",
-      itemsList: [
-        { name: "File Cabinet", sku: "OFF-003", qty: 3, price: 2500 },
-      ],
-      total: 7500,
-      status: "Approved",
-      date: "2025-01-12",
-      requester: "Jane Doe",
-    },
-    {
-      id: "PR-2025-011",
-      itemsList: [
-        { name: "Mech Keyboard", sku: "IT-004", qty: 10, price: 1200 },
-      ],
-      total: 12000,
-      status: "Pending",
-      date: "2025-01-11",
-      requester: "John Doe",
-    },
-    {
-      id: "PR-2025-010",
-      itemsList: [{ name: "Sticky Notes", sku: "PAP-002", qty: 50, price: 25 }],
-      total: 1250,
-      status: "Approved",
-      date: "2025-01-10",
-      requester: "Mike Johnson",
-    },
-    {
-      id: "PR-2025-009",
-      itemsList: [
-        { name: "Whiteboard Marker", sku: "ST-001", qty: 20, price: 35 },
-      ],
-      total: 700,
-      status: "Approved",
-      date: "2025-01-09",
-      requester: "Admin",
-    },
-    {
-      id: "PR-2025-008",
-      itemsList: [
-        { name: "Ergonomic Chair", sku: "FUR-005", qty: 1, price: 8500 },
-      ],
-      total: 8500,
-      status: "Pending",
-      date: "2025-01-08",
-      requester: "Sarah Smith",
-    },
-    {
-      id: "PR-2025-007",
-      itemsList: [{ name: "USB-C Hub", sku: "IT-009", qty: 5, price: 1200 }],
-      total: 6000,
-      status: "Rejected",
-      date: "2025-01-07",
-      requester: "Jane Doe",
-    },
-    {
-      id: "PR-2025-006",
-      itemsList: [
-        { name: "A4 Paper (Box)", sku: "PAP-001", qty: 10, price: 550 },
-      ],
-      total: 5500,
-      status: "Approved",
-      date: "2025-01-06",
-      requester: "Admin",
-    },
-    {
-      id: "PR-2025-005",
-      itemsList: [
-        { name: "Coffee Beans 1kg", sku: "PAN-002", qty: 4, price: 450 },
-      ],
-      total: 1800,
-      status: "Pending",
-      date: "2025-01-05",
-      requester: "Mike Johnson",
-    },
-    {
-      id: "PR-2025-004",
-      itemsList: [
-        { name: "HDMI Cable 3m", sku: "IT-012", qty: 10, price: 250 },
-      ],
-      total: 2500,
-      status: "Approved",
-      date: "2025-01-04",
-      requester: "IT Support",
-    },
-    {
-      id: "PR-2025-003",
-      itemsList: [
-        { name: "Safety Helmet", sku: "SAF-001", qty: 15, price: 350 },
-      ],
-      total: 5250,
-      status: "Approved",
-      date: "2025-01-03",
-      requester: "Site Manager",
-    },
-    {
-      id: "PR-2025-002",
-      itemsList: [
-        { name: "Extension Cord", sku: "ELE-003", qty: 8, price: 180 },
-      ],
-      total: 1440,
-      status: "Pending",
-      date: "2025-01-02",
-      requester: "John Doe",
-    },
-    {
-      id: "PR-2025-001",
-      itemsList: [
-        { name: "Wireless Mouse", sku: "IT-002", qty: 3, price: 450 },
-      ],
-      total: 1350,
-      status: "Approved",
-      date: "2025-01-01",
-      requester: "Sarah Smith",
-    },
-  ]);
+  // --- Fetch Data ---
+  useEffect(() => {
+    const fetchRequests = async () => {
+      setLoading(true);
+      try {
+        const data = await purchasingApi.getAll({
+          status: filterStatus,
+          search: searchTerm,
+        });
+        setRequests(data);
+      } catch (error) {
+        console.error("Failed to fetch PRs:", error);
+        toast.error("Failed to load purchase requisitions");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const timeoutId = setTimeout(() => {
+      fetchRequests();
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [filterStatus, searchTerm]); // Note: Pagination is client-side for now based on API response structure
 
   // --- Helpers ---
   const processedRequests = requests.map((req) => {
-    const itemsSummary = req.itemsList.map((i) => i.name).join(", ");
+    const itemsSummary = req.itemsList.map((i: any) => i.name).join(", ");
     return { ...req, itemsSummary };
   });
 
-  // --- Filter Logic ---
-  const filteredRequests = processedRequests.filter((req) => {
-    const matchesSearch =
-      req.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      req.itemsSummary.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      req.requester.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === "all" || req.status === filterStatus;
-    return matchesSearch && matchesStatus;
-  });
-
-  // --- Pagination Logic ---
-  const totalPages = Math.ceil(filteredRequests.length / itemsPerPage);
+  // --- Pagination Logic (Client-side for now as API returns all) ---
+  // If API supported server-side pagination, we would pass page param to API
+  const totalPages = Math.ceil(processedRequests.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedRequests = filteredRequests.slice(
+  const paginatedRequests = processedRequests.slice(
     startIndex,
     startIndex + itemsPerPage
   );
 
   // --- Handlers ---
-  const handleRowClick = (req: PurchaseRequisition) => {
+  const handleRowClick = (req: any) => {
     setSelectedRequest(req);
     setIsSheetOpen(true);
   };
@@ -334,92 +212,104 @@ export default function PurchaseRequisitionPage() {
             </div>
 
             {/* Data Table */}
-            <div className="rounded-lg border border-slate-200 overflow-hidden">
-              <Table>
-                <TableHeader className="bg-slate-50">
-                  <TableRow>
-                    {/* Header cells: Added h-12 for height, pl-6/pr-6 for ends */}
-                    <TableHead className="w-[150px] font-semibold text-slate-700 pl-6 h-12">
-                      PR No.
-                    </TableHead>
-                    <TableHead className="min-w-[200px] font-semibold text-slate-700 h-12">
-                      Item Description
-                    </TableHead>
-                    <TableHead className="text-right font-semibold text-slate-700 h-12">
-                      Amount
-                    </TableHead>
-                    <TableHead className="font-semibold text-slate-700 pl-8 h-12">
-                      Requester By
-                    </TableHead>
-                    <TableHead className="font-semibold text-slate-700 h-12">
-                      Date
-                    </TableHead>
-                    <TableHead className="text-center font-semibold text-slate-700 pr-6 h-12">
-                      Status
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedRequests.map((req) => (
-                    <TableRow
-                      key={req.id}
-                      className="hover:bg-slate-50/60 transition-colors cursor-pointer group"
-                      onClick={() => handleRowClick(req)}
-                    >
-
-                      {/* PR No. */}
-                      <TableCell className="pl-6 py-4">
-                        <span className="font-medium text-blue-600 group-hover:underline underline-offset-4">
-                          {req.id}
-                        </span>
-                      </TableCell>
-
-                      {/* Item Description */}
-                      <TableCell className="font-medium text-slate-900 py-4">
-                        <div className="flex items-center gap-2">
-                          {req.itemsSummary}
-                        </div>
-                      </TableCell>
-
-                      {/* Amount */}
-                      <TableCell className="text-right font-medium text-slate-700 py-4">
-                        ฿{req.total.toLocaleString()}
-                      </TableCell>
-
-                      {/* Requester By */}
-                      <TableCell className="pl-8 py-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600 border border-slate-200">
-                            {req.requester.charAt(0)}
-                          </div>
-                          <span className="text-sm text-slate-600">
-                            {req.requester}
-                          </span>
-                        </div>
-                      </TableCell>
-
-                      {/* Date */}
-                      <TableCell className="text-slate-500 text-sm whitespace-nowrap py-4">
-                        {req.date}
-                      </TableCell>
-
-                      {/* Status */}
-                      <TableCell className="text-center pr-6 py-4">
-                        <StatusBadge status={req.status} />
-                      </TableCell>
+            <div className="rounded-lg border border-slate-200 overflow-hidden min-h-[400px]">
+              {loading ? (
+                <div className="flex items-center justify-center h-[400px]">
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader className="bg-slate-50">
+                    <TableRow>
+                      <TableHead className="w-[150px] font-semibold text-slate-700 pl-6 h-12">
+                        PR No.
+                      </TableHead>
+                      <TableHead className="min-w-[200px] font-semibold text-slate-700 h-12">
+                        Item Description
+                      </TableHead>
+                      <TableHead className="text-right font-semibold text-slate-700 h-12">
+                        Amount
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 pl-8 h-12">
+                        Requester By
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-700 h-12">
+                        Date
+                      </TableHead>
+                      <TableHead className="text-center font-semibold text-slate-700 pr-6 h-12">
+                        Status
+                      </TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedRequests.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center py-12 text-slate-500">
+                          No purchase requisitions found.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      paginatedRequests.map((req) => (
+                        <TableRow
+                          key={req.id}
+                          className="hover:bg-slate-50/60 transition-colors cursor-pointer group"
+                          onClick={() => handleRowClick(req)}
+                        >
+                          {/* PR No. */}
+                          <TableCell className="pl-6 py-4">
+                            <span className="font-medium text-blue-600 group-hover:underline underline-offset-4">
+                              {req.id}
+                            </span>
+                          </TableCell>
+
+                          {/* Item Description */}
+                          <TableCell className="font-medium text-slate-900 py-4">
+                            <div className="flex items-center gap-2">
+                              {req.itemsSummary}
+                            </div>
+                          </TableCell>
+
+                          {/* Amount */}
+                          <TableCell className="text-right font-medium text-slate-700 py-4">
+                            ฿{req.total.toLocaleString()}
+                          </TableCell>
+
+                          {/* Requester By */}
+                          <TableCell className="pl-8 py-4">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600 border border-slate-200">
+                                {req.requester.charAt(0)}
+                              </div>
+                              <span className="text-sm text-slate-600">
+                                {req.requester}
+                              </span>
+                            </div>
+                          </TableCell>
+
+                          {/* Date */}
+                          <TableCell className="text-slate-500 text-sm whitespace-nowrap py-4">
+                            {req.date}
+                          </TableCell>
+
+                          {/* Status */}
+                          <TableCell className="text-center pr-6 py-4">
+                            <StatusBadge status={req.status} />
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              )}
             </div>
 
             {/* Pagination Footer */}
-            {totalPages > 1 && (
+            {!loading && totalPages > 1 && (
               <div className="flex flex-col sm:flex-row items-center justify-between mt-4 pt-4 gap-4 border-t border-slate-100">
                 <div className="text-sm text-slate-500">
                   Showing {startIndex + 1} -{" "}
-                  {Math.min(startIndex + itemsPerPage, filteredRequests.length)}{" "}
-                  of {filteredRequests.length} entries
+                  {Math.min(startIndex + itemsPerPage, processedRequests.length)}{" "}
+                  of {processedRequests.length} entries
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
@@ -499,7 +389,7 @@ export default function PurchaseRequisitionPage() {
                     </div>
                     <div className="divide-y max-h-[300px] overflow-y-auto">
                       {selectedRequest.itemsList.map(
-                        (item: { name?: string; [key: string]: unknown }, idx: number) => (
+                        (item: any, idx: number) => (
                           <div
                             key={idx}
                             className="px-4 py-3 text-sm grid grid-cols-12 gap-2 items-center"
@@ -568,7 +458,7 @@ export default function PurchaseRequisitionPage() {
 
 // --- Sub-components ---
 
-function StatCard({ title, value, icon: Icon, color, bg }: StatCardProps) {
+function StatCard({ title, value, icon: Icon, color, bg }: any) {
   return (
     <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all">
       <CardContent className="p-6 flex items-center justify-between">

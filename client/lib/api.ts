@@ -84,4 +84,86 @@ export const suppliersApi = {
         const response = await api.get('/suppliers');
         return response.data;
     },
+    getOne: async (id: string) => {
+        const response = await api.get(`/suppliers/${id}`);
+        return response.data;
+    },
+    create: async (data: any) => {
+        const response = await api.post('/suppliers', data);
+        return response.data;
+    },
+    update: async (id: string, data: any) => {
+        const response = await api.put(`/suppliers/${id}`, data);
+        return response.data;
+    },
+    delete: async (id: string) => {
+        const response = await api.delete(`/suppliers/${id}`);
+        return response.data;
+    },
+};
+
+export const transactionsApi = {
+    getAll: async (params?: any) => {
+        const searchParams = new URLSearchParams();
+        if (params?.page) searchParams.append("page", params.page.toString());
+        if (params?.limit) searchParams.append("limit", params.limit.toString());
+        if (params?.type && params.type !== "all") searchParams.append("type", params.type);
+        if (params?.search) searchParams.append("search", params.search);
+
+        const response = await api.get(`/transactions?${searchParams.toString()}`);
+        return response.data;
+    },
+};
+
+export const purchasingApi = {
+    getAll: async (params?: any) => {
+        const searchParams = new URLSearchParams();
+        if (params?.status && params.status !== "all") searchParams.append("status", params.status);
+        if (params?.search) searchParams.append("search", params.search);
+
+        const response = await api.get(`/purchasing/requisitions?${searchParams.toString()}`);
+        return response.data;
+    },
+    getOne: async (id: string) => {
+        const response = await api.get(`/purchasing/requisitions/${id}`);
+        return response.data;
+    },
+    create: async (data: any) => {
+        const response = await api.post("/purchasing/requisitions", data);
+        return response.data;
+    },
+    updateStatus: async (id: string, status: string) => {
+        const response = await api.patch(`/purchasing/requisitions/${id}/status`, { status });
+        return response.data;
+    },
+};
+
+export const purchaseOrdersApi = {
+    getAll: async () => {
+        const response = await api.get("/purchasing/orders");
+        return response.data;
+    },
+    getOne: async (id: string) => {
+        const response = await api.get(`/purchasing/orders/${id}`);
+        return response.data;
+    },
+    create: async (data: any) => {
+        const response = await api.post("/purchasing/orders", data);
+        return response.data;
+    },
+};
+
+export const dashboardApi = {
+    getStats: async () => {
+        const response = await api.get('/dashboard/stats');
+        return response.data;
+    },
+    getRecentTransactions: async () => {
+        const response = await api.get('/dashboard/transactions');
+        return response.data;
+    },
+    getLowStockItems: async () => {
+        const response = await api.get('/dashboard/low-stock');
+        return response.data;
+    },
 };

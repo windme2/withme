@@ -1,6 +1,8 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { dashboardApi } from "@/lib/api";
 import {
   Card,
   CardContent,
@@ -42,96 +44,37 @@ import {
   Pie,
   Cell,
 } from "recharts";
+import { toast } from "sonner";
 
 export default function DashboardPage() {
   const router = useRouter();
+  const [stats, setStats] = useState<any>(null);
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [lowStockItems, setLowStockItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // --- Mock Data ---
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [statsData, transactionsData, lowStockData] = await Promise.all([
+          dashboardApi.getStats(),
+          dashboardApi.getRecentTransactions(),
+          dashboardApi.getLowStockItems(),
+        ]);
+        setStats(statsData);
+        setTransactions(transactionsData);
+        setLowStockItems(lowStockData);
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+        toast.error("Failed to load dashboard data");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
-  // Recent Transactions
-  const recentTransactions = [
-    {
-      id: "GRN-2025-015",
-      type: "receipt",
-      description: "รับสินค้าจาก Tech World Co.",
-      amount: "฿45,000",
-      date: "2 ชั่วโมงที่แล้ว",
-      status: "completed",
-    },
-    {
-      id: "SO-2025-030",
-      type: "shipment",
-      description: "จัดส่งสินค้าให้ Global Retail",
-      amount: "฿55,000",
-      date: "3 ชั่วโมงที่แล้ว",
-      status: "shipped",
-    },
-    {
-      id: "ADJ-2025-015",
-      type: "adjustment",
-      description: "ปรับยอดสินค้า (Internal Use)",
-      amount: "-2 ชิ้น",
-      date: "5 ชั่วโมงที่แล้ว",
-      status: "completed",
-    },
-    {
-      id: "RT-2025-005",
-      type: "return",
-      description: "รับคืนสินค้าจาก Local Tech Shop",
-      amount: "฿5,000",
-      date: "1 วันที่แล้ว",
-      status: "received",
-    },
-    {
-      id: "PR-2025-016",
-      type: "requisition",
-      description: "คำขอซื้อรอการอนุมัติ",
-      amount: "฿32,000",
-      date: "1 วันที่แล้ว",
-      status: "pending",
-    },
-  ];
-
-  const stats = [
-    {
-      title: "มูลค่าสินค้าคงคลัง",
-      value: "฿1,240,500",
-      icon: DollarSign,
-      description: "มูลค่ารวมทั้งหมด",
-      color: "bg-blue-500",
-      change: "+12%",
-      isPositive: true,
-    },
-    {
-      title: "สินค้าทั้งหมด",
-      value: "1,247",
-      icon: Package,
-      description: "รายการ (SKU)",
-      color: "bg-indigo-500",
-      change: "+8 Items",
-      isPositive: true,
-    },
-    {
-      title: "คำสั่งซื้อรออนุมัติ",
-      value: "12",
-      icon: ShoppingCart,
-      description: "Pending Orders",
-      color: "bg-amber-500",
-      change: "รอจัดการ",
-      isPositive: null,
-    },
-    {
-      title: "สินค้าต้องเติม (Low Stock)",
-      value: "5",
-      icon: AlertTriangle,
-      description: "ต่ำกว่าเกณฑ์",
-      color: "bg-red-500",
-      change: "-2 Items",
-      isPositive: false,
-    },
-  ];
-
-  // Data 1: Stock Movement (Area Chart)
+  // --- Mock Data for Charts (Keep these for now as backend doesn't provide historical data yet) ---
   const stockMovementData = [
     { name: "Mon", inbound: 40, outbound: 24 },
     { name: "Tue", inbound: 30, outbound: 13 },
@@ -142,7 +85,6 @@ export default function DashboardPage() {
     { name: "Sun", inbound: 34, outbound: 43 },
   ];
 
-  // Data 2: Revenue (Bar Chart)
   const salesData = [
     { month: "Jan", sales: 4000 },
     { month: "Feb", sales: 3000 },
@@ -153,80 +95,49 @@ export default function DashboardPage() {
     { month: "Jul", sales: 3490 },
   ];
 
-  // Data 3: Pending Approvals (Pie Chart)
   const approvalStatusData = [
-    { name: "รออนุมัติ (Pending)", value: 12, color: "#f59e0b" }, // Amber-500
-    { name: "อนุมัติแล้ว (Approved)", value: 45, color: "#10b981" }, // Emerald-500
-    { name: "ไม่อนุมัติ (Rejected)", value: 3, color: "#ef4444" }, // Red-500
+    { name: "รออนุมัติ (Pending)", value: stats?.pendingOrders || 0, color: "#f59e0b" },
+    { name: "อนุมัติแล้ว (Approved)", value: 45, color: "#10b981" }, // Mock
+    { name: "ไม่อนุมัติ (Rejected)", value: 3, color: "#ef4444" }, // Mock
   ];
 
-  // Low Stock Items
-  const lowStockItems = [
+  const statCards = [
     {
-      name: "Notebook A4",
-      sku: "PEN-001",
-      quantity: 5,
-      minLevel: 10,
-      supplier: "ABC Corp",
+      title: "มูลค่าสินค้าคงคลัง",
+      value: stats ? `฿${stats.totalValue.toLocaleString()}` : "Loading...",
+      icon: DollarSign,
+      description: "มูลค่ารวมทั้งหมด (Estimated)",
+      color: "bg-blue-500",
+      change: "+12%", // Mock change
+      isPositive: true,
     },
     {
-      name: "HB Pencil #2",
-      sku: "PEN-002",
-      quantity: 3,
-      minLevel: 20,
-      supplier: "Write Co",
+      title: "สินค้าทั้งหมด",
+      value: stats ? stats.totalItems : "Loading...",
+      icon: Package,
+      description: "รายการ (SKU)",
+      color: "bg-indigo-500",
+      change: "+8 Items", // Mock change
+      isPositive: true,
     },
     {
-      name: "Stapler HD",
-      sku: "OFF-001",
-      quantity: 2,
-      minLevel: 5,
-      supplier: "Office Pro",
+      title: "คำสั่งซื้อรออนุมัติ",
+      value: stats ? stats.pendingOrders : "Loading...",
+      icon: ShoppingCart,
+      description: "Pending Orders",
+      color: "bg-amber-500",
+      change: "รอจัดการ",
+      isPositive: null,
     },
     {
-      name: "Glue Stick",
-      sku: "GLU-001",
-      quantity: 0,
-      minLevel: 15,
-      supplier: "Stick It",
+      title: "สินค้าต้องเติม (Low Stock)",
+      value: stats ? stats.lowStockCount : "Loading...",
+      icon: AlertTriangle,
+      description: "ต่ำกว่าเกณฑ์",
+      color: "bg-red-500",
+      change: "-2 Items", // Mock change
+      isPositive: false,
     },
-    {
-      name: "Blue Ink Pen",
-      sku: "PEN-005",
-      quantity: 8,
-      minLevel: 50,
-      supplier: "Ink Master",
-    },
-    {
-      name: "Correction Tape",
-      sku: "OFF-015",
-      quantity: 4,
-      minLevel: 25,
-      supplier: "Office Pro",
-    },
-    {
-      name: "Whiteboard Marker",
-      sku: "MRK-003",
-      quantity: 6,
-      minLevel: 30,
-      supplier: "Marker Plus",
-    },
-    {
-      name: "Paper Clips (Box)",
-      sku: "CLP-001",
-      quantity: 1,
-      minLevel: 10,
-      supplier: "Office Supplies",
-    },
-  ];
-
-  // Note: topProducts is prepared for future use in dashboard charts
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const topProducts = [
-    { name: "A4 Paper 80gsm", sales: 450, revenue: "฿12,500", trend: "up" },
-    { name: "Blue Ink Pen", sales: 320, revenue: "฿8,900", trend: "up" },
-    { name: "Office Chair", sales: 15, revenue: "฿45,000", trend: "down" },
-    { name: "Whiteboard Marker", sales: 120, revenue: "฿3,600", trend: "up" },
   ];
 
   return (
@@ -244,7 +155,7 @@ export default function DashboardPage() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((stat, index) => (
+          {statCards.map((stat, index) => (
             <Card
               key={index}
               className="border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all"
@@ -272,13 +183,12 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex items-center mt-4 text-xs">
                   <span
-                    className={`flex items-center font-medium ${
-                      stat.isPositive === true
+                    className={`flex items-center font-medium ${stat.isPositive === true
                         ? "text-emerald-600"
                         : stat.isPositive === false
-                        ? "text-red-600"
-                        : "text-amber-600"
-                    }`}
+                          ? "text-red-600"
+                          : "text-amber-600"
+                      }`}
                   >
                     {stat.isPositive === true && (
                       <ArrowUpRight className="h-3 w-3 mr-1" />
@@ -407,7 +317,7 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            {/* Approval Status (Pie Chart - Changed as requested) */}
+            {/* Approval Status (Pie Chart) */}
             <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
               <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
@@ -532,82 +442,83 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {recentTransactions.map((transaction, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start gap-3 p-3 rounded-lg border border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer"
-                    onClick={() => {
-                      if (transaction.type === "receipt")
-                        router.push("/inventory/goods-received");
-                      else if (transaction.type === "shipment")
-                        router.push("/sales/shipments");
-                      else if (transaction.type === "adjustment")
-                        router.push("/inventory/adjustments");
-                      else if (transaction.type === "return")
-                        router.push("/sales/returns");
-                      else if (transaction.type === "requisition")
-                        router.push("/purchasing/requisition");
-                    }}
-                  >
+                {transactions.length === 0 ? (
+                  <div className="text-center py-4 text-slate-500">No recent transactions</div>
+                ) : (
+                  transactions.map((transaction, index) => (
                     <div
-                      className={`p-2 rounded-lg ${
-                        transaction.type === "receipt"
-                          ? "bg-blue-50"
-                          : transaction.type === "shipment"
-                          ? "bg-purple-50"
-                          : transaction.type === "adjustment"
-                          ? "bg-amber-50"
-                          : transaction.type === "return"
-                          ? "bg-red-50"
-                          : "bg-slate-50"
-                      }`}
+                      key={index}
+                      className="flex items-start gap-3 p-3 rounded-lg border border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer"
+                      onClick={() => {
+                        if (transaction.type === "receipt")
+                          router.push("/inventory/goods-received");
+                        else if (transaction.type === "shipment")
+                          router.push("/sales/shipments");
+                        else if (transaction.type === "adjustment")
+                          router.push("/inventory/adjustments");
+                        else if (transaction.type === "return")
+                          router.push("/sales/returns");
+                        else if (transaction.type === "requisition")
+                          router.push("/purchasing/requisition");
+                      }}
                     >
-                      {transaction.type === "receipt" ? (
-                        <Package className="h-4 w-4 text-blue-600" />
-                      ) : transaction.type === "shipment" ? (
-                        <Truck className="h-4 w-4 text-purple-600" />
-                      ) : transaction.type === "adjustment" ? (
-                        <RotateCcw className="h-4 w-4 text-amber-600" />
-                      ) : transaction.type === "return" ? (
-                        <RotateCcw className="h-4 w-4 text-red-600" />
-                      ) : (
-                        <FileText className="h-4 w-4 text-slate-600" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="text-sm font-medium text-slate-900 truncate">
-                          {transaction.id}
-                        </p>
-                        <Badge
-                          variant="outline"
-                          className={`text-xs ${
-                            transaction.status === "completed"
-                              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                              : transaction.status === "shipped"
-                              ? "bg-purple-50 text-purple-700 border-purple-200"
-                              : transaction.status === "received"
-                              ? "bg-blue-50 text-blue-700 border-blue-200"
-                              : "bg-amber-50 text-amber-700 border-amber-200"
+                      <div
+                        className={`p-2 rounded-lg ${transaction.type === "receipt"
+                            ? "bg-blue-50"
+                            : transaction.type === "shipment"
+                              ? "bg-purple-50"
+                              : transaction.type === "adjustment"
+                                ? "bg-amber-50"
+                                : transaction.type === "return"
+                                  ? "bg-red-50"
+                                  : "bg-slate-50"
                           }`}
-                        >
-                          {transaction.status}
-                        </Badge>
+                      >
+                        {transaction.type === "receipt" ? (
+                          <Package className="h-4 w-4 text-blue-600" />
+                        ) : transaction.type === "shipment" ? (
+                          <Truck className="h-4 w-4 text-purple-600" />
+                        ) : transaction.type === "adjustment" ? (
+                          <RotateCcw className="h-4 w-4 text-amber-600" />
+                        ) : transaction.type === "return" ? (
+                          <RotateCcw className="h-4 w-4 text-red-600" />
+                        ) : (
+                          <FileText className="h-4 w-4 text-slate-600" />
+                        )}
                       </div>
-                      <p className="text-xs text-slate-600 mt-1">
-                        {transaction.description}
-                      </p>
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="text-xs text-slate-500">
-                          {transaction.date}
-                        </span>
-                        <span className="text-sm font-semibold text-slate-900">
-                          {transaction.amount}
-                        </span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-sm font-medium text-slate-900 truncate">
+                            {transaction.id}
+                          </p>
+                          <Badge
+                            variant="outline"
+                            className={`text-xs ${transaction.status === "completed" || transaction.status === "approved"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                : transaction.status === "shipped"
+                                  ? "bg-purple-50 text-purple-700 border-purple-200"
+                                  : transaction.status === "received"
+                                    ? "bg-blue-50 text-blue-700 border-blue-200"
+                                    : "bg-amber-50 text-amber-700 border-amber-200"
+                              }`}
+                          >
+                            {transaction.status}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-slate-600 mt-1">
+                          {transaction.description}
+                        </p>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="text-xs text-slate-500">
+                            {new Date(transaction.date).toLocaleDateString()}
+                          </span>
+                          <span className="text-sm font-semibold text-slate-900">
+                            {transaction.amount}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  )))}
               </div>
             </CardContent>
           </Card>
@@ -647,51 +558,53 @@ export default function DashboardPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {lowStockItems.map((item, index) => (
-                      <tr
-                        key={index}
-                        className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer group"
-                        onClick={() => router.push("/inventory/items")}
-                      >
-                        <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">
-                          <div className="flex items-center gap-2">
-                            <span>{item.name}</span>
-                            <ArrowRight className="h-4 w-4 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          </div>
-                          <div className="text-xs text-slate-500 font-normal">
-                            {item.supplier}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-slate-500">{item.sku}</td>
-                        <td className="px-4 py-3 text-center font-bold text-red-600">
-                          {item.quantity} / {item.minLevel}
-                        </td>
-                        <td className="px-4 py-3 text-center">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              item.quantity === 0
-                                ? "bg-red-100 text-red-700"
-                                : "bg-amber-100 text-amber-700"
-                            }`}
-                          >
-                            {item.quantity === 0 ? "Out of Stock" : "Low Stock"}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="h-8 text-xs border-slate-200"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              router.push("/purchasing/requisition/new");
-                            }}
-                          >
-                            Re-order
-                          </Button>
-                        </td>
-                      </tr>
-                    ))}
+                    {lowStockItems.length === 0 ? (
+                      <tr><td colSpan={5} className="text-center py-4 text-slate-500">No low stock items</td></tr>
+                    ) : (
+                      lowStockItems.map((item, index) => (
+                        <tr
+                          key={index}
+                          className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer group"
+                          onClick={() => router.push("/inventory/items")}
+                        >
+                          <td className="px-4 py-3 font-medium text-slate-900 dark:text-white">
+                            <div className="flex items-center gap-2">
+                              <span>{item.name}</span>
+                              <ArrowRight className="h-4 w-4 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            </div>
+                            <div className="text-xs text-slate-500 font-normal">
+                              {item.supplier}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3 text-slate-500">{item.sku}</td>
+                          <td className="px-4 py-3 text-center font-bold text-red-600">
+                            {item.quantity} / {item.minLevel}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${item.quantity === 0
+                                  ? "bg-red-100 text-red-700"
+                                  : "bg-amber-100 text-amber-700"
+                                }`}
+                            >
+                              {item.quantity === 0 ? "Out of Stock" : "Low Stock"}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 text-xs border-slate-200"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push("/purchasing/requisition/new");
+                              }}
+                            >
+                              Re-order
+                            </Button>
+                          </td>
+                        </tr>
+                      )))}
                   </tbody>
                 </table>
               </div>

@@ -85,3 +85,14 @@ export const TransactionType = {
 } as const
 
 export type TransactionType = (typeof TransactionType)[keyof typeof TransactionType]
+
+
+export const PurchaseOrderStatus = {
+  draft: 'draft',
+  sent: 'sent',
+  partially_received: 'partially_received',
+  completed: 'completed',
+  cancelled: 'cancelled'
+} as const
+
+export type PurchaseOrderStatus = (typeof PurchaseOrderStatus)[keyof typeof PurchaseOrderStatus]

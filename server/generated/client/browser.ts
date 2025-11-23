@@ -97,3 +97,13 @@ export type user_permissions = Prisma.user_permissionsModel
  * 
  */
 export type users = Prisma.usersModel
+/**
+ * Model purchase_orders
+ * 
+ */
+export type purchase_orders = Prisma.purchase_ordersModel
+/**
+ * Model purchase_order_items
+ * 
+ */
+export type purchase_order_items = Prisma.purchase_order_itemsModel

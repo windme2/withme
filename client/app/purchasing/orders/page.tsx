@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -19,6 +19,7 @@ import {
   ChevronLeft,
   ChevronRight,
   PackageOpen,
+  AlertCircle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -45,178 +46,50 @@ import {
   SheetFooter,
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
+import { purchaseOrdersApi } from "@/lib/api";
+import type { StatCardProps } from "@/lib/types";
 
 export default function PurchaseOrderPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedOrder, setSelectedOrder] = useState<{ id: string; details: { [key: string]: unknown }[]; [key: string]: unknown } | null>(null);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // --- Pagination State ---
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
-  // --- Mock Data ---
-  const orders = [
-    {
-      id: "PO-2025-015",
-      supplier: "Tech World Co.",
-      date: "2025-01-15",
-      totalValue: 45000,
-      status: "Issued",
-      prRef: "PR-2025-015",
-      details: [
-        { name: 'Monitor 24"', qty: 5, price: 4500 },
-        { name: "HDMI Cable", qty: 5, price: 4500 },
-      ],
-    },
-    {
-      id: "PO-2025-014",
-      supplier: "Office Pro Supply",
-      date: "2025-01-14",
-      totalValue: 12500,
-      status: "Received",
-      prRef: "PR-2025-014",
-      details: [
-        { name: "Paper A4", qty: 50, price: 120 },
-        { name: "Binder", qty: 20, price: 50 },
-      ],
-    },
-    {
-      id: "PO-2025-013",
-      supplier: "ABC Stationery Co.",
-      date: "2025-01-13",
-      totalValue: 8900,
-      status: "Received",
-      prRef: "PR-2025-013",
-      details: [{ name: "Pen Blue", qty: 100, price: 15 }],
-    },
-    {
-      id: "PO-2025-012",
-      supplier: "Paper Plus Ltd.",
-      date: "2025-01-12",
-      totalValue: 25000,
-      status: "Issued",
-      prRef: "PR-2025-012",
-      details: [{ name: "Paper A4", qty: 200, price: 120 }],
-    },
-    {
-      id: "PO-2025-011",
-      supplier: "IT Solution Hub",
-      date: "2025-01-11",
-      totalValue: 85000,
-      status: "Pending",
-      prRef: "PR-2025-011",
-      details: [
-        { name: "Laptop Dell", qty: 2, price: 35000 },
-        { name: "Mouse", qty: 2, price: 500 },
-      ],
-    },
-    {
-      id: "PO-2025-010",
-      supplier: "Furniture Mart",
-      date: "2025-01-10",
-      totalValue: 35000,
-      status: "Cancelled",
-      prRef: "PR-2025-010",
-      details: [{ name: "Office Chair", qty: 5, price: 3500 }],
-    },
-    {
-      id: "PO-2025-009",
-      supplier: "Office Pro Supply",
-      date: "2025-01-09",
-      totalValue: 18750,
-      status: "Received",
-      prRef: "PR-2025-009",
-      details: [{ name: "Whiteboard", qty: 1, price: 2500 }],
-    },
-    {
-      id: "PO-2025-008",
-      supplier: "Clean & Clear",
-      date: "2025-01-08",
-      totalValue: 4500,
-      status: "Received",
-      prRef: "PR-2025-008",
-      details: [{ name: "Tissue Box", qty: 50, price: 35 }],
-    },
-    {
-      id: "PO-2025-007",
-      supplier: "Tech World Co.",
-      date: "2025-01-07",
-      totalValue: 22000,
-      status: "Issued",
-      prRef: "PR-2025-007",
-      details: [{ name: 'Monitor 27"', qty: 2, price: 8500 }],
-    },
-    {
-      id: "PO-2025-006",
-      supplier: "ABC Stationery Co.",
-      date: "2025-01-06",
-      totalValue: 25500,
-      status: "Received",
-      prRef: "PR-2025-006",
-      details: [{ name: "Notebook", qty: 100, price: 45 }],
-    },
-    {
-      id: "PO-2025-005",
-      supplier: "Paper Plus Ltd.",
-      date: "2025-01-05",
-      totalValue: 12300,
-      status: "Pending",
-      prRef: "PR-2025-005",
-      details: [{ name: "Ink Cartridge", qty: 4, price: 2500 }],
-    },
-    {
-      id: "PO-2025-004",
-      supplier: "Write Co. International",
-      date: "2025-01-04",
-      totalValue: 42100,
-      status: "Cancelled",
-      prRef: "PR-2025-004",
-      details: [{ name: "Premium Pen", qty: 50, price: 550 }],
-    },
-    {
-      id: "PO-2025-003",
-      supplier: "Office Pro Supply",
-      date: "2025-01-03",
-      totalValue: 3200,
-      status: "Received",
-      prRef: "PR-2025-003",
-      details: [{ name: "Stapler", qty: 10, price: 150 }],
-    },
-    {
-      id: "PO-2025-002",
-      supplier: "IT Solution Hub",
-      date: "2025-01-02",
-      totalValue: 15000,
-      status: "Issued",
-      prRef: "PR-2025-002",
-      details: [{ name: "Tablet", qty: 1, price: 15000 }],
-    },
-    {
-      id: "PO-2025-001",
-      supplier: "ABC Stationery Co.",
-      date: "2025-01-01",
-      totalValue: 5000,
-      status: "Received",
-      prRef: "PR-2025-001",
-      details: [{ name: "Marker Set", qty: 20, price: 120 }],
-    },
-  ];
+  const fetchOrders = async () => {
+    try {
+      setIsLoading(true);
+      const data = await purchaseOrdersApi.getAll();
+      setOrders(data);
+    } catch (error) {
+      toast.error("Failed to fetch purchase orders");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
   // --- Data Processing ---
-  const ordersWithStats = orders.map((order) => {
-    const totalQty = order.details.reduce((sum, item) => sum + item.qty, 0);
-    return { ...order, totalQty };
-  });
+  // Backend returns amount, date, id, prRef, status, supplier.
+  // We need to calculate totalQty if not provided, but backend findAll doesn't provide items.
+  // So we might show '-' for Qty in list or update backend to return it.
+  // For now, let's assume backend doesn't return qty in list.
 
   // --- Filter Logic ---
-  const filteredOrders = ordersWithStats.filter((order) => {
+  const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.supplier.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.prRef.toLowerCase().includes(searchTerm.toLowerCase());
+      (order.prRef && order.prRef.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus =
       filterStatus === "all" || order.status === filterStatus;
     return matchesSearch && matchesStatus;
@@ -236,9 +109,14 @@ export default function PurchaseOrderPage() {
     setCurrentPage(1);
   };
 
-  const handleRowClick = (order: { id: string; details: { [key: string]: unknown }[]; [key: string]: unknown }) => {
-    setSelectedOrder(order);
-    setIsSheetOpen(true);
+  const handleRowClick = async (order: any) => {
+    try {
+      const details = await purchaseOrdersApi.getOne(order.id);
+      setSelectedOrder(details);
+      setIsSheetOpen(true);
+    } catch (error) {
+      toast.error("Failed to fetch order details");
+    }
   };
 
   // --- Feature: Print PO ---
@@ -255,29 +133,28 @@ export default function PurchaseOrderPage() {
         `<h1>Purchase Order: ${selectedOrder.id}</h1>`
       );
       printWindow.document.write(
-        `<p><strong>Supplier:</strong> ${selectedOrder.supplier}</p>`
+        `<p><strong>Supplier:</strong> ${selectedOrder.supplier.name}</p>`
       );
       printWindow.document.write(
         `<p><strong>Date:</strong> ${selectedOrder.date}</p>`
       );
       printWindow.document.write(
-        `<p><strong>PR Ref.:</strong> ${selectedOrder.prRef}</p>`
+        `<p><strong>PR Ref.:</strong> ${selectedOrder.prRef || '-'}</p>`
       );
       printWindow.document.write(
         '<br/><table><thead><tr><th>Item</th><th>Qty</th><th class="text-right">Total</th></tr></thead><tbody>'
       );
-      selectedOrder.details.forEach((item: { name?: string; [key: string]: unknown }) => {
+      selectedOrder.items.forEach((item: any) => {
         printWindow.document.write(
-          `<tr><td>${item.name}</td><td>${
-            item.qty
+          `<tr><td>${item.productName}</td><td>${item.quantity
           }</td><td class="text-right">฿${(
-            item.price * item.qty
+            item.totalPrice
           ).toLocaleString()}</td></tr>`
         );
       });
       printWindow.document.write("</tbody></table>");
       printWindow.document.write(
-        `<h3 class="text-right">Grand Total: ฿${selectedOrder.totalValue.toLocaleString()}</h3>`
+        `<h3 class="text-right">Grand Total: ฿${selectedOrder.totalAmount.toLocaleString()}</h3>`
       );
       printWindow.document.write("</body></html>");
       printWindow.document.close();
@@ -288,7 +165,7 @@ export default function PurchaseOrderPage() {
   // --- Feature: Download File ---
   const handleDownload = () => {
     if (!selectedOrder) return;
-    const content = `PO Number: ${selectedOrder.id}\nSupplier: ${selectedOrder.supplier}\nDate: ${selectedOrder.date}\nTotal: ${selectedOrder.totalValue}`;
+    const content = `PO Number: ${selectedOrder.id}\nSupplier: ${selectedOrder.supplier.name}\nDate: ${selectedOrder.date}\nTotal: ${selectedOrder.totalAmount}`;
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -333,22 +210,22 @@ export default function PurchaseOrderPage() {
             bg="bg-blue-50"
           />
           <StatCard
-            title="Issued (Sent)"
-            value={orders.filter((o) => o.status === "Issued").length}
+            title="Sent"
+            value={orders.filter((o) => o.status === "Sent").length}
             icon={Truck}
             color="text-amber-600"
             bg="bg-amber-50"
           />
           <StatCard
             title="Completed"
-            value={orders.filter((o) => o.status === "Received").length}
+            value={orders.filter((o) => o.status === "Completed").length}
             icon={CheckCircle2}
             color="text-emerald-600"
             bg="bg-emerald-50"
           />
           <StatCard
             title="Total Value"
-            value="฿355k"
+            value={`฿${(orders.reduce((sum, o) => sum + o.amount, 0) / 1000).toFixed(1)}k`}
             icon={FileText}
             color="text-purple-600"
             bg="bg-purple-50"
@@ -387,10 +264,11 @@ export default function PurchaseOrderPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="Issued">Issued</SelectItem>
-                    <SelectItem value="Received">Received</SelectItem>
+                    <SelectItem value="Draft">Draft</SelectItem>
+                    <SelectItem value="Sent">Sent</SelectItem>
+                    <SelectItem value="Partially Received">Partially Received</SelectItem>
+                    <SelectItem value="Completed">Completed</SelectItem>
                     <SelectItem value="Cancelled">Cancelled</SelectItem>
-                    <SelectItem value="Pending">Pending</SelectItem>
                   </SelectContent>
                 </Select>
 
@@ -416,9 +294,6 @@ export default function PurchaseOrderPage() {
                     <TableHead className="font-semibold text-slate-700 h-12">
                       Supplier
                     </TableHead>
-                    <TableHead className="text-center font-semibold text-slate-700 h-12">
-                      Items Qty
-                    </TableHead>
                     <TableHead className="text-right font-semibold text-slate-700 h-12">
                       Amount
                     </TableHead>
@@ -431,52 +306,59 @@ export default function PurchaseOrderPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedOrders.map((order) => (
-                    <TableRow
-                      key={order.id}
-                      className="hover:bg-slate-50/60 transition-colors cursor-pointer group"
-                      onClick={() => handleRowClick(order)}
-                    >
-                      {/* Added py-4 to all cells for vertical breathing room */}
-
-                      {/* PO No. */}
-                      <TableCell className="pl-6 py-4">
-                        <span className="font-medium text-blue-600 group-hover:underline underline-offset-4">
-                          {order.id}
-                        </span>
-                      </TableCell>
-
-                      {/* PR Ref. */}
-                      <TableCell className="text-slate-600 font-medium py-4">
-                        {order.prRef}
-                      </TableCell>
-
-                      {/* Supplier */}
-                      <TableCell className="font-medium text-slate-900 py-4">
-                        {order.supplier}
-                      </TableCell>
-
-                      {/* Items Qty */}
-                      <TableCell className="text-center text-slate-700 py-4">
-                        {order.totalQty}
-                      </TableCell>
-
-                      {/* Amount */}
-                      <TableCell className="text-right font-bold text-slate-700 py-4">
-                        ฿{order.totalValue.toLocaleString()}
-                      </TableCell>
-
-                      {/* Date */}
-                      <TableCell className="text-slate-500 text-sm pl-6 whitespace-nowrap py-4">
-                        {order.date}
-                      </TableCell>
-
-                      {/* Status */}
-                      <TableCell className="text-center pr-6 py-4">
-                        <StatusBadge status={order.status} />
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                        Loading orders...
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : paginatedOrders.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                        No orders found.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paginatedOrders.map((order) => (
+                      <TableRow
+                        key={order.id}
+                        className="hover:bg-slate-50/60 transition-colors cursor-pointer group"
+                        onClick={() => handleRowClick(order)}
+                      >
+                        {/* PO No. */}
+                        <TableCell className="pl-6 py-4">
+                          <span className="font-medium text-blue-600 group-hover:underline underline-offset-4">
+                            {order.id}
+                          </span>
+                        </TableCell>
+
+                        {/* PR Ref. */}
+                        <TableCell className="text-slate-600 font-medium py-4">
+                          {order.prRef}
+                        </TableCell>
+
+                        {/* Supplier */}
+                        <TableCell className="font-medium text-slate-900 py-4">
+                          {order.supplier}
+                        </TableCell>
+
+                        {/* Amount */}
+                        <TableCell className="text-right font-bold text-slate-700 py-4">
+                          ฿{order.amount.toLocaleString()}
+                        </TableCell>
+
+                        {/* Date */}
+                        <TableCell className="text-slate-500 text-sm pl-6 whitespace-nowrap py-4">
+                          {order.date}
+                        </TableCell>
+
+                        {/* Status */}
+                        <TableCell className="text-center pr-6 py-4">
+                          <StatusBadge status={order.status} />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -544,7 +426,7 @@ export default function PurchaseOrderPage() {
                   <div className="flex justify-between">
                     <span className="text-slate-500 text-sm">PR Reference</span>
                     <span className="font-medium text-slate-900">
-                      {selectedOrder.prRef}
+                      {selectedOrder.prRef || '-'}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -565,12 +447,12 @@ export default function PurchaseOrderPage() {
                   </h4>
                   <div className="p-3 border rounded-lg">
                     <div className="font-medium text-lg">
-                      {selectedOrder.supplier}
+                      {selectedOrder.supplier.name}
                     </div>
                     <div className="text-sm text-slate-500 mt-1">
-                      123 Business Rd, Commerce City
+                      {selectedOrder.supplier.address || 'No address provided'}
                       <br />
-                      Tax ID: 0105555555555
+                      Tax ID: {selectedOrder.supplier.tax_id || '-'}
                     </div>
                   </div>
                 </div>
@@ -586,22 +468,25 @@ export default function PurchaseOrderPage() {
                       <div className="col-span-4 text-right">Total</div>
                     </div>
                     <div className="divide-y max-h-[300px] overflow-y-auto">
-                      {selectedOrder.details &&
-                        selectedOrder.details.map((item: { name?: string; [key: string]: unknown }, idx: number) => (
+                      {selectedOrder.items &&
+                        selectedOrder.items.map((item: any, idx: number) => (
                           <div
                             key={idx}
                             className="px-4 py-3 text-sm grid grid-cols-12 gap-2 items-center"
                           >
                             <div className="col-span-6">
                               <div className="font-medium text-slate-900">
-                                {item.name}
+                                {item.productName}
+                              </div>
+                              <div className="text-xs text-slate-400 font-mono">
+                                {item.sku}
                               </div>
                             </div>
                             <div className="col-span-2 text-right text-slate-600">
-                              {item.qty}
+                              {item.quantity}
                             </div>
                             <div className="col-span-4 text-right font-medium text-slate-900">
-                              ฿{(item.price * item.qty).toLocaleString()}
+                              ฿{item.totalPrice.toLocaleString()}
                             </div>
                           </div>
                         ))}
@@ -611,7 +496,7 @@ export default function PurchaseOrderPage() {
                         Grand Total
                       </span>
                       <span className="text-lg font-bold text-blue-600">
-                        ฿{selectedOrder.totalValue.toLocaleString()}
+                        ฿{selectedOrder.totalAmount.toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -645,8 +530,6 @@ export default function PurchaseOrderPage() {
 
 // --- Sub-Components ---
 
-import type { StatCardProps } from "@/lib/types";
-
 function StatCard({ title, value, icon: Icon, color, bg }: StatCardProps) {
   return (
     <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all">
@@ -666,8 +549,9 @@ function StatCard({ title, value, icon: Icon, color, bg }: StatCardProps) {
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
     Draft: "bg-slate-50 text-slate-700 border-slate-200",
-    Issued: "bg-blue-50 text-blue-700 border-blue-200",
-    Pending: "bg-amber-50 text-amber-700 border-amber-200",
+    Sent: "bg-blue-50 text-blue-700 border-blue-200",
+    "Partially Received": "bg-amber-50 text-amber-700 border-amber-200",
+    Completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
     Cancelled: "bg-red-50 text-red-700 border-red-200",
   };
   const currentStyle =
@@ -677,9 +561,10 @@ function StatusBadge({ status }: { status: string }) {
     <span
       className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${currentStyle}`}
     >
-      {status === "Received" && <CheckCircle2 className="w-3 h-3 mr-1" />}
-      {status === "Issued" && <Truck className="w-3 h-3 mr-1" />}
-      {status === "Pending" && <Clock className="w-3 h-3 mr-1" />}
+      {status === "Completed" && <CheckCircle2 className="w-3 h-3 mr-1" />}
+      {status === "Sent" && <Truck className="w-3 h-3 mr-1" />}
+      {status === "Partially Received" && <Clock className="w-3 h-3 mr-1" />}
+      {status === "Draft" && <FileText className="w-3 h-3 mr-1" />}
       {status === "Cancelled" && <XCircle className="w-3 h-3 mr-1" />}
       {status}
     </span>

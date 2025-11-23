@@ -128,6 +128,7 @@ model products {
   categories                 categories?                  @relation(fields: [category_id], references: [id])
   purchase_requisition_items purchase_requisition_items[]
   shipment_items             shipment_items[]
+  purchase_order_items       purchase_order_items[]
 }
 
 model purchase_requisition_items {
@@ -199,6 +200,7 @@ model suppliers {
   created_at     DateTime         @default(now())
   updated_at     DateTime
   goods_received goods_received[]
+  purchase_orders purchase_orders[]
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
@@ -299,4 +301,41 @@ enum TransactionType {
   shipped
   adjusted
   returned
+}
+
+model purchase_orders {
+  id              String   @id
+  po_number       String   @unique
+  supplier_id     String
+  pr_number       String?
+  status          PurchaseOrderStatus
+  order_date      DateTime @default(now())
+  expected_date   DateTime?
+  total_amount    Decimal  @db.Decimal(10, 2)
+  notes           String?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  suppliers       suppliers @relation(fields: [supplier_id], references: [id])
+  purchase_order_items purchase_order_items[]
+}
+
+model purchase_order_items {
+  id              String   @id
+  po_id           String
+  product_id      String
+  quantity        Int
+  unit_price      Decimal  @db.Decimal(10, 2)
+  total_price     Decimal  @db.Decimal(10, 2)
+
+  purchase_orders purchase_orders @relation(fields: [po_id], references: [id])
+  products        products        @relation(fields: [product_id], references: [id])
+}
+
+enum PurchaseOrderStatus {
+  draft
+  sent
+  partially_received
+  completed
+  cancelled
 }

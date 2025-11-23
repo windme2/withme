@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MainLayout } from "@/components/layout/main-layout";
 import {
@@ -36,13 +36,14 @@ import {
   ArrowLeft,
   Package,
   Truck,
-  ListOrdered, // New Icon for PR Ref selection
+  ListOrdered,
 } from "lucide-react";
 import { toast } from "sonner";
+import { purchasingApi, suppliersApi, inventoryApi, purchaseOrdersApi } from "@/lib/api";
 
-// --- Type Definitions for Clarity ---
 type ItemType = {
   id: number;
+  productId: string;
   name: string;
   sku: string;
   quantity: number;
@@ -50,81 +51,78 @@ type ItemType = {
   total: number;
 };
 
-// --- Mock Data: Approved Purchase Requisitions (PRs) ---
-const approvedPRs = [
-  {
-    id: "PR-2025-001",
-    requestedBy: "Jane Doe",
-    supplierRecommendation: "Tech World Co.",
-    items: [
-      { name: "Wireless Keyboard", sku: "KB01", quantity: 5, unitPrice: 0 },
-      { name: "USB-C Hub", sku: "USBH03", quantity: 10, unitPrice: 0 },
-    ],
-  },
-  {
-    id: "PR-2025-002",
-    requestedBy: "John Smith",
-    supplierRecommendation: "Office Pro Supply",
-    items: [
-      { name: "Shipping Labels", sku: "LAB01", quantity: 100, unitPrice: 0 },
-      { name: "Packing Tape", sku: "TAP05", quantity: 50, unitPrice: 0 },
-    ],
-  },
-];
-
 export default function NewPurchaseOrderPage() {
   const router = useRouter();
 
-  // --- State Management ---
   const [items, setItems] = useState<ItemType[]>([
-    { id: 1, name: "", sku: "", quantity: 0, unitPrice: 0, total: 0 },
+    { id: 1, productId: "", name: "", sku: "", quantity: 0, unitPrice: 0, total: 0 },
   ]);
-  const [selectedPRId, setSelectedPRId] = useState<string | null>(null); // Track selected PR
+  const [selectedPRId, setSelectedPRId] = useState<string | null>(null);
   const [generalInfo, setGeneralInfo] = useState({
-    supplier: "",
-    paymentTerms: "",
+    supplierId: "",
+    supplierName: "",
     prRef: "",
+    expectedDate: "",
+    notes: "",
   });
 
-  // --- Core Logic: Handle PR Selection ---
-  const handlePrSelect = (prId: string) => {
+  // Data from API
+  const [approvedPRs, setApprovedPRs] = useState<any[]>([]);
+  const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        const [prsData, suppliersData, productsData] = await Promise.all([
+          purchasingApi.getAll("approved"),
+          suppliersApi.getAll(),
+          inventoryApi.getAll(),
+        ]);
+        setApprovedPRs(prsData);
+        setSuppliers(suppliersData);
+        setProducts(productsData);
+      } catch (error) {
+        toast.error("Failed to load data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const handlePrSelect = async (prId: string) => {
     setSelectedPRId(prId);
     setGeneralInfo({ ...generalInfo, prRef: prId });
-    const pr = approvedPRs.find((p) => p.id === prId);
 
-    if (pr) {
-      // 1. Populate items from the selected PR
-      const newItems: ItemType[] = pr.items.map((item, index) => ({
-        id: index + 1, // Use index + 1 for simple mapping ID
-        name: item.name,
-        sku: item.sku,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice, // Unit Price starts at 0, must be filled by PO issuer
-        total: 0,
-      }));
-      setItems(newItems);
-
-      // 2. Automatically set the recommended supplier
-      setGeneralInfo((prev) => ({
-        ...prev,
-        supplier: pr.supplierRecommendation, // Use the recommendation
-      }));
-      toast.info(`Loaded items from ${prId}. Supplier pre-filled.`);
-    } else {
-      // Reset if selection cleared
-      setItems([
-        { id: 1, name: "", sku: "", quantity: 0, unitPrice: 0, total: 0 },
-      ]);
-      setGeneralInfo({ ...generalInfo, supplier: "", prRef: "" });
+    try {
+      const pr = await purchasingApi.getOne(prId);
+      if (pr && pr.itemsList) {
+        const newItems: ItemType[] = pr.itemsList.map((item: any, index: number) => ({
+          id: index + 1,
+          productId: item.productId || "",
+          name: item.name,
+          sku: item.sku,
+          quantity: item.qty || item.quantity,
+          unitPrice: 0,
+          total: 0,
+        }));
+        setItems(newItems);
+        toast.info(`Loaded ${newItems.length} items from ${prId}`);
+      }
+    } catch (error) {
+      toast.error("Failed to load PR details");
     }
   };
 
-  // --- Item Handlers (Simplified, allowing modification of Qty/Price) ---
   const addItem = () => {
     setItems([
       ...items,
       {
         id: Date.now(),
+        productId: "",
         name: "",
         sku: "",
         quantity: 0,
@@ -145,6 +143,16 @@ export default function NewPurchaseOrderPage() {
       items.map((item) => {
         if (item.id === id) {
           const updated = { ...item, [field]: value };
+
+          // If product is selected, auto-fill name and SKU
+          if (field === "productId") {
+            const product = products.find((p) => p.id === value);
+            if (product) {
+              updated.name = product.name;
+              updated.sku = product.sku;
+            }
+          }
+
           // Auto-calculate total when qty or price changes
           if (field === "quantity" || field === "unitPrice") {
             updated.total = updated.quantity * updated.unitPrice;
@@ -156,13 +164,13 @@ export default function NewPurchaseOrderPage() {
     );
   };
 
-  const handleSave = () => {
-    if (!generalInfo.supplier) {
+  const handleSave = async () => {
+    if (!generalInfo.supplierId) {
       toast.error("Please select a Supplier.");
       return;
     }
-    if (items.some((item) => item.quantity <= 0)) {
-      toast.error("All items must have a quantity greater than zero.");
+    if (items.some((item) => !item.productId || item.quantity <= 0)) {
+      toast.error("All items must have a product selected and quantity greater than zero.");
       return;
     }
     if (items.some((item) => item.unitPrice <= 0)) {
@@ -170,29 +178,47 @@ export default function NewPurchaseOrderPage() {
       return;
     }
 
-    // In a real app, send data including generalInfo and items to backend
-    toast.success("Purchase Order issued successfully!");
-    setTimeout(() => router.back(), 1000);
+    try {
+      const payload = {
+        supplierId: generalInfo.supplierId,
+        prNumber: generalInfo.prRef || null,
+        expectedDate: generalInfo.expectedDate || null,
+        notes: generalInfo.notes,
+        items: items.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          unitPrice: item.unitPrice,
+        })),
+      };
+
+      await purchaseOrdersApi.create(payload);
+      toast.success("Purchase Order issued successfully!");
+      setTimeout(() => router.push("/purchasing/orders"), 1000);
+    } catch (error) {
+      toast.error("Failed to create purchase order");
+    }
   };
 
-  // --- Calculations ---
   const totalAmount = items.reduce((sum, item) => sum + item.total, 0);
   const totalItems = items.length;
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
 
-  // Determine if the item row came from a selected PR (name/sku should be view-only)
-  const isPrItem = (item: ItemType) =>
-    selectedPRId &&
-    approvedPRs.some((pr) =>
-      pr.items.some(
-        (prItem) => prItem.name === item.name && prItem.sku === item.sku
-      )
+  const isPrItem = (item: ItemType) => selectedPRId && item.productId !== "";
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center h-96">
+          <p className="text-slate-500">Loading...</p>
+        </div>
+      </MainLayout>
     );
+  }
 
   return (
     <MainLayout>
       <div className="space-y-6 p-1 pb-20">
-        {/* --- Header Section --- */}
+        {/* Header */}
         <div className="flex justify-between items-start">
           <div className="space-y-1">
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
@@ -210,9 +236,9 @@ export default function NewPurchaseOrderPage() {
           </Button>
         </div>
 
-        {/* --- Top Section: General Info (2/3) & Summary (1/3) --- */}
+        {/* Top Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          {/* Left Column: General Information (2/3) */}
+          {/* Left Column: General Information */}
           <div className="lg:col-span-2">
             <Card className="border-slate-200 shadow-sm h-full">
               <CardHeader className="pb-4">
@@ -222,7 +248,7 @@ export default function NewPurchaseOrderPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-5">
-                {/* Reference PR Section (Dropdown to load items) */}
+                {/* PR Selection */}
                 <div className="space-y-2 pb-3 border-b border-slate-100">
                   <Label
                     htmlFor="pr-selection"
@@ -240,7 +266,7 @@ export default function NewPurchaseOrderPage() {
                     <SelectContent>
                       {approvedPRs.map((pr) => (
                         <SelectItem key={pr.id} value={pr.id}>
-                          {pr.id}
+                          {pr.id} - {pr.requester}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -264,77 +290,67 @@ export default function NewPurchaseOrderPage() {
                       id="date"
                       type="date"
                       defaultValue={new Date().toISOString().split("T")[0]}
+                      disabled
+                      className="bg-slate-50 text-slate-500"
                     />
                   </div>
                 </div>
 
-                {/* Supplier / Payment Terms */}
+                {/* Supplier */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-2">
                     <Label htmlFor="supplier">
                       Supplier <span className="text-red-500">*</span>
                     </Label>
-                    {/* Supplier Select is controlled by generalInfo.supplier state */}
                     <Select
-                      onValueChange={(val) =>
-                        setGeneralInfo({ ...generalInfo, supplier: val })
-                      }
-                      value={generalInfo.supplier}
+                      onValueChange={(val) => {
+                        const supplier = suppliers.find((s) => s.id === val);
+                        setGeneralInfo({
+                          ...generalInfo,
+                          supplierId: val,
+                          supplierName: supplier?.name || "",
+                        });
+                      }}
+                      value={generalInfo.supplierId}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select Supplier" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Tech World Co.">
-                          Tech World Co.
-                        </SelectItem>
-                        <SelectItem value="Office Pro Supply">
-                          Office Pro Supply
-                        </SelectItem>
-                        <SelectItem value="ABC Stationery Co.">
-                          ABC Stationery Co.
-                        </SelectItem>
+                        {suppliers.map((supplier) => (
+                          <SelectItem key={supplier.id} value={supplier.id}>
+                            {supplier.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="paymentTerms">Payment Terms</Label>
-                    <Select
-                      onValueChange={(val) =>
-                        setGeneralInfo({ ...generalInfo, paymentTerms: val })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select terms" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="COD">Cash on Delivery</SelectItem>
-                        <SelectItem value="NET30">Net 30 Days</SelectItem>
-                        <SelectItem value="NET60">Net 60 Days</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                {/* Requested By / Required Date */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-2">
                     <Label htmlFor="pr-ref">Reference PR No.</Label>
                     <Input
                       id="pr-ref"
                       placeholder="Linked PR automatically fills this field"
-                      disabled // Disable manual input as it's controlled by the PR selection above
+                      disabled
                       value={generalInfo.prRef}
                       className="bg-slate-50 text-slate-600"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="required-date">Delivery Date</Label>
-                    <Input id="required-date" type="date" />
-                  </div>
                 </div>
 
-                {/* Notes consolidated inside this card */}
+                {/* Expected Date */}
+                <div className="space-y-2">
+                  <Label htmlFor="expected-date">Expected Delivery Date</Label>
+                  <Input
+                    id="expected-date"
+                    type="date"
+                    value={generalInfo.expectedDate}
+                    onChange={(e) =>
+                      setGeneralInfo({ ...generalInfo, expectedDate: e.target.value })
+                    }
+                  />
+                </div>
+
+                {/* Notes */}
                 <div className="space-y-2">
                   <Label htmlFor="notes">Notes / Delivery Instructions</Label>
                   <Textarea
@@ -342,13 +358,17 @@ export default function NewPurchaseOrderPage() {
                     placeholder="Specific delivery time or receiving instructions..."
                     rows={3}
                     className="resize-none min-h-[80px]"
+                    value={generalInfo.notes}
+                    onChange={(e) =>
+                      setGeneralInfo({ ...generalInfo, notes: e.target.value })
+                    }
                   />
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Right Column: Summary (1/3) */}
+          {/* Right Column: Summary */}
           <div className="lg:col-span-1">
             <Card className="border-slate-200 shadow-sm sticky top-6 h-full">
               <CardHeader className="bg-slate-50 border-b border-slate-100 py-4 px-6">
@@ -397,7 +417,7 @@ export default function NewPurchaseOrderPage() {
           </div>
         </div>
 
-        {/* --- Bottom Section: Ordered Items Table (FULL WIDTH) --- */}
+        {/* Items Table */}
         <div className="mt-6">
           <Card className="border-slate-200 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -415,7 +435,7 @@ export default function NewPurchaseOrderPage() {
                 variant="outline"
                 size="sm"
                 className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                disabled={!!selectedPRId} // Disable manual add if items are loaded from PR
+                disabled={!!selectedPRId}
               >
                 <Plus className="h-4 w-4 mr-2" />
                 {selectedPRId ? "Items Loaded" : "Add Item"}
@@ -429,7 +449,7 @@ export default function NewPurchaseOrderPage() {
                       <TableHead className="pl-6 w-[50px] text-center">
                         #
                       </TableHead>
-                      <TableHead className="min-w-[200px]">Item Name</TableHead>
+                      <TableHead className="min-w-[250px]">Product</TableHead>
                       <TableHead className="w-[150px]">
                         SKU / Part No.
                       </TableHead>
@@ -454,33 +474,36 @@ export default function NewPurchaseOrderPage() {
                           {index + 1}
                         </TableCell>
                         <TableCell className="py-3">
-                          <Input
-                            placeholder="Product Name / Description"
-                            value={item.name}
-                            onChange={(e) =>
-                              updateItem(item.id, "name", e.target.value)
+                          <Select
+                            value={item.productId}
+                            onValueChange={(val) =>
+                              updateItem(item.id, "productId", val)
                             }
-                            className={`h-9 ${
-                              isPrItem(item)
+                            disabled={isPrItem(item)}
+                          >
+                            <SelectTrigger
+                              className={`h-9 ${isPrItem(item)
                                 ? "bg-slate-100 text-slate-600"
                                 : "border-slate-200 focus:border-blue-500"
-                            }`}
-                            disabled={isPrItem(item)} // Disable editing if loaded from PR
-                          />
+                                }`}
+                            >
+                              <SelectValue placeholder="Select Product" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {products.map((product) => (
+                                <SelectItem key={product.id} value={product.id}>
+                                  {product.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </TableCell>
                         <TableCell className="py-3">
                           <Input
                             placeholder="SKU"
                             value={item.sku}
-                            onChange={(e) =>
-                              updateItem(item.id, "sku", e.target.value)
-                            }
-                            className={`h-9 ${
-                              isPrItem(item)
-                                ? "bg-slate-100 text-slate-600"
-                                : "border-slate-200 focus:border-blue-500"
-                            }`}
-                            disabled={isPrItem(item)} // Disable editing if loaded from PR
+                            disabled
+                            className="h-9 bg-slate-100 text-slate-600"
                           />
                         </TableCell>
                         <TableCell className="py-3">
@@ -505,6 +528,7 @@ export default function NewPurchaseOrderPage() {
                           <Input
                             type="number"
                             min="0"
+                            step="0.01"
                             placeholder="0.00"
                             className="text-right border-slate-200 focus:border-blue-500 h-9"
                             value={item.unitPrice === 0 ? "" : item.unitPrice}
