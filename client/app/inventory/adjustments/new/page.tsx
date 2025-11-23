@@ -1,11 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { inventoryApi, adjustmentsApi } from "@/lib/api";
 import { MainLayout } from "@/components/layout/main-layout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
@@ -22,55 +30,70 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Plus, Trash2, Save, RotateCcw } from "lucide-react";
+import { Plus, Trash2, Save, ArrowLeft, ClipboardList } from "lucide-react";
 import { toast } from "sonner";
 
 export default function NewAdjustmentPage() {
   const router = useRouter();
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Form State
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [type, setType] = useState("Add");
+  const [notes, setNotes] = useState("");
+
   const [items, setItems] = useState([
-    { id: 1, product: "", sku: "", status: "Add", quantity: 0, remark: "" },
+    { id: 1, productId: "", name: "", sku: "", quantity: 0, reason: "" },
   ]);
 
-  // --- Mock Products for Dropdown ---
-  const productsList = [
-    { name: "A4 Paper 80gsm", sku: "SKU001" },
-    { name: "Blue Ink Pen", sku: "SKU002" },
-    { name: "Notebook A4", sku: "SKU003" },
-    { name: "HB Pencil #2", sku: "SKU004" },
-  ];
+  // Fetch Data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const productsData = await inventoryApi.getAll();
+        setProducts(productsData);
+      } catch (error) {
+        toast.error("Failed to load products");
+      }
+    };
+    fetchData();
+  }, []);
 
-  // Function to add new row
-  const addNewRow = () => {
+  // --- Event Handlers ---
+  const addItem = () => {
     setItems([
       ...items,
       {
         id: Date.now(),
-        product: "",
+        productId: "",
+        name: "",
         sku: "",
-        status: "Add",
         quantity: 0,
-        remark: "",
+        reason: "",
       },
     ]);
   };
 
-  // Function to remove row
-  const removeRow = (id: number) => {
+  const removeItem = (id: number) => {
     if (items.length > 1) {
       setItems(items.filter((item) => item.id !== id));
     }
   };
 
-  // Function to update row
-  const updateRow = (id: number, field: string, value: string | number) => {
+  const updateItem = (id: number, field: string, value: string | number) => {
     setItems(
       items.map((item) => {
         if (item.id === id) {
           const updated = { ...item, [field]: value };
-          // Auto-fill SKU if product changes
-          if (field === "product") {
-            const selectedProd = productsList.find((p) => p.name === value);
-            updated.sku = selectedProd ? selectedProd.sku : "";
+
+          // If product selected, update details
+          if (field === "productId") {
+            const product = products.find(p => p.id === value);
+            if (product) {
+              updated.name = product.name;
+              updated.sku = product.sku;
+            }
           }
           return updated;
         }
@@ -79,19 +102,32 @@ export default function NewAdjustmentPage() {
     );
   };
 
-  const handleSave = () => {
-    toast.success("Adjustment saved successfully!");
-    setTimeout(() => router.push("/inventory/adjustments"), 1000);
-  };
+  const handleSave = async () => {
+    if (items.some(i => !i.productId || i.quantity <= 0)) {
+      toast.error("Please fill in all item details correctly");
+      return;
+    }
 
-  // Calculations
-  const totalQuantity = items.reduce(
-    (sum, item) =>
-      sum + (item.status === "Add" ? item.quantity : -item.quantity),
-    0
-  );
-  const addedItems = items.filter((i) => i.status === "Add").length;
-  const removedItems = items.filter((i) => i.status === "Remove").length;
+    setLoading(true);
+    try {
+      await adjustmentsApi.create({
+        type,
+        date,
+        notes,
+        items: items.map(i => ({
+          productId: i.productId,
+          quantity: i.quantity,
+          reason: i.reason
+        }))
+      });
+      toast.success("Adjustment created successfully!");
+      setTimeout(() => router.push("/inventory/adjustments"), 1000);
+    } catch (error) {
+      toast.error("Failed to create adjustment");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <MainLayout>
@@ -100,68 +136,85 @@ export default function NewAdjustmentPage() {
         <div className="flex justify-between items-start">
           <div className="space-y-1">
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-              New Adjustment
+              Create New Adjustment
             </h1>
             <p className="text-slate-500">
-              Create a new manual stock adjustment record.
+              ปรับปรุงยอดสินค้าคงคลัง (เพิ่ม/ลด)
             </p>
           </div>
           <Button
             variant="outline"
-            className="gap-2"
             onClick={() => router.back()}
+            className="gap-2"
           >
-            <ArrowLeft className="h-4 w-4" /> Back
+            <ArrowLeft className="h-4 w-4" />
+            Back
           </Button>
         </div>
 
-        {/* --- Top Section --- */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-          {/* Left: General Info */}
+          {/* --- Left Column: General Info (2/3 Width) --- */}
           <div className="lg:col-span-2">
             <Card className="border-slate-200 shadow-sm h-full">
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                  <RotateCcw className="h-5 w-5 text-blue-600" />
+                  <ClipboardList className="h-5 w-5 text-blue-600" />
                   General Information
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-2">
-                    <span className="text-sm font-medium text-slate-700">
-                      Adjustment ID
-                    </span>
+                    <Label htmlFor="adj-number">Adjustment Number</Label>
                     <Input
-                      value="ADJ-2025-001"
+                      id="adj-number"
+                      placeholder="Auto-generated"
                       disabled
                       className="bg-slate-50 text-slate-500"
                     />
                   </div>
                   <div className="space-y-2">
-                    <span className="text-sm font-medium text-slate-700">
-                      Date
-                    </span>
+                    <Label htmlFor="date">Date</Label>
                     <Input
+                      id="date"
                       type="date"
-                      defaultValue={new Date().toISOString().split("T")[0]}
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
                     />
                   </div>
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="type">Type</Label>
+                    <Select value={type} onValueChange={setType}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Add">Add Stock</SelectItem>
+                        <SelectItem value="Remove">Remove Stock</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
-                  <span className="text-sm font-medium text-slate-700">
-                    Reference Note (Optional)
-                  </span>
+                  <Label htmlFor="notes">Notes</Label>
                   <Textarea
-                    placeholder="e.g. Year-end audit..."
+                    id="notes"
+                    placeholder="Reason for adjustment..."
+                    rows={3}
                     className="resize-none min-h-[80px]"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
                   />
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Right: Summary */}
+          {/* --- Right Column: Summary (1/3 Width) --- */}
           <div className="lg:col-span-1">
             <Card className="border-slate-200 shadow-sm h-full flex flex-col">
               <CardHeader className="bg-slate-50 border-b border-slate-100 py-4 px-6">
@@ -169,52 +222,31 @@ export default function NewAdjustmentPage() {
                   Summary
                 </CardTitle>
               </CardHeader>
+
               <CardContent className="p-6 flex-1 flex flex-col justify-between gap-6">
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Total Lines</span>
+                    <span className="text-slate-500">Total Items</span>
                     <span className="font-medium text-slate-900">
                       {items.length}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Items to Add</span>
-                    <span className="font-medium text-emerald-600">
-                      +{addedItems}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-500">Items to Remove</span>
-                    <span className="font-medium text-red-600">
-                      -{removedItems}
-                    </span>
-                  </div>
-                  <div className="border-t border-slate-100 my-2"></div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-slate-500 font-medium">
-                      Net Quantity Change
-                    </span>
-                    <span
-                      className={`font-bold ${
-                        totalQuantity > 0
-                          ? "text-emerald-600"
-                          : totalQuantity < 0
-                          ? "text-red-600"
-                          : "text-slate-900"
-                      }`}
-                    >
-                      {totalQuantity > 0 ? `+${totalQuantity}` : totalQuantity}
+                    <span className="text-slate-500">Total Quantity</span>
+                    <span className="font-medium text-slate-900">
+                      {items.reduce((sum, item) => sum + item.quantity, 0)}
                     </span>
                   </div>
                 </div>
 
                 <div className="pt-4 border-t border-slate-100">
-                  {/* Save Button - Green Theme */}
                   <Button
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-md h-11 text-base"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-md h-11 text-base transition-all hover:scale-[1.02]"
                     onClick={handleSave}
+                    disabled={loading}
                   >
-                    <Save className="h-4 w-4 mr-2" /> Save ADJ
+                    <Save className="h-4 w-4 mr-2" />
+                    {loading ? "Saving..." : "Save Adjustment"}
                   </Button>
                 </div>
               </CardContent>
@@ -222,7 +254,7 @@ export default function NewAdjustmentPage() {
           </div>
         </div>
 
-        {/* --- Bottom Section: Items Table --- */}
+        {/* --- Bottom Section: Items Table (Full Width) --- */}
         <div className="mt-6">
           <Card className="border-slate-200 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -230,15 +262,16 @@ export default function NewAdjustmentPage() {
                 <CardTitle className="text-lg font-semibold">
                   Adjustment Items
                 </CardTitle>
-                <CardDescription>List of items to be adjusted.</CardDescription>
+                <CardDescription>List of items to adjust.</CardDescription>
               </div>
               <Button
-                size="sm"
+                onClick={addItem}
                 variant="outline"
-                onClick={addNewRow}
+                size="sm"
                 className="text-blue-600 border-blue-200 hover:bg-blue-50"
               >
-                <Plus className="h-4 w-4 mr-1" /> Add Item
+                <Plus className="h-4 w-4 mr-2" />
+                Add Item
               </Button>
             </CardHeader>
             <CardContent className="p-0">
@@ -249,16 +282,14 @@ export default function NewAdjustmentPage() {
                       <TableHead className="w-[50px] pl-6 text-center">
                         #
                       </TableHead>
-                      <TableHead className="w-[150px]">SKU</TableHead>{" "}
-                      {/* SKU มาก่อน */}
-                      <TableHead className="min-w-[250px]">
-                        Product Description
+                      <TableHead className="w-[250px]">Product</TableHead>
+                      <TableHead className="w-[150px]">SKU</TableHead>
+                      <TableHead className="w-[100px] text-right">
+                        Qty
                       </TableHead>
-                      <TableHead className="w-[160px]">Status</TableHead>
-                      <TableHead className="w-[120px] text-right">
-                        Quantity
+                      <TableHead className="min-w-[200px]">
+                        Reason
                       </TableHead>
-                      <TableHead className="min-w-[200px]">Remark</TableHead>
                       <TableHead className="w-[50px] pr-6 text-right">
                         Action
                       </TableHead>
@@ -270,73 +301,29 @@ export default function NewAdjustmentPage() {
                         <TableCell className="pl-6 text-center text-slate-500">
                           {index + 1}
                         </TableCell>
-
-                        {/* SKU Column (Auto-filled / Read Only) */}
-                        <TableCell className="py-3">
-                          <Input
-                            value={item.sku}
-                            readOnly
-                            className="bg-slate-50 text-slate-500 border-slate-200 h-9 font-mono"
-                            placeholder="Auto"
-                          />
-                        </TableCell>
-
-                        {/* Product Column (Select) */}
                         <TableCell className="py-3">
                           <Select
-                            value={item.product}
-                            onValueChange={(val) =>
-                              updateRow(item.id, "product", val)
-                            }
+                            value={item.productId}
+                            onValueChange={(val) => updateItem(item.id, "productId", val)}
                           >
-                            <SelectTrigger className="border-slate-200 focus:border-blue-500 h-9">
+                            <SelectTrigger className="h-9">
                               <SelectValue placeholder="Select Product" />
                             </SelectTrigger>
                             <SelectContent>
-                              {productsList.map((p) => (
-                                <SelectItem key={p.sku} value={p.name}>
-                                  {p.name}
-                                </SelectItem>
+                              {products.map(p => (
+                                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </TableCell>
-
-                        {/* Status Column (Type) */}
                         <TableCell className="py-3">
-                          <Select
-                            value={item.status}
-                            onValueChange={(val) =>
-                              updateRow(item.id, "status", val)
-                            }
-                          >
-                            <SelectTrigger
-                              className={`h-9 border-slate-200 ${
-                                item.status === "Add"
-                                  ? "text-emerald-600 font-medium"
-                                  : "text-red-600 font-medium"
-                              }`}
-                            >
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem
-                                value="Add"
-                                className="text-emerald-600"
-                              >
-                                Add Stock (+)
-                              </SelectItem>
-                              <SelectItem
-                                value="Remove"
-                                className="text-red-600"
-                              >
-                                Remove Stock (-)
-                              </SelectItem>
-                            </SelectContent>
-                          </Select>
+                          <Input
+                            placeholder="SKU"
+                            value={item.sku}
+                            disabled
+                            className="bg-slate-50 border-slate-200 h-9"
+                          />
                         </TableCell>
-
-                        {/* Quantity Column */}
                         <TableCell className="py-3">
                           <Input
                             type="number"
@@ -344,7 +331,7 @@ export default function NewAdjustmentPage() {
                             className="text-right border-slate-200 focus:border-blue-500 h-9"
                             value={item.quantity}
                             onChange={(e) =>
-                              updateRow(
+                              updateItem(
                                 item.id,
                                 "quantity",
                                 Number(e.target.value)
@@ -352,26 +339,27 @@ export default function NewAdjustmentPage() {
                             }
                           />
                         </TableCell>
-
-                        {/* Remark Column */}
                         <TableCell className="py-3">
                           <Input
-                            placeholder="Reason..."
+                            placeholder="Reason (Optional)"
                             className="border-slate-200 focus:border-blue-500 h-9"
-                            value={item.remark}
+                            value={item.reason}
                             onChange={(e) =>
-                              updateRow(item.id, "remark", e.target.value)
+                              updateItem(
+                                item.id,
+                                "reason",
+                                e.target.value
+                              )
                             }
                           />
                         </TableCell>
-
                         <TableCell className="pr-6 py-3 text-right">
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="text-slate-400 hover:text-red-600 h-8 w-8"
-                            onClick={() => removeRow(item.id)}
+                            onClick={() => removeItem(item.id)}
                             disabled={items.length === 1}
+                            className="text-slate-400 hover:text-red-600 h-8 w-8"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>

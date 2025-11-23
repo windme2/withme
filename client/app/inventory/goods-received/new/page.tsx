@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { suppliersApi, inventoryApi, goodsReceivedApi } from "@/lib/api";
 import { MainLayout } from "@/components/layout/main-layout";
 import {
   Card,
@@ -34,11 +35,36 @@ import { toast } from "sonner";
 
 export default function NewGoodsReceivedPage() {
   const router = useRouter();
+  const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  // --- State Management ---
+  // Form State
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [supplierId, setSupplierId] = useState("");
+  const [poRef, setPoRef] = useState("");
+  const [notes, setNotes] = useState("");
+
   const [items, setItems] = useState([
-    { id: 1, name: "", sku: "", quantity: 0, unitPrice: 0, total: 0 },
+    { id: 1, productId: "", name: "", sku: "", quantity: 0, unitPrice: 0, total: 0 },
   ]);
+
+  // Fetch Data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [suppliersData, productsData] = await Promise.all([
+          suppliersApi.getAll(),
+          inventoryApi.getAll(),
+        ]);
+        setSuppliers(suppliersData);
+        setProducts(productsData);
+      } catch (error) {
+        toast.error("Failed to load data");
+      }
+    };
+    fetchData();
+  }, []);
 
   // --- Event Handlers ---
   const addItem = () => {
@@ -46,6 +72,7 @@ export default function NewGoodsReceivedPage() {
       ...items,
       {
         id: Date.now(),
+        productId: "",
         name: "",
         sku: "",
         quantity: 0,
@@ -66,9 +93,20 @@ export default function NewGoodsReceivedPage() {
       items.map((item) => {
         if (item.id === id) {
           const updated = { ...item, [field]: value };
-          // Auto-calculate total when qty or price changes
-          if (field === "quantity" || field === "unitPrice") {
-            updated.total = updated.quantity * updated.unitPrice;
+
+          // If product selected, update details
+          if (field === "productId") {
+            const product = products.find(p => p.id === value);
+            if (product) {
+              updated.name = product.name;
+              updated.sku = product.sku;
+              updated.unitPrice = 0; // Default price?
+            }
+          }
+
+          // Auto-calculate total
+          if (field === "quantity" || field === "unitPrice" || field === "productId") {
+            updated.total = (updated.quantity || 0) * (updated.unitPrice || 0);
           }
           return updated;
         }
@@ -77,10 +115,36 @@ export default function NewGoodsReceivedPage() {
     );
   };
 
-  const handleSave = () => {
-    // Simulate API call
-    toast.success("GRN created successfully!");
-    setTimeout(() => router.push("/inventory/goods-received"), 1000);
+  const handleSave = async () => {
+    if (!supplierId) {
+      toast.error("Please select a supplier");
+      return;
+    }
+    if (items.some(i => !i.productId || i.quantity <= 0)) {
+      toast.error("Please fill in all item details correctly");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await goodsReceivedApi.create({
+        supplierId,
+        date,
+        poRef,
+        notes,
+        items: items.map(i => ({
+          productId: i.productId,
+          quantity: i.quantity,
+          unitPrice: i.unitPrice
+        }))
+      });
+      toast.success("GRN created successfully!");
+      setTimeout(() => router.push("/inventory/goods-received"), 1000);
+    } catch (error) {
+      toast.error("Failed to create GRN");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // --- Financial Calculations ---
@@ -140,7 +204,8 @@ export default function NewGoodsReceivedPage() {
                     <Input
                       id="date"
                       type="date"
-                      defaultValue={new Date().toISOString().split("T")[0]}
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
                     />
                   </div>
                 </div>
@@ -148,26 +213,25 @@ export default function NewGoodsReceivedPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-2">
                     <Label htmlFor="supplier">Supplier</Label>
-                    <Select>
+                    <Select value={supplierId} onValueChange={setSupplierId}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select supplier" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="abc-stationery">
-                          ABC Stationery Co.
-                        </SelectItem>
-                        <SelectItem value="paper-plus">
-                          Paper Plus Ltd.
-                        </SelectItem>
-                        <SelectItem value="office-pro">
-                          Office Pro Supply
-                        </SelectItem>
+                        {suppliers.map((s) => (
+                          <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="po-number">PO Reference</Label>
-                    <Input id="po-number" placeholder="e.g. PO-2024-001" />
+                    <Input
+                      id="po-number"
+                      placeholder="e.g. PO-2024-001"
+                      value={poRef}
+                      onChange={(e) => setPoRef(e.target.value)}
+                    />
                   </div>
                 </div>
 
@@ -178,6 +242,8 @@ export default function NewGoodsReceivedPage() {
                     placeholder="Additional remarks..."
                     rows={3}
                     className="resize-none min-h-[80px]"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
                   />
                 </div>
               </CardContent>
@@ -249,9 +315,10 @@ export default function NewGoodsReceivedPage() {
                   <Button
                     className="w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-md h-11 text-base transition-all hover:scale-[1.02]"
                     onClick={handleSave}
+                    disabled={loading}
                   >
                     <Save className="h-4 w-4 mr-2" />
-                    Save GRN
+                    {loading ? "Saving..." : "Save GRN"}
                   </Button>
                 </div>
               </CardContent>
@@ -287,10 +354,8 @@ export default function NewGoodsReceivedPage() {
                       <TableHead className="w-[50px] pl-6 text-center">
                         #
                       </TableHead>
+                      <TableHead className="w-[250px]">Product</TableHead>
                       <TableHead className="w-[150px]">SKU</TableHead>
-                      <TableHead className="min-w-[200px]">
-                        Description
-                      </TableHead>
                       <TableHead className="w-[100px] text-right">
                         Qty
                       </TableHead>
@@ -312,23 +377,26 @@ export default function NewGoodsReceivedPage() {
                           {index + 1}
                         </TableCell>
                         <TableCell className="py-3">
-                          <Input
-                            placeholder="SKU"
-                            value={item.sku}
-                            onChange={(e) =>
-                              updateItem(item.id, "sku", e.target.value)
-                            }
-                            className="border-slate-200 focus:border-blue-500 h-9"
-                          />
+                          <Select
+                            value={item.productId}
+                            onValueChange={(val) => updateItem(item.id, "productId", val)}
+                          >
+                            <SelectTrigger className="h-9">
+                              <SelectValue placeholder="Select Product" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {products.map(p => (
+                                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </TableCell>
                         <TableCell className="py-3">
                           <Input
-                            placeholder="Item Name / Description"
-                            value={item.name}
-                            onChange={(e) =>
-                              updateItem(item.id, "name", e.target.value)
-                            }
-                            className="border-slate-200 focus:border-blue-500 h-9"
+                            placeholder="SKU"
+                            value={item.sku}
+                            disabled
+                            className="bg-slate-50 border-slate-200 h-9"
                           />
                         </TableCell>
                         <TableCell className="py-3">

@@ -106,4 +106,80 @@ export class AdjustmentsService {
             accuracy: '98.5%', // Mock value
         };
     }
+    async create(data: any) {
+        const { type, date, notes, items, userId } = data;
+
+        // Map frontend type to backend enum
+        const typeMap: Record<string, any> = {
+            'Add': 'count',
+            'Remove': 'damage', // Default to damage for remove, could be loss/other
+        };
+        const adjustmentType = typeMap[type] || 'other';
+
+        return this.prisma.$transaction(async (tx) => {
+            // 1. Create Adjustment Header
+            const adjustment = await tx.inventory_adjustments.create({
+                data: {
+                    id: `adj-${Date.now()}`,
+                    adjustment_number: `ADJ-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
+                    adjustment_type: adjustmentType,
+                    status: 'approved', // Auto-approve for now
+                    adjustment_date: new Date(date),
+                    notes: notes,
+                    adjusted_by: userId,
+                    approved_by: userId,
+                    updated_at: new Date(),
+                },
+            });
+
+            // 2. Process Items
+            for (const item of items) {
+                // Get current stock
+                const currentStock = await tx.inventory_levels.findUnique({
+                    where: { product_id: item.productId },
+                });
+
+                const quantityBefore = currentStock?.quantity || 0;
+                let quantityAfter = quantityBefore;
+
+                if (type === 'Add') {
+                    quantityAfter += Number(item.quantity);
+                } else {
+                    quantityAfter -= Number(item.quantity);
+                }
+
+                // Create Adjustment Item
+                await tx.adjustment_items.create({
+                    data: {
+                        id: `adj-item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                        adjustment_id: adjustment.id,
+                        product_id: item.productId,
+                        quantity_before: quantityBefore,
+                        quantity_after: quantityAfter,
+                        reason: item.reason,
+                    },
+                });
+
+                // Update Inventory Level
+                await tx.inventory_levels.upsert({
+                    where: { product_id: item.productId },
+                    update: {
+                        quantity: quantityAfter,
+                        last_counted_at: new Date(),
+                        last_counted_by: userId,
+                        updated_at: new Date(),
+                    },
+                    create: {
+                        product_id: item.productId,
+                        quantity: quantityAfter,
+                        last_counted_at: new Date(),
+                        last_counted_by: userId,
+                        updated_at: new Date(),
+                    },
+                });
+            }
+
+            return adjustment;
+        });
+    }
 }

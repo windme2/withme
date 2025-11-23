@@ -123,6 +123,68 @@ export class GoodsReceivedService {
         };
     }
 
+    async create(data: any) {
+        const { supplierId, date, poRef, notes, items, userId } = data;
+
+        return this.prisma.$transaction(async (tx) => {
+            // 1. Create GRN Header
+            const grn = await tx.goods_received.create({
+                data: {
+                    id: `grn-${Date.now()}`,
+                    grn_number: `GRN-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
+                    supplier_id: supplierId,
+                    received_date: new Date(date),
+                    received_by: userId,
+                    status: 'completed', // Auto-complete for now to update stock immediately
+                    total_amount: items.reduce((sum: number, item: any) => sum + (item.quantity * item.unitPrice), 0),
+                    notes: notes,
+                    updated_at: new Date(),
+                },
+            });
+
+            // 2. Process Items
+            for (const item of items) {
+                // Create GRN Item
+                await tx.goods_received_items.create({
+                    data: {
+                        id: `grn-item-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                        grn_id: grn.id,
+                        product_id: item.productId,
+                        quantity: Number(item.quantity),
+                        unit_price: Number(item.unitPrice),
+                        total_price: Number(item.quantity) * Number(item.unitPrice),
+                    },
+                });
+
+                // Update Inventory Level (Increase stock)
+                const currentStock = await tx.inventory_levels.findUnique({
+                    where: { product_id: item.productId },
+                });
+
+                const quantityBefore = currentStock?.quantity || 0;
+                const quantityAfter = quantityBefore + Number(item.quantity);
+
+                await tx.inventory_levels.upsert({
+                    where: { product_id: item.productId },
+                    update: {
+                        quantity: quantityAfter,
+                        last_counted_at: new Date(), // Or maybe keep old count date? Let's update it.
+                        updated_at: new Date(),
+                    },
+                    create: {
+                        product_id: item.productId,
+                        quantity: quantityAfter,
+                        last_counted_at: new Date(),
+                        last_counted_by: userId,
+                        updated_at: new Date(),
+                    },
+                });
+            }
+
+            return grn;
+        });
+    }
+
     private mapStatus(status: string): string {
         const statusMap: Record<string, string> = {
             pending: 'Pending',

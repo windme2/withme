@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
 import { GoodsReceivedService } from './goods-received.service';
 
 @Controller('goods-received')
@@ -18,5 +18,11 @@ export class GoodsReceivedController {
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.goodsReceivedService.findOne(id);
+    }
+    @Post()
+    create(@Body() body: any) {
+        // Mock user ID for now
+        const userId = 'user-admin-001';
+        return this.goodsReceivedService.create({ ...body, userId });
     }
 }

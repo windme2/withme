@@ -51,6 +51,10 @@ export const goodsReceivedApi = {
         const response = await api.get('/goods-received/stats');
         return response.data;
     },
+    create: async (data: any) => {
+        const response = await api.post('/goods-received', data);
+        return response.data;
+    },
 };
 
 export const adjustmentsApi = {
@@ -67,6 +71,17 @@ export const adjustmentsApi = {
     },
     getStats: async () => {
         const response = await api.get('/adjustments/stats');
+        return response.data;
+    },
+    create: async (data: any) => {
+        const response = await api.post('/adjustments', data);
+        return response.data;
+    },
+};
+
+export const suppliersApi = {
+    getAll: async () => {
+        const response = await api.get('/suppliers');
         return response.data;
     },
 };
