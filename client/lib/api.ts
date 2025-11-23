@@ -167,3 +167,95 @@ export const dashboardApi = {
         return response.data;
     },
 };
+
+export const salesOrdersApi = {
+    getAll: async (status?: string, search?: string) => {
+        const params = new URLSearchParams();
+        if (status && status !== 'all') params.append('status', status);
+        if (search) params.append('search', search);
+        const response = await api.get(`/sales/orders?${params.toString()}`);
+        return response.data;
+    },
+    getOne: async (id: string) => {
+        const response = await api.get(`/sales/orders/${id}`);
+        return response.data;
+    },
+    create: async (data: any) => {
+        const response = await api.post("/sales/orders", data);
+        return response.data;
+    },
+    updateStatus: async (id: string, status: string) => {
+        const response = await api.patch(`/sales/orders/${id}/status`, { status });
+        return response.data;
+    },
+};
+
+export const customersApi = {
+    getAll: async (search?: string, isActive?: string) => {
+        const params = new URLSearchParams();
+        if (search) params.append('search', search);
+        if (isActive && isActive !== 'all') params.append('isActive', isActive);
+        const response = await api.get(`/customers?${params.toString()}`);
+        return response.data;
+    },
+    getOne: async (id: string) => {
+        const response = await api.get(`/customers/${id}`);
+        return response.data;
+    },
+    create: async (data: any) => {
+        const response = await api.post("/customers", data);
+        return response.data;
+    },
+    update: async (id: string, data: any) => {
+        const response = await api.put(`/customers/${id}`, data);
+        return response.data;
+    },
+    delete: async (id: string) => {
+        const response = await api.delete(`/customers/${id}`);
+        return response.data;
+    },
+};
+
+export const shipmentsApi = {
+    getAll: async (status?: string, search?: string) => {
+        const params = new URLSearchParams();
+        if (status && status !== 'all') params.append('status', status);
+        if (search) params.append('search', search);
+        const response = await api.get(`/sales/shipments?${params.toString()}`);
+        return response.data;
+    },
+    getOne: async (id: string) => {
+        const response = await api.get(`/sales/shipments/${id}`);
+        return response.data;
+    },
+    create: async (data: any) => {
+        const response = await api.post("/sales/shipments", data);
+        return response.data;
+    },
+    updateStatus: async (id: string, status: string) => {
+        const response = await api.patch(`/sales/shipments/${id}/status`, { status });
+        return response.data;
+    },
+};
+
+export const returnsApi = {
+    getAll: async (status?: string, search?: string) => {
+        const params = new URLSearchParams();
+        if (status && status !== 'all') params.append('status', status);
+        if (search) params.append('search', search);
+        const response = await api.get(`/sales/returns?${params.toString()}`);
+        return response.data;
+    },
+    getOne: async (id: string) => {
+        const response = await api.get(`/sales/returns/${id}`);
+        return response.data;
+    },
+    create: async (data: any) => {
+        const response = await api.post("/sales/returns", data);
+        return response.data;
+    },
+    updateStatus: async (id: string, status: string) => {
+        const response = await api.patch(`/sales/returns/${id}/status`, { status });
+        return response.data;
+    },
+};

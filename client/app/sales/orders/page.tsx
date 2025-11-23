@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -47,164 +47,47 @@ import {
   DollarSign,
 } from "lucide-react";
 import { toast } from "sonner";
-
-// --- Mock Data ---
-const mockOrders = [
-  {
-    id: "SO-2025-030",
-    customer: "Global Retail Co.",
-    contactPerson: "Jane Smith",
-    date: "2025-02-15",
-    dueDate: "2025-02-20",
-    totalQty: 25,
-    totalValue: 55000,
-    status: "Confirmed",
-    items: [
-      { name: 'Monitor 24"', sku: "IT-001", qty: 5, price: 4500, unit: "ชิ้น" },
-      { name: "HDMI Cable 2m", sku: "CAB-001", qty: 20, price: 250, unit: "เส้น" },
-    ],
-  },
-  {
-    id: "SO-2025-029",
-    customer: "Local Tech Shop",
-    contactPerson: "Mike Johnson",
-    date: "2025-02-14",
-    dueDate: "2025-02-19",
-    totalQty: 50,
-    totalValue: 25000,
-    status: "Draft",
-    items: [
-      { name: "Keyboard", sku: "IT-005", qty: 10, price: 500, unit: "ชิ้น" },
-      { name: "Mouse Wireless", sku: "IT-006", qty: 40, price: 500, unit: "ชิ้น" },
-    ],
-  },
-  {
-    id: "SO-2025-028",
-    customer: "ABC Trading Ltd.",
-    contactPerson: "Sarah Wilson",
-    date: "2025-02-13",
-    dueDate: "2025-02-18",
-    totalQty: 100,
-    totalValue: 8900,
-    status: "Shipped",
-    items: [
-      { name: "Mousepads", sku: "ACC-001", qty: 100, price: 89, unit: "ชิ้น" },
-    ],
-  },
-  {
-    id: "SO-2025-027",
-    customer: "Quick Serve Services",
-    contactPerson: "David Lee",
-    date: "2025-02-12",
-    dueDate: "2025-02-17",
-    totalQty: 5,
-    totalValue: 25000,
-    status: "Completed",
-    items: [
-      { name: "Laptop HP", sku: "IT-010", qty: 5, price: 5000, unit: "ชิ้น" },
-    ],
-  },
-  {
-    id: "SO-2025-026",
-    customer: "IT Solution Hub",
-    contactPerson: "Anna Chen",
-    date: "2025-02-11",
-    dueDate: "2025-02-16",
-    totalQty: 1,
-    totalValue: 85000,
-    status: "Cancelled",
-    items: [
-      { name: "Server Rack", sku: "IT-020", qty: 1, price: 85000, unit: "ชุด" },
-    ],
-  },
-  {
-    id: "SO-2025-025",
-    customer: "Global Retail Co.",
-    contactPerson: "Jane Smith",
-    date: "2025-02-10",
-    dueDate: "2025-02-15",
-    totalQty: 200,
-    totalValue: 24000,
-    status: "Confirmed",
-    items: [
-      { name: "A4 Paper 80gsm", sku: "SKU001", qty: 200, price: 120, unit: "รีม" },
-    ],
-  },
-  {
-    id: "SO-2025-024",
-    customer: "Furniture Mart Inc.",
-    contactPerson: "Emily Wong",
-    date: "2025-02-09",
-    dueDate: "2025-02-14",
-    totalQty: 10,
-    totalValue: 45000,
-    status: "Shipped",
-    items: [
-      { name: "Office Chair", sku: "FUR-001", qty: 10, price: 4500, unit: "ตัว" },
-    ],
-  },
-  {
-    id: "SO-2025-023",
-    customer: "Local Tech Shop",
-    contactPerson: "Mike Johnson",
-    date: "2025-02-08",
-    dueDate: "2025-02-13",
-    totalQty: 30,
-    totalValue: 13500,
-    status: "Completed",
-    items: [
-      { name: "USB-C Cable", sku: "CAB-002", qty: 30, price: 450, unit: "เส้น" },
-    ],
-  },
-  {
-    id: "SO-2025-022",
-    customer: "ABC Trading Ltd.",
-    contactPerson: "Sarah Wilson",
-    date: "2025-02-07",
-    dueDate: "2025-02-12",
-    totalQty: 15,
-    totalValue: 67500,
-    status: "Confirmed",
-    items: [
-      { name: "Webcam 1080p", sku: "IT-003", qty: 15, price: 4500, unit: "ชิ้น" },
-    ],
-  },
-  {
-    id: "SO-2025-021",
-    customer: "Quick Serve Services",
-    contactPerson: "David Lee",
-    date: "2025-02-06",
-    dueDate: "2025-02-11",
-    totalQty: 50,
-    totalValue: 7500,
-    status: "Draft",
-    items: [
-      { name: "Blue Ink Pen", sku: "SKU002", qty: 50, price: 150, unit: "แพ็ค" },
-    ],
-  },
-];
+import { salesOrdersApi } from "@/lib/api";
 
 export default function SalesOrdersPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedOrder, setSelectedOrder] = useState<typeof mockOrders[0] | null>(null);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // --- Pagination State ---
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
+  const fetchOrders = async () => {
+    try {
+      setIsLoading(true);
+      const data = await salesOrdersApi.getAll(filterStatus, searchTerm);
+      setOrders(data);
+    } catch (error) {
+      toast.error("Failed to fetch sales orders");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
   // --- Stats Calculation ---
-  const totalOrders = mockOrders.length;
-  const draftOrders = mockOrders.filter((o) => o.status === "Draft").length;
-  const confirmedOrders = mockOrders.filter((o) => o.status === "Confirmed").length;
-  const totalValue = mockOrders
+  const totalOrders = orders.length;
+  const draftOrders = orders.filter((o) => o.status === "Draft").length;
+  const confirmedOrders = orders.filter((o) => o.status === "Confirmed").length;
+  const totalValue = orders
     .filter((o) => o.status !== "Cancelled")
     .reduce((sum, o) => sum + o.totalValue, 0);
 
   // --- Filter Logic ---
-  const filteredOrders = mockOrders.filter((order) => {
+  const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.customer.toLowerCase().includes(searchTerm.toLowerCase());
@@ -227,22 +110,52 @@ export default function SalesOrdersPage() {
     setCurrentPage(1);
   };
 
-  const handleRowClick = (order: typeof mockOrders[0]) => {
-    setSelectedOrder(order);
-    setIsSheetOpen(true);
-  };
-
-  const handleConfirmOrder = () => {
-    if (selectedOrder?.status === "Draft") {
-      toast.success(`ยืนยัน Sales Order ${selectedOrder.id} เรียบร้อย!`);
-      setIsSheetOpen(false);
+  const handleRowClick = async (order: any) => {
+    try {
+      const details = await salesOrdersApi.getOne(order.id);
+      setSelectedOrder(details);
+      setIsSheetOpen(true);
+    } catch (error) {
+      toast.error("Failed to fetch order details");
     }
   };
 
-  const handleCancelOrder = () => {
+  const handleConfirmOrder = async () => {
+    if (selectedOrder?.status === "Draft") {
+      try {
+        await salesOrdersApi.updateStatus(selectedOrder.id, "confirmed");
+        toast.success(`ยืนยัน Sales Order ${selectedOrder.id} เรียบร้อย!`);
+        setIsSheetOpen(false);
+        fetchOrders();
+      } catch (error) {
+        toast.error("Failed to confirm order");
+      }
+    }
+  };
+
+  const handleCancelOrder = async () => {
     if (selectedOrder) {
-      toast.error(`ยกเลิก Sales Order ${selectedOrder.id}`);
-      setIsSheetOpen(false);
+      try {
+        await salesOrdersApi.updateStatus(selectedOrder.id, "cancelled");
+        toast.error(`ยกเลิก Sales Order ${selectedOrder.id}`);
+        setIsSheetOpen(false);
+        fetchOrders();
+      } catch (error) {
+        toast.error("Failed to cancel order");
+      }
+    }
+  };
+
+  const handleShipOrder = async () => {
+    if (selectedOrder?.status === "Confirmed") {
+      try {
+        await salesOrdersApi.updateStatus(selectedOrder.id, "shipped");
+        toast.success("เตรียมจัดส่งสินค้า");
+        setIsSheetOpen(false);
+        fetchOrders();
+      } catch (error) {
+        toast.error("Failed to ship order");
+      }
     }
   };
 
@@ -371,35 +284,49 @@ export default function SalesOrdersPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedOrders.map((order) => (
-                    <TableRow
-                      key={order.id}
-                      className="hover:bg-slate-50/60 transition-colors cursor-pointer"
-                      onClick={() => handleRowClick(order)}
-                    >
-                      <TableCell className="font-medium text-blue-600 pl-6 py-4">
-                        {order.id}
-                      </TableCell>
-                      <TableCell className="text-slate-500 text-sm py-4">
-                        {order.date}
-                      </TableCell>
-                      <TableCell className="py-4">
-                        <div>
-                          <div className="font-medium text-slate-900">{order.customer}</div>
-                          <div className="text-xs text-slate-500">{order.contactPerson}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right font-medium text-slate-900 py-4">
-                        {order.totalQty}
-                      </TableCell>
-                      <TableCell className="text-right font-bold text-slate-900 py-4">
-                        ฿{order.totalValue.toLocaleString()}
-                      </TableCell>
-                      <TableCell className="text-center py-4">
-                        <StatusBadge status={order.status} />
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                        Loading orders...
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : paginatedOrders.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                        No orders found.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paginatedOrders.map((order) => (
+                      <TableRow
+                        key={order.id}
+                        className="hover:bg-slate-50/60 transition-colors cursor-pointer"
+                        onClick={() => handleRowClick(order)}
+                      >
+                        <TableCell className="font-medium text-blue-600 pl-6 py-4">
+                          {order.id}
+                        </TableCell>
+                        <TableCell className="text-slate-500 text-sm py-4">
+                          {order.date}
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div>
+                            <div className="font-medium text-slate-900">{order.customer}</div>
+                            <div className="text-xs text-slate-500">{order.contactPerson}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right font-medium text-slate-900 py-4">
+                          {order.totalQty}
+                        </TableCell>
+                        <TableCell className="text-right font-bold text-slate-900 py-4">
+                          ฿{order.totalValue.toLocaleString()}
+                        </TableCell>
+                        <TableCell className="text-center py-4">
+                          <StatusBadge status={order.status} />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -452,7 +379,7 @@ export default function SalesOrdersPage() {
                   Sales Order Details: {selectedOrder.id}
                 </SheetTitle>
                 <SheetDescription>
-                  Ordered on {selectedOrder.date} • Due {selectedOrder.dueDate}
+                  Ordered on {selectedOrder.date} • Due {selectedOrder.dueDate || 'N/A'}
                 </SheetDescription>
               </SheetHeader>
 
@@ -464,7 +391,7 @@ export default function SalesOrdersPage() {
                   </h4>
                   <InfoRow label="SO No." value={selectedOrder.id} />
                   <InfoRow label="Order Date" value={selectedOrder.date} />
-                  <InfoRow label="Due Date" value={selectedOrder.dueDate} />
+                  <InfoRow label="Due Date" value={selectedOrder.dueDate || 'N/A'} />
                   <InfoRow
                     label="Status"
                     value={<StatusBadge status={selectedOrder.status} />}
@@ -477,7 +404,9 @@ export default function SalesOrdersPage() {
                     <User className="h-4 w-4" /> Customer Information
                   </h4>
                   <InfoRow label="Company Name" value={selectedOrder.customer} />
-                  <InfoRow label="Contact Person" value={selectedOrder.contactPerson} />
+                  <InfoRow label="Contact Person" value={selectedOrder.contactPerson || '-'} />
+                  {selectedOrder.email && <InfoRow label="Email" value={selectedOrder.email} />}
+                  {selectedOrder.phone && <InfoRow label="Phone" value={selectedOrder.phone} />}
                 </div>
 
                 {/* Financial Summary */}
@@ -502,7 +431,7 @@ export default function SalesOrdersPage() {
                     <PackageOpen className="h-4 w-4" /> รายการสินค้า
                   </h4>
                   <div className="border rounded-lg overflow-hidden divide-y">
-                    {selectedOrder.items.map((item, idx) => (
+                    {selectedOrder.items && selectedOrder.items.map((item: any, idx: number) => (
                       <div
                         key={idx}
                         className="px-4 py-3 hover:bg-slate-50 transition-colors"
@@ -553,10 +482,7 @@ export default function SalesOrdersPage() {
                 ) : selectedOrder.status === "Confirmed" ? (
                   <Button
                     className="w-full bg-blue-600 hover:bg-blue-700"
-                    onClick={() => {
-                      toast.success("เตรียมจัดส่งสินค้า");
-                      setIsSheetOpen(false);
-                    }}
+                    onClick={handleShipOrder}
                   >
                     <Truck className="h-4 w-4 mr-2" />
                     จัดส่งสินค้า
@@ -567,8 +493,8 @@ export default function SalesOrdersPage() {
                     {selectedOrder.status === "Completed"
                       ? "สำเร็จแล้ว"
                       : selectedOrder.status === "Shipped"
-                      ? "จัดส่งแล้ว"
-                      : "ยกเลิกแล้ว"}
+                        ? "จัดส่งแล้ว"
+                        : "ยกเลิกแล้ว"}
                   </div>
                 )}
               </SheetFooter>

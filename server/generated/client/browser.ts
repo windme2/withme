@@ -107,3 +107,28 @@ export type purchase_orders = Prisma.purchase_ordersModel
  * 
  */
 export type purchase_order_items = Prisma.purchase_order_itemsModel
+/**
+ * Model sales_orders
+ * 
+ */
+export type sales_orders = Prisma.sales_ordersModel
+/**
+ * Model sales_order_items
+ * 
+ */
+export type sales_order_items = Prisma.sales_order_itemsModel
+/**
+ * Model customers
+ * 
+ */
+export type customers = Prisma.customersModel
+/**
+ * Model sales_returns
+ * 
+ */
+export type sales_returns = Prisma.sales_returnsModel
+/**
+ * Model return_items
+ * 
+ */
+export type return_items = Prisma.return_itemsModel

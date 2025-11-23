@@ -96,3 +96,24 @@ export const PurchaseOrderStatus = {
 } as const
 
 export type PurchaseOrderStatus = (typeof PurchaseOrderStatus)[keyof typeof PurchaseOrderStatus]
+
+
+export const SalesOrderStatus = {
+  draft: 'draft',
+  confirmed: 'confirmed',
+  shipped: 'shipped',
+  completed: 'completed',
+  cancelled: 'cancelled'
+} as const
+
+export type SalesOrderStatus = (typeof SalesOrderStatus)[keyof typeof SalesOrderStatus]
+
+
+export const ReturnStatus = {
+  pending: 'pending',
+  approved: 'approved',
+  rejected: 'rejected',
+  completed: 'completed'
+} as const
+
+export type ReturnStatus = (typeof ReturnStatus)[keyof typeof ReturnStatus]

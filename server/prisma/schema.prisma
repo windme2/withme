@@ -129,6 +129,8 @@ model products {
   purchase_requisition_items purchase_requisition_items[]
   shipment_items             shipment_items[]
   purchase_order_items       purchase_order_items[]
+  sales_order_items          sales_order_items[]
+  return_items               return_items[]
 }
 
 model purchase_requisition_items {
@@ -245,6 +247,8 @@ model users {
   purchase_requisitions_purchase_requisitions_approved_byTousers  purchase_requisitions[]  @relation("purchase_requisitions_approved_byTousers")
   purchase_requisitions_purchase_requisitions_requested_byTousers purchase_requisitions[]  @relation("purchase_requisitions_requested_byTousers")
   sales_shipments                                                 sales_shipments[]
+  sales_orders                                                    sales_orders[]
+  sales_returns                                                   sales_returns[]
   user_permissions_user_permissions_granted_byTousers             user_permissions[]       @relation("user_permissions_granted_byTousers")
   user_permissions_user_permissions_user_idTousers                user_permissions[]       @relation("user_permissions_user_idTousers")
 }
@@ -338,4 +342,99 @@ enum PurchaseOrderStatus {
   partially_received
   completed
   cancelled
+}
+
+model sales_orders {
+  id              String   @id
+  so_number       String   @unique
+  customer_name   String
+  contact_person  String?
+  customer_email  String?
+  customer_phone  String?
+  status          SalesOrderStatus
+  order_date      DateTime @default(now())
+  due_date        DateTime?
+  total_amount    Decimal  @db.Decimal(10, 2)
+  notes           String?
+  created_by      String
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  users              users @relation(fields: [created_by], references: [id])
+  sales_order_items  sales_order_items[]
+}
+
+model sales_order_items {
+  id              String   @id
+  so_id           String
+  product_id      String
+  quantity        Int
+  unit_price      Decimal  @db.Decimal(10, 2)
+  total_price     Decimal  @db.Decimal(10, 2)
+
+  sales_orders    sales_orders @relation(fields: [so_id], references: [id])
+  products        products     @relation(fields: [product_id], references: [id])
+}
+
+enum SalesOrderStatus {
+  draft
+  confirmed
+  shipped
+  completed
+  cancelled
+}
+
+model customers {
+  id              String   @id
+  customer_code   String   @unique
+  name            String
+  contact_person  String?
+  email           String?
+  phone           String?
+  address         String?
+  tax_id          String?
+  credit_limit    Decimal? @db.Decimal(10, 2)
+  payment_terms   Int?
+  is_active       Boolean  @default(true)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+}
+
+model sales_returns {
+  id              String   @id
+  return_number   String   @unique
+  so_number       String?
+  customer_name   String
+  return_date     DateTime @default(now())
+  status          ReturnStatus
+  reason          String?
+  total_amount    Decimal  @db.Decimal(10, 2)
+  refund_method   String?
+  handled_by      String
+  notes           String?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+  
+  users           users @relation(fields: [handled_by], references: [id])
+  return_items    return_items[]
+}
+
+model return_items {
+  id              String   @id
+  return_id       String
+  product_id      String
+  quantity        Int
+  unit_price      Decimal  @db.Decimal(10, 2)
+  total_price     Decimal  @db.Decimal(10, 2)
+  condition       String?
+  
+  sales_returns   sales_returns @relation(fields: [return_id], references: [id])
+  products        products      @relation(fields: [product_id], references: [id])
+}
+
+enum ReturnStatus {
+  pending
+  approved
+  rejected
+  completed
 }

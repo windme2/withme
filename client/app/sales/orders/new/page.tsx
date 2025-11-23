@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,30 +25,10 @@ import {
 } from "@/components/ui/table";
 import { ArrowLeft, Plus, Trash2, Save, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
-
-// --- Mock Data for Customers & Products ---
-const mockCustomers = [
-  { id: "C-2025-001", name: "Global Retail Co.", contact: "Jane Smith" },
-  { id: "C-2025-002", name: "Local Tech Shop", contact: "Mike Johnson" },
-  { id: "C-2025-003", name: "ABC Trading Ltd.", contact: "Sarah Wilson" },
-  { id: "C-2025-004", name: "Quick Serve Services", contact: "David Lee" },
-  { id: "C-2025-005", name: "Furniture Mart Inc.", contact: "Emily Wong" },
-];
-
-const mockProducts = [
-  { sku: "IT-001", name: 'Monitor 24"', price: 4500, stock: 50, unit: "ชิ้น" },
-  { sku: "IT-005", name: "Keyboard", price: 500, stock: 120, unit: "ชิ้น" },
-  { sku: "IT-006", name: "Mouse Wireless", price: 500, stock: 200, unit: "ชิ้น" },
-  { sku: "SKU001", name: "A4 Paper 80gsm", price: 120, stock: 450, unit: "รีม" },
-  { sku: "SKU002", name: "Blue Ink Pen", price: 25, stock: 500, unit: "แพ็ค" },
-  { sku: "CAB-001", name: "HDMI Cable 2m", price: 250, stock: 300, unit: "เส้น" },
-  { sku: "CAB-002", name: "USB-C Cable", price: 450, stock: 150, unit: "เส้น" },
-  { sku: "ACC-001", name: "Mousepads", price: 89, stock: 800, unit: "ชิ้น" },
-  { sku: "FUR-001", name: "Office Chair", price: 4500, stock: 30, unit: "ตัว" },
-  { sku: "IT-003", name: "Webcam 1080p", price: 4500, stock: 45, unit: "ชิ้น" },
-];
+import { salesOrdersApi, inventoryApi } from "@/lib/api";
 
 interface OrderItem {
+  productId: string;
   sku: string;
   name: string;
   qty: number;
@@ -61,14 +41,36 @@ export default function NewSalesOrderPage() {
   const router = useRouter();
 
   // Form State
-  const [customerId, setCustomerId] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [contactPerson, setContactPerson] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [remarks, setRemarks] = useState("");
   const [items, setItems] = useState<OrderItem[]>([]);
 
   // Add Item State
-  const [selectedProduct, setSelectedProduct] = useState("");
+  const [selectedProductId, setSelectedProductId] = useState("");
   const [quantity, setQuantity] = useState(1);
+
+  // Products from API
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const data = await inventoryApi.getAll();
+        setProducts(data);
+      } catch (error) {
+        toast.error("Failed to load products");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   // Calculate Totals
   const subtotal = items.reduce((sum, item) => sum + item.total, 0);
@@ -77,12 +79,12 @@ export default function NewSalesOrderPage() {
   const grandTotal = subtotal + vatAmount;
 
   const handleAddItem = () => {
-    if (!selectedProduct) {
+    if (!selectedProductId) {
       toast.error("กรุณาเลือกสินค้า");
       return;
     }
 
-    const product = mockProducts.find((p) => p.sku === selectedProduct);
+    const product = products.find((p) => p.id === selectedProductId);
     if (!product) return;
 
     if (quantity <= 0) {
@@ -90,13 +92,13 @@ export default function NewSalesOrderPage() {
       return;
     }
 
-    if (quantity > product.stock) {
-      toast.error(`สินค้าคงเหลือไม่เพียงพอ (มีเพียง ${product.stock} ${product.unit})`);
+    if (quantity > product.quantity) {
+      toast.error(`สินค้าคงเหลือไม่เพียงพอ (มีเพียง ${product.quantity} ${product.unit})`);
       return;
     }
 
     // Check if item already exists
-    const existingItemIndex = items.findIndex((item) => item.sku === product.sku);
+    const existingItemIndex = items.findIndex((item) => item.productId === product.id);
     if (existingItemIndex >= 0) {
       const updatedItems = [...items];
       updatedItems[existingItemIndex].qty += quantity;
@@ -105,20 +107,23 @@ export default function NewSalesOrderPage() {
       setItems(updatedItems);
       toast.success("เพิ่มจำนวนสินค้าแล้ว");
     } else {
+      // Use a default price (you might want to add price field to products or use a fixed price)
+      const unitPrice = 1000; // Default price, should be from product data
       const newItem: OrderItem = {
+        productId: product.id,
         sku: product.sku,
         name: product.name,
         qty: quantity,
-        price: product.price,
+        price: unitPrice,
         unit: product.unit,
-        total: quantity * product.price,
+        total: quantity * unitPrice,
       };
       setItems([...items, newItem]);
       toast.success("เพิ่มสินค้าลงรายการแล้ว");
     }
 
     // Reset selection
-    setSelectedProduct("");
+    setSelectedProductId("");
     setQuantity(1);
   };
 
@@ -127,11 +132,18 @@ export default function NewSalesOrderPage() {
     toast.success("ลบสินค้าออกจากรายการแล้ว");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleUpdatePrice = (index: number, newPrice: number) => {
+    const updatedItems = [...items];
+    updatedItems[index].price = newPrice;
+    updatedItems[index].total = updatedItems[index].qty * newPrice;
+    setItems(updatedItems);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!customerId) {
-      toast.error("กรุณาเลือกลูกค้า");
+    if (!customerName.trim()) {
+      toast.error("กรุณากรอกชื่อลูกค้า");
       return;
     }
 
@@ -145,14 +157,41 @@ export default function NewSalesOrderPage() {
       return;
     }
 
-    // Simulate API call
-    toast.success("สร้าง Sales Order สำเร็จ!");
-    setTimeout(() => {
-      router.push("/sales/orders");
-    }, 1000);
+    try {
+      const payload = {
+        customerName: customerName.trim(),
+        contactPerson: contactPerson.trim() || null,
+        email: email.trim() || null,
+        phone: phone.trim() || null,
+        dueDate: dueDate,
+        notes: remarks.trim() || null,
+        items: items.map(item => ({
+          productId: item.productId,
+          quantity: item.qty,
+          unitPrice: item.price,
+        })),
+      };
+
+      await salesOrdersApi.create(payload);
+      toast.success("สร้าง Sales Order สำเร็จ!");
+      setTimeout(() => {
+        router.push("/sales/orders");
+      }, 1000);
+    } catch (error) {
+      toast.error("เกิดข้อผิดพลาดในการสร้าง Sales Order");
+      console.error(error);
+    }
   };
 
-  const selectedCustomer = mockCustomers.find((c) => c.id === customerId);
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center h-96">
+          <p className="text-slate-500">Loading products...</p>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -190,35 +229,68 @@ export default function NewSalesOrderPage() {
                 <CardContent className="p-6 space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="customer" className="text-sm font-medium text-slate-700">
-                        ลูกค้า <span className="text-red-500">*</span>
+                      <Label htmlFor="customerName" className="text-sm font-medium text-slate-700">
+                        ชื่อลูกค้า <span className="text-red-500">*</span>
                       </Label>
-                      <Select value={customerId} onValueChange={setCustomerId}>
-                        <SelectTrigger id="customer">
-                          <SelectValue placeholder="เลือกลูกค้า" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {mockCustomers.map((customer) => (
-                            <SelectItem key={customer.id} value={customer.id}>
-                              {customer.name} ({customer.contact})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Input
+                        id="customerName"
+                        placeholder="ชื่อบริษัทหรือลูกค้า"
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                      />
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="dueDate" className="text-sm font-medium text-slate-700">
-                        วันครบกำหนด <span className="text-red-500">*</span>
+                      <Label htmlFor="contactPerson" className="text-sm font-medium text-slate-700">
+                        ผู้ติดต่อ
                       </Label>
                       <Input
-                        id="dueDate"
-                        type="date"
-                        value={dueDate}
-                        onChange={(e) => setDueDate(e.target.value)}
-                        min={new Date().toISOString().split("T")[0]}
+                        id="contactPerson"
+                        placeholder="ชื่อผู้ติดต่อ"
+                        value={contactPerson}
+                        onChange={(e) => setContactPerson(e.target.value)}
                       />
                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="text-sm font-medium text-slate-700">
+                        อีเมล
+                      </Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="email@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="phone" className="text-sm font-medium text-slate-700">
+                        เบอร์โทร
+                      </Label>
+                      <Input
+                        id="phone"
+                        placeholder="02-xxx-xxxx"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="dueDate" className="text-sm font-medium text-slate-700">
+                      วันครบกำหนด <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="dueDate"
+                      type="date"
+                      value={dueDate}
+                      onChange={(e) => setDueDate(e.target.value)}
+                      min={new Date().toISOString().split("T")[0]}
+                    />
                   </div>
 
                   <div className="space-y-2">
@@ -247,15 +319,14 @@ export default function NewSalesOrderPage() {
                       <Label htmlFor="product" className="text-sm font-medium text-slate-700">
                         สินค้า
                       </Label>
-                      <Select value={selectedProduct} onValueChange={setSelectedProduct}>
+                      <Select value={selectedProductId} onValueChange={setSelectedProductId}>
                         <SelectTrigger id="product">
                           <SelectValue placeholder="เลือกสินค้า" />
                         </SelectTrigger>
                         <SelectContent>
-                          {mockProducts.map((product) => (
-                            <SelectItem key={product.sku} value={product.sku}>
-                              {product.name} - ฿{product.price} (คงเหลือ: {product.stock}{" "}
-                              {product.unit})
+                          {products.map((product) => (
+                            <SelectItem key={product.id} value={product.id}>
+                              {product.name} - {product.sku} (คงเหลือ: {product.quantity} {product.unit})
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -313,7 +384,7 @@ export default function NewSalesOrderPage() {
                               ชื่อสินค้า
                             </TableHead>
                             <TableHead className="text-right font-semibold text-slate-700">
-                              ราคา
+                              ราคา/หน่วย
                             </TableHead>
                             <TableHead className="text-center font-semibold text-slate-700">
                               จำนวน
@@ -333,8 +404,15 @@ export default function NewSalesOrderPage() {
                               <TableCell className="font-medium text-slate-900">
                                 {item.name}
                               </TableCell>
-                              <TableCell className="text-right text-slate-600">
-                                ฿{item.price.toLocaleString()}
+                              <TableCell className="text-right">
+                                <Input
+                                  type="number"
+                                  min="0"
+                                  step="0.01"
+                                  value={item.price}
+                                  onChange={(e) => handleUpdatePrice(index, parseFloat(e.target.value) || 0)}
+                                  className="w-24 text-right"
+                                />
                               </TableCell>
                               <TableCell className="text-center font-medium text-slate-900">
                                 {item.qty} {item.unit}
@@ -366,7 +444,7 @@ export default function NewSalesOrderPage() {
             {/* Right Column: Summary */}
             <div className="space-y-6">
               {/* Customer Info Card */}
-              {selectedCustomer && (
+              {customerName && (
                 <Card className="border-slate-200 shadow-sm">
                   <CardHeader className="border-b bg-slate-50/50">
                     <CardTitle className="text-lg">ข้อมูลลูกค้า</CardTitle>
@@ -375,15 +453,17 @@ export default function NewSalesOrderPage() {
                     <div>
                       <p className="text-xs text-slate-500">ชื่อบริษัท</p>
                       <p className="text-sm font-medium text-slate-900">
-                        {selectedCustomer.name}
+                        {customerName}
                       </p>
                     </div>
-                    <div>
-                      <p className="text-xs text-slate-500">ผู้ติดต่อ</p>
-                      <p className="text-sm font-medium text-slate-900">
-                        {selectedCustomer.contact}
-                      </p>
-                    </div>
+                    {contactPerson && (
+                      <div>
+                        <p className="text-xs text-slate-500">ผู้ติดต่อ</p>
+                        <p className="text-sm font-medium text-slate-900">
+                          {contactPerson}
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}

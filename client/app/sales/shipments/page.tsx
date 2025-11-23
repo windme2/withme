@@ -1,551 +1,151 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetFooter,
-} from "@/components/ui/sheet";
-import {
-  Plus,
-  Search,
-  Truck,
-  XCircle,
-  ChevronLeft,
-  ChevronRight,
-  PackageOpen,
-  Package,
-  ClipboardCheck,
-  Clock3,
-  X,
-} from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Plus, Search, Truck, Package, CheckCircle2, Clock } from "lucide-react";
+import { toast } from "sonner";
+import { shipmentsApi } from "@/lib/api";
 
-// --- Mock Data ---
-const mockShipments = [
-  {
-    id: "SH-2025-015",
-    orderRef: "SO-2025-030",
-    customer: "Global Retail Co.",
-    date: "2025-02-15",
-    totalQty: 25,
-    totalValue: 55000,
-    status: "Delivered",
-    details: [{ name: 'Monitor 24"', qty: 5, price: 4500 }],
-  },
-  {
-    id: "SH-2025-014",
-    orderRef: "SO-2025-029",
-    customer: "Local Tech Shop",
-    date: "2025-02-14",
-    totalQty: 10,
-    totalValue: 12500,
-    status: "Shipped",
-    details: [{ name: "Keyboard", qty: 10, price: 500 }],
-  },
-  {
-    id: "SH-2025-013",
-    orderRef: "SO-2025-028",
-    customer: "ABC Trading Ltd.",
-    date: "2025-02-13",
-    totalQty: 50,
-    totalValue: 8900,
-    status: "Pending",
-    details: [{ name: "Mousepads", qty: 50, price: 100 }],
-  },
-  {
-    id: "SH-2025-012",
-    orderRef: "SO-2025-027",
-    customer: "Quick Serve Services",
-    date: "2025-02-12",
-    totalQty: 5,
-    totalValue: 25000,
-    status: "Delivered",
-    details: [{ name: "Laptop HP", qty: 5, price: 5000 }],
-  },
-  {
-    id: "SH-2025-011",
-    orderRef: "SO-2025-026",
-    customer: "IT Solution Hub",
-    date: "2025-02-11",
-    totalQty: 15,
-    totalValue: 85000,
-    status: "Cancelled",
-    details: [{ name: "Server Rack", qty: 1, price: 70000 }],
-  },
-  {
-    id: "SH-2025-010",
-    orderRef: "SO-2025-025",
-    customer: "Furniture Mart Inc.",
-    date: "2025-02-10",
-    totalQty: 2,
-    totalValue: 35000,
-    status: "Delivered",
-    details: [{ name: "Office Desk", qty: 2, price: 15000 }],
-  },
-  {
-    id: "SH-2025-009",
-    orderRef: "SO-2025-024",
-    customer: "Home Office Supply",
-    date: "2025-02-09",
-    totalQty: 10,
-    totalValue: 7500,
-    status: "Shipped",
-    details: [],
-  },
-  {
-    id: "SH-2025-008",
-    orderRef: "SO-2025-023",
-    customer: "Clean & Clear",
-    date: "2025-02-08",
-    totalQty: 30,
-    totalValue: 4500,
-    status: "Pending",
-    details: [],
-  },
-  {
-    id: "SH-2025-007",
-    orderRef: "SO-2025-022",
-    customer: "Tech World Co.",
-    date: "2025-02-07",
-    totalQty: 8,
-    totalValue: 22000,
-    status: "Delivered",
-    details: [],
-  },
-  {
-    id: "SH-2025-006",
-    orderRef: "SO-2025-021",
-    customer: "ABC Stationery Co.",
-    date: "2025-02-06",
-    totalQty: 5,
-    totalValue: 25500,
-    status: "Delivered",
-    details: [],
-  },
-];
-
-export default function SalesShipmentsPage() {
+export default function ShipmentsPage() {
   const router = useRouter();
+  const [shipments, setShipments] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [selectedShipment, setSelectedShipment] = useState<{
-    id: string;
-    [key: string]: unknown;
-  } | null>(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // --- Pagination State ---
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
-
-  // --- Data Processing ---
-  const totalValueSum = mockShipments.reduce((sum, s) => sum + s.totalValue, 0);
-
-  // --- Filter Logic ---
-  const filteredShipments = mockShipments.filter((shipment) => {
-    const matchesSearch =
-      shipment.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      shipment.orderRef.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      shipment.customer.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      filterStatus === "all" || shipment.status === filterStatus;
-    return matchesSearch && matchesStatus;
-  });
-
-  // --- Pagination Logic ---
-  const totalPages = Math.ceil(filteredShipments.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedShipments = filteredShipments.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
-
-  const clearFilters = () => {
-    setSearchTerm("");
-    setFilterStatus("all");
-    setCurrentPage(1);
+  const fetchShipments = async () => {
+    try {
+      setIsLoading(true);
+      const data = await shipmentsApi.getAll(filterStatus, searchTerm);
+      setShipments(data);
+    } catch (error) {
+      toast.error("Failed to fetch shipments");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleRowClick = (shipment: { id: string; [key: string]: unknown }) => {
-    setSelectedShipment(shipment);
-    setIsSheetOpen(true);
-  };
+  useEffect(() => {
+    fetchShipments();
+  }, [filterStatus, searchTerm]);
+
+  const pendingCount = shipments.filter(s => s.status === 'Pending').length;
+  const shippedCount = shipments.filter(s => s.status === 'Shipped').length;
+  const deliveredCount = shipments.filter(s => s.status === 'Delivered').length;
 
   return (
     <MainLayout>
       <div className="space-y-6 p-1">
-        {/* --- Header & Primary Action --- */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        {/* Header */}
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-              Sales Shipments
-            </h1>
-            <p className="text-slate-500 mt-1">
-              ติดตามสถานะและจัดการคำสั่งจัดส่งสินค้าให้ลูกค้า
-            </p>
+            <h1 className="text-3xl font-bold text-slate-900">Sales Shipments</h1>
+            <p className="text-slate-500 mt-1">ติดตามการจัดส่งสินค้า</p>
           </div>
-          <Button
-            className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
-            onClick={() => router.push("/sales/shipments/new")}
-          >
+          <Button onClick={() => router.push('/sales/shipments/new')} className="bg-blue-600 hover:bg-blue-700">
             <Plus className="h-4 w-4 mr-2" />
             New Shipment
           </Button>
         </div>
 
-        {/* --- Stats Cards --- */}
+        {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <StatCard
-            title="Total Shipments"
-            value={mockShipments.length}
-            icon={PackageOpen}
-            color="text-blue-600"
-            bg="bg-blue-50"
-          />
-          <StatCard
-            title="Pending/Shipped"
-            value={
-              mockShipments.filter(
-                (o) => o.status === "Pending" || o.status === "Shipped"
-              ).length
-            }
-            icon={Truck}
-            color="text-amber-600"
-            bg="bg-amber-50"
-          />
-          <StatCard
-            title="Delivered"
-            value={mockShipments.filter((o) => o.status === "Delivered").length}
-            icon={ClipboardCheck}
-            color="text-emerald-600"
-            bg="bg-emerald-50"
-          />
-          <StatCard
-            title="Total Value"
-            value={`฿${(totalValueSum / 1000).toFixed(1)}K`}
-            icon={Package}
-            color="text-purple-600"
-            bg="bg-purple-50"
-          />
+          <StatCard title="Total Shipments" value={shipments.length} icon={Package} color="text-blue-600" bg="bg-blue-50" />
+          <StatCard title="Pending" value={pendingCount} icon={Clock} color="text-amber-600" bg="bg-amber-50" />
+          <StatCard title="Shipped" value={shippedCount} icon={Truck} color="text-purple-600" bg="bg-purple-50" />
+          <StatCard title="Delivered" value={deliveredCount} icon={CheckCircle2} color="text-emerald-600" bg="bg-emerald-50" />
         </div>
 
-        {/* --- Main Content: Table --- */}
-        <Card className="border-slate-200 shadow-sm">
+        {/* Table */}
+        <Card>
           <CardContent className="p-6">
-            {/* --- Toolbar: Filter --- */}
-            <div className="flex flex-col md:flex-row gap-4 mb-6 justify-between">
+            <div className="flex gap-4 mb-4">
               <div className="relative flex-1 max-w-sm">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 <Input
-                  placeholder="Search Shipment No, Order Ref, or Customer..."
-                  className="pl-10 border-slate-200"
+                  placeholder="Search shipments..."
+                  className="pl-10"
                   value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setCurrentPage(1);
-                  }}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <div className="flex gap-2">
-                <Select
-                  value={filterStatus}
-                  onValueChange={(val) => {
-                    setFilterStatus(val);
-                    setCurrentPage(1);
-                  }}
-                >
-                  <SelectTrigger className="w-[160px] border-slate-200">
-                    <SelectValue placeholder="Filter by Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="Shipped">Shipped</SelectItem>
-                    <SelectItem value="Delivered">Delivered</SelectItem>
-                    <SelectItem value="Pending">Pending</SelectItem>
-                    <SelectItem value="Cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-
-                {(searchTerm || filterStatus !== "all") && (
-                  <Button variant="ghost" size="icon" onClick={clearFilters}>
-                    <X className="h-4 w-4 text-slate-500" />
-                  </Button>
-                )}
-              </div>
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="w-[160px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="shipped">Shipped</SelectItem>
+                  <SelectItem value="delivered">Delivered</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* --- Data Table --- */}
-            <div className="rounded-lg border border-slate-200 overflow-hidden">
+            <div className="rounded-lg border">
               <Table>
                 <TableHeader className="bg-slate-50">
                   <TableRow>
-                    <TableHead className="w-[150px] font-semibold text-slate-700 pl-6 h-12">
-                      Shipment No.
-                    </TableHead>
-                    <TableHead className="w-[150px] font-semibold text-slate-700 h-12">
-                      Order Ref.
-                    </TableHead>
-                    <TableHead className="font-semibold text-slate-700 h-12">
-                      Customer
-                    </TableHead>
-                    <TableHead className="text-center font-semibold text-slate-700 h-12">
-                      Total Qty
-                    </TableHead>
-                    <TableHead className="text-right font-semibold text-slate-700 h-12">
-                      Total Value
-                    </TableHead>
-                    <TableHead className="font-semibold text-slate-700 h-12">
-                      Date
-                    </TableHead>
-                    <TableHead className="text-center font-semibold text-slate-700 pr-6 h-12">
-                      Status
-                    </TableHead>
+                    <TableHead>Shipment No.</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Shipping Address</TableHead>
+                    <TableHead>Shipment Date</TableHead>
+                    <TableHead>Tracking No.</TableHead>
+                    <TableHead className="text-right">Total Items</TableHead>
+                    <TableHead className="text-center">Status</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedShipments.map((shipment) => (
-                    <TableRow
-                      key={shipment.id}
-                      className="hover:bg-slate-50/60 transition-colors cursor-pointer group"
-                      onClick={() => handleRowClick(shipment)}
-                    >
-                      {/* Shipment No. */}
-                      <TableCell className="pl-6 py-4">
-                        <span className="font-medium text-blue-600 group-hover:underline underline-offset-4">
-                          {shipment.id}
-                        </span>
-                      </TableCell>
-
-                      {/* Order Ref. */}
-                      <TableCell className="text-slate-600 py-4">
-                        {shipment.orderRef}
-                      </TableCell>
-
-                      {/* Customer */}
-                      <TableCell className="font-medium text-slate-900 py-4">
-                        {shipment.customer}
-                      </TableCell>
-
-                      {/* Total Qty */}
-                      <TableCell className="text-center text-slate-700 py-4">
-                        {shipment.totalQty}
-                      </TableCell>
-
-                      {/* Total Value */}
-                      <TableCell className="text-right font-bold text-slate-700 py-4">
-                        ฿{shipment.totalValue.toLocaleString()}
-                      </TableCell>
-
-                      {/* Date */}
-                      <TableCell className="text-slate-500 text-sm py-4">
-                        {shipment.date}
-                      </TableCell>
-
-                      {/* Status */}
-                      <TableCell className="text-center pr-6 py-4">
-                        <StatusBadge status={shipment.status} />
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">Loading...</TableCell>
+                    </TableRow>
+                  ) : shipments.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8 text-slate-500">
+                        No shipments found
                       </TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    shipments.map((shipment) => (
+                      <TableRow key={shipment.id} className="hover:bg-slate-50">
+                        <TableCell className="font-medium text-blue-600">{shipment.shipmentNumber}</TableCell>
+                        <TableCell className="font-medium">{shipment.customerName}</TableCell>
+                        <TableCell className="text-slate-600">{shipment.shippingAddress}</TableCell>
+                        <TableCell>{shipment.shipmentDate || '-'}</TableCell>
+                        <TableCell>{shipment.trackingNumber || '-'}</TableCell>
+                        <TableCell className="text-right">{shipment.totalItems}</TableCell>
+                        <TableCell className="text-center">
+                          <StatusBadge status={shipment.status} />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
-
-            {/* Pagination Footer */}
-            {totalPages > 1 && (
-              <div className="flex flex-col sm:flex-row items-center justify-between mt-4 pt-4 gap-4 border-t border-slate-100">
-                <div className="text-sm text-slate-500">
-                  Showing {startIndex + 1} -{" "}
-                  {Math.min(
-                    startIndex + itemsPerPage,
-                    filteredShipments.length
-                  )}{" "}
-                  of {filteredShipments.length} entries
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className="border-slate-200"
-                  >
-                    <ChevronLeft className="h-4 w-4 mr-1" /> Previous
-                  </Button>
-                  <div className="text-sm font-medium text-slate-700 px-2">
-                    Page {currentPage} / {totalPages}
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() =>
-                      setCurrentPage((p) => Math.min(totalPages, p + 1))
-                    }
-                    disabled={currentPage === totalPages}
-                    className="border-slate-200"
-                  >
-                    Next <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </div>
-              </div>
-            )}
           </CardContent>
         </Card>
       </div>
-
-      {/* --- Detail Sheet (Shipment) --- */}
-      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
-          {selectedShipment && (
-            <ShipmentDetailSheet shipment={selectedShipment} />
-          )}
-        </SheetContent>
-      </Sheet>
     </MainLayout>
   );
 }
 
-// --- Detail Sheet Component ---
-function ShipmentDetailSheet({
-  shipment,
-}: {
-  shipment: {
-    id: string;
-    details?: { name: string; [key: string]: unknown }[];
-    [key: string]: unknown;
-  } | null;
-}) {
-  // Mock function to update status
-  const handleUpdateStatus = (newStatus: string) => {
-    if (newStatus === "Delivered") {
-      alert(
-        `Simulating status update: Shipment ${shipment.id} marked as Delivered.`
-      );
-    }
-  };
-
+function StatCard({ title, value, icon: Icon, color, bg }: any) {
   return (
-    <>
-      <SheetHeader className="mb-6 border-b pb-4">
-        <SheetTitle className="text-2xl font-bold flex items-center gap-2">
-          <Truck className="h-6 w-6 text-blue-600" />
-          {shipment.id}
-        </SheetTitle>
-        <SheetDescription>
-          Order Ref: {shipment.orderRef} | Customer: {shipment.customer}
-        </SheetDescription>
-      </SheetHeader>
-
-      <div className="space-y-6">
-        {/* Info Block */}
-        <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 space-y-3">
-          <InfoRow label="Shipment Date" value={shipment.date} />
-          <InfoRow label="Customer" value={shipment.customer} />
-          <InfoRow
-            label="Current Status"
-            value={<StatusBadge status={shipment.status} />}
-          />
-        </div>
-
-        {/* Item Summary (Simple version) */}
-        <div>
-          <h4 className="font-medium text-slate-900 mb-3 flex items-center gap-2">
-            <PackageOpen className="h-4 w-4" /> Items Shipped
-          </h4>
-          <div className="border rounded-lg overflow-hidden">
-            <div className="divide-y">
-              {shipment.details && shipment.details.length > 0 ? (
-                shipment.details.map(
-                  (
-                    item: { name: string; [key: string]: unknown },
-                    idx: number
-                  ) => (
-                    <div
-                      key={idx}
-                      className="px-4 py-3 flex justify-between items-center text-sm"
-                    >
-                      <div className="font-medium text-slate-900">
-                        {item.name}
-                      </div>
-                      <div className="text-slate-500">Qty: {item.qty}</div>
-                    </div>
-                  )
-                )
-              ) : (
-                <div className="px-4 py-3 text-sm text-slate-500 italic">
-                  No detailed items recorded.
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Financial Summary */}
-        <div className="border rounded-lg p-4 space-y-3">
-          <div className="flex justify-between font-bold text-lg pt-2">
-            <span>Total Value</span>
-            <span className="text-blue-600">
-              ฿{shipment.totalValue.toLocaleString()}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <SheetFooter className="mt-8 border-t pt-4">
-        {shipment.status === "Shipped" && (
-          <Button
-            className="w-full bg-emerald-600 hover:bg-emerald-700"
-            onClick={() => handleUpdateStatus("Delivered")}
-          >
-            <ClipboardCheck className="h-4 w-4 mr-2" />
-            Mark as Delivered
-          </Button>
-        )}
-        {(shipment.status === "Delivered" ||
-          shipment.status === "Cancelled") && (
-          <div className="w-full text-center text-slate-400 text-sm italic">
-            Shipment status is final.
-          </div>
-        )}
-      </SheetFooter>
-    </>
-  );
-}
-
-// --- Sub-Components ---
-
-import type { StatCardProps } from "@/lib/types";
-
-function StatCard({ title, value, icon: Icon, color, bg }: StatCardProps) {
-  return (
-    <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all">
+    <Card>
       <CardContent className="p-6 flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-slate-500 mb-1">{title}</p>
-          <h3 className="text-2xl font-bold text-slate-900">{value}</h3>
+          <p className="text-sm text-slate-500 mb-1">{title}</p>
+          <h3 className="text-2xl font-bold">{value}</h3>
         </div>
         <div className={`p-3 rounded-xl ${bg}`}>
           <Icon className={`h-6 w-6 ${color}`} />
@@ -556,33 +156,16 @@ function StatCard({ title, value, icon: Icon, color, bg }: StatCardProps) {
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    Delivered: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    Shipped: "bg-blue-50 text-blue-700 border-blue-200",
-    Pending: "bg-amber-50 text-amber-700 border-amber-200",
-    Cancelled: "bg-red-50 text-red-700 border-red-200",
+  const config: Record<string, { bg: string; text: string }> = {
+    Pending: { bg: "bg-amber-50", text: "text-amber-700" },
+    Shipped: { bg: "bg-purple-50", text: "text-purple-700" },
+    Delivered: { bg: "bg-emerald-50", text: "text-emerald-700" },
+    Cancelled: { bg: "bg-red-50", text: "text-red-700" },
   };
-  const currentStyle =
-    styles[status] || "bg-slate-100 text-slate-700 border-slate-200";
-
+  const c = config[status] || config.Pending;
   return (
-    <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${currentStyle}`}
-    >
-      {status === "Delivered" && <ClipboardCheck className="w-3 h-3 mr-1" />}
-      {status === "Shipped" && <Truck className="w-3 h-3 mr-1" />}
-      {status === "Pending" && <Clock3 className="w-3 h-3 mr-1" />}
-      {status === "Cancelled" && <XCircle className="w-3 h-3 mr-1" />}
+    <Badge variant="outline" className={`${c.bg} ${c.text} border-0`}>
       {status}
-    </span>
-  );
-}
-
-function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex justify-between py-1 border-b border-slate-100 last:border-b-0">
-      <span className="text-sm text-slate-500">{label}</span>
-      <span className="font-medium text-slate-900">{value}</span>
-    </div>
+    </Badge>
   );
 }

@@ -68,7 +68,12 @@ export const ModelName = {
   user_permissions: 'user_permissions',
   users: 'users',
   purchase_orders: 'purchase_orders',
-  purchase_order_items: 'purchase_order_items'
+  purchase_order_items: 'purchase_order_items',
+  sales_orders: 'sales_orders',
+  sales_order_items: 'sales_order_items',
+  customers: 'customers',
+  sales_returns: 'sales_returns',
+  return_items: 'return_items'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -345,6 +350,89 @@ export const Purchase_order_itemsScalarFieldEnum = {
 } as const
 
 export type Purchase_order_itemsScalarFieldEnum = (typeof Purchase_order_itemsScalarFieldEnum)[keyof typeof Purchase_order_itemsScalarFieldEnum]
+
+
+export const Sales_ordersScalarFieldEnum = {
+  id: 'id',
+  so_number: 'so_number',
+  customer_name: 'customer_name',
+  contact_person: 'contact_person',
+  customer_email: 'customer_email',
+  customer_phone: 'customer_phone',
+  status: 'status',
+  order_date: 'order_date',
+  due_date: 'due_date',
+  total_amount: 'total_amount',
+  notes: 'notes',
+  created_by: 'created_by',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Sales_ordersScalarFieldEnum = (typeof Sales_ordersScalarFieldEnum)[keyof typeof Sales_ordersScalarFieldEnum]
+
+
+export const Sales_order_itemsScalarFieldEnum = {
+  id: 'id',
+  so_id: 'so_id',
+  product_id: 'product_id',
+  quantity: 'quantity',
+  unit_price: 'unit_price',
+  total_price: 'total_price'
+} as const
+
+export type Sales_order_itemsScalarFieldEnum = (typeof Sales_order_itemsScalarFieldEnum)[keyof typeof Sales_order_itemsScalarFieldEnum]
+
+
+export const CustomersScalarFieldEnum = {
+  id: 'id',
+  customer_code: 'customer_code',
+  name: 'name',
+  contact_person: 'contact_person',
+  email: 'email',
+  phone: 'phone',
+  address: 'address',
+  tax_id: 'tax_id',
+  credit_limit: 'credit_limit',
+  payment_terms: 'payment_terms',
+  is_active: 'is_active',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type CustomersScalarFieldEnum = (typeof CustomersScalarFieldEnum)[keyof typeof CustomersScalarFieldEnum]
+
+
+export const Sales_returnsScalarFieldEnum = {
+  id: 'id',
+  return_number: 'return_number',
+  so_number: 'so_number',
+  customer_name: 'customer_name',
+  return_date: 'return_date',
+  status: 'status',
+  reason: 'reason',
+  total_amount: 'total_amount',
+  refund_method: 'refund_method',
+  handled_by: 'handled_by',
+  notes: 'notes',
+  created_at: 'created_at',
+  updated_at: 'updated_at'
+} as const
+
+export type Sales_returnsScalarFieldEnum = (typeof Sales_returnsScalarFieldEnum)[keyof typeof Sales_returnsScalarFieldEnum]
+
+
+export const Return_itemsScalarFieldEnum = {
+  id: 'id',
+  return_id: 'return_id',
+  product_id: 'product_id',
+  quantity: 'quantity',
+  unit_price: 'unit_price',
+  total_price: 'total_price',
+  condition: 'condition'
+} as const
+
+export type Return_itemsScalarFieldEnum = (typeof Return_itemsScalarFieldEnum)[keyof typeof Return_itemsScalarFieldEnum]
 
 
 export const SortOrder = {

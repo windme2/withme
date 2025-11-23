@@ -280,6 +280,8 @@ export type productsWhereInput = {
   purchase_requisition_items?: Prisma.Purchase_requisition_itemsListRelationFilter
   shipment_items?: Prisma.Shipment_itemsListRelationFilter
   purchase_order_items?: Prisma.Purchase_order_itemsListRelationFilter
+  sales_order_items?: Prisma.Sales_order_itemsListRelationFilter
+  return_items?: Prisma.Return_itemsListRelationFilter
 }
 
 export type productsOrderByWithRelationInput = {
@@ -302,6 +304,8 @@ export type productsOrderByWithRelationInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsOrderByRelationAggregateInput
   shipment_items?: Prisma.shipment_itemsOrderByRelationAggregateInput
   purchase_order_items?: Prisma.purchase_order_itemsOrderByRelationAggregateInput
+  sales_order_items?: Prisma.sales_order_itemsOrderByRelationAggregateInput
+  return_items?: Prisma.return_itemsOrderByRelationAggregateInput
 }
 
 export type productsWhereUniqueInput = Prisma.AtLeast<{
@@ -327,6 +331,8 @@ export type productsWhereUniqueInput = Prisma.AtLeast<{
   purchase_requisition_items?: Prisma.Purchase_requisition_itemsListRelationFilter
   shipment_items?: Prisma.Shipment_itemsListRelationFilter
   purchase_order_items?: Prisma.Purchase_order_itemsListRelationFilter
+  sales_order_items?: Prisma.Sales_order_itemsListRelationFilter
+  return_items?: Prisma.Return_itemsListRelationFilter
 }, "id" | "sku">
 
 export type productsOrderByWithAggregationInput = {
@@ -384,6 +390,8 @@ export type productsCreateInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsCreateNestedManyWithoutProductsInput
   shipment_items?: Prisma.shipment_itemsCreateNestedManyWithoutProductsInput
   purchase_order_items?: Prisma.purchase_order_itemsCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsCreateNestedManyWithoutProductsInput
 }
 
 export type productsUncheckedCreateInput = {
@@ -405,6 +413,8 @@ export type productsUncheckedCreateInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedCreateNestedManyWithoutProductsInput
   shipment_items?: Prisma.shipment_itemsUncheckedCreateNestedManyWithoutProductsInput
   purchase_order_items?: Prisma.purchase_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsUncheckedCreateNestedManyWithoutProductsInput
 }
 
 export type productsUpdateInput = {
@@ -426,6 +436,8 @@ export type productsUpdateInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUpdateManyWithoutProductsNestedInput
   shipment_items?: Prisma.shipment_itemsUpdateManyWithoutProductsNestedInput
   purchase_order_items?: Prisma.purchase_order_itemsUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUpdateManyWithoutProductsNestedInput
 }
 
 export type productsUncheckedUpdateInput = {
@@ -447,6 +459,8 @@ export type productsUncheckedUpdateInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedUpdateManyWithoutProductsNestedInput
   shipment_items?: Prisma.shipment_itemsUncheckedUpdateManyWithoutProductsNestedInput
   purchase_order_items?: Prisma.purchase_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUncheckedUpdateManyWithoutProductsNestedInput
 }
 
 export type productsCreateManyInput = {
@@ -707,6 +721,34 @@ export type productsUpdateOneRequiredWithoutPurchase_order_itemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.productsUpdateToOneWithWhereWithoutPurchase_order_itemsInput, Prisma.productsUpdateWithoutPurchase_order_itemsInput>, Prisma.productsUncheckedUpdateWithoutPurchase_order_itemsInput>
 }
 
+export type productsCreateNestedOneWithoutSales_order_itemsInput = {
+  create?: Prisma.XOR<Prisma.productsCreateWithoutSales_order_itemsInput, Prisma.productsUncheckedCreateWithoutSales_order_itemsInput>
+  connectOrCreate?: Prisma.productsCreateOrConnectWithoutSales_order_itemsInput
+  connect?: Prisma.productsWhereUniqueInput
+}
+
+export type productsUpdateOneRequiredWithoutSales_order_itemsNestedInput = {
+  create?: Prisma.XOR<Prisma.productsCreateWithoutSales_order_itemsInput, Prisma.productsUncheckedCreateWithoutSales_order_itemsInput>
+  connectOrCreate?: Prisma.productsCreateOrConnectWithoutSales_order_itemsInput
+  upsert?: Prisma.productsUpsertWithoutSales_order_itemsInput
+  connect?: Prisma.productsWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.productsUpdateToOneWithWhereWithoutSales_order_itemsInput, Prisma.productsUpdateWithoutSales_order_itemsInput>, Prisma.productsUncheckedUpdateWithoutSales_order_itemsInput>
+}
+
+export type productsCreateNestedOneWithoutReturn_itemsInput = {
+  create?: Prisma.XOR<Prisma.productsCreateWithoutReturn_itemsInput, Prisma.productsUncheckedCreateWithoutReturn_itemsInput>
+  connectOrCreate?: Prisma.productsCreateOrConnectWithoutReturn_itemsInput
+  connect?: Prisma.productsWhereUniqueInput
+}
+
+export type productsUpdateOneRequiredWithoutReturn_itemsNestedInput = {
+  create?: Prisma.XOR<Prisma.productsCreateWithoutReturn_itemsInput, Prisma.productsUncheckedCreateWithoutReturn_itemsInput>
+  connectOrCreate?: Prisma.productsCreateOrConnectWithoutReturn_itemsInput
+  upsert?: Prisma.productsUpsertWithoutReturn_itemsInput
+  connect?: Prisma.productsWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.productsUpdateToOneWithWhereWithoutReturn_itemsInput, Prisma.productsUpdateWithoutReturn_itemsInput>, Prisma.productsUncheckedUpdateWithoutReturn_itemsInput>
+}
+
 export type productsCreateWithoutAdjustment_itemsInput = {
   id: string
   sku: string
@@ -725,6 +767,8 @@ export type productsCreateWithoutAdjustment_itemsInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsCreateNestedManyWithoutProductsInput
   shipment_items?: Prisma.shipment_itemsCreateNestedManyWithoutProductsInput
   purchase_order_items?: Prisma.purchase_order_itemsCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsCreateNestedManyWithoutProductsInput
 }
 
 export type productsUncheckedCreateWithoutAdjustment_itemsInput = {
@@ -745,6 +789,8 @@ export type productsUncheckedCreateWithoutAdjustment_itemsInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedCreateNestedManyWithoutProductsInput
   shipment_items?: Prisma.shipment_itemsUncheckedCreateNestedManyWithoutProductsInput
   purchase_order_items?: Prisma.purchase_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsUncheckedCreateNestedManyWithoutProductsInput
 }
 
 export type productsCreateOrConnectWithoutAdjustment_itemsInput = {
@@ -781,6 +827,8 @@ export type productsUpdateWithoutAdjustment_itemsInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUpdateManyWithoutProductsNestedInput
   shipment_items?: Prisma.shipment_itemsUpdateManyWithoutProductsNestedInput
   purchase_order_items?: Prisma.purchase_order_itemsUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUpdateManyWithoutProductsNestedInput
 }
 
 export type productsUncheckedUpdateWithoutAdjustment_itemsInput = {
@@ -801,6 +849,8 @@ export type productsUncheckedUpdateWithoutAdjustment_itemsInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedUpdateManyWithoutProductsNestedInput
   shipment_items?: Prisma.shipment_itemsUncheckedUpdateManyWithoutProductsNestedInput
   purchase_order_items?: Prisma.purchase_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUncheckedUpdateManyWithoutProductsNestedInput
 }
 
 export type productsCreateWithoutCategoriesInput = {
@@ -821,6 +871,8 @@ export type productsCreateWithoutCategoriesInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsCreateNestedManyWithoutProductsInput
   shipment_items?: Prisma.shipment_itemsCreateNestedManyWithoutProductsInput
   purchase_order_items?: Prisma.purchase_order_itemsCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsCreateNestedManyWithoutProductsInput
 }
 
 export type productsUncheckedCreateWithoutCategoriesInput = {
@@ -841,6 +893,8 @@ export type productsUncheckedCreateWithoutCategoriesInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedCreateNestedManyWithoutProductsInput
   shipment_items?: Prisma.shipment_itemsUncheckedCreateNestedManyWithoutProductsInput
   purchase_order_items?: Prisma.purchase_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsUncheckedCreateNestedManyWithoutProductsInput
 }
 
 export type productsCreateOrConnectWithoutCategoriesInput = {
@@ -904,6 +958,8 @@ export type productsCreateWithoutGoods_received_itemsInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsCreateNestedManyWithoutProductsInput
   shipment_items?: Prisma.shipment_itemsCreateNestedManyWithoutProductsInput
   purchase_order_items?: Prisma.purchase_order_itemsCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsCreateNestedManyWithoutProductsInput
 }
 
 export type productsUncheckedCreateWithoutGoods_received_itemsInput = {
@@ -924,6 +980,8 @@ export type productsUncheckedCreateWithoutGoods_received_itemsInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedCreateNestedManyWithoutProductsInput
   shipment_items?: Prisma.shipment_itemsUncheckedCreateNestedManyWithoutProductsInput
   purchase_order_items?: Prisma.purchase_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsUncheckedCreateNestedManyWithoutProductsInput
 }
 
 export type productsCreateOrConnectWithoutGoods_received_itemsInput = {
@@ -960,6 +1018,8 @@ export type productsUpdateWithoutGoods_received_itemsInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUpdateManyWithoutProductsNestedInput
   shipment_items?: Prisma.shipment_itemsUpdateManyWithoutProductsNestedInput
   purchase_order_items?: Prisma.purchase_order_itemsUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUpdateManyWithoutProductsNestedInput
 }
 
 export type productsUncheckedUpdateWithoutGoods_received_itemsInput = {
@@ -980,6 +1040,8 @@ export type productsUncheckedUpdateWithoutGoods_received_itemsInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedUpdateManyWithoutProductsNestedInput
   shipment_items?: Prisma.shipment_itemsUncheckedUpdateManyWithoutProductsNestedInput
   purchase_order_items?: Prisma.purchase_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUncheckedUpdateManyWithoutProductsNestedInput
 }
 
 export type productsCreateWithoutInventory_levelsInput = {
@@ -1000,6 +1062,8 @@ export type productsCreateWithoutInventory_levelsInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsCreateNestedManyWithoutProductsInput
   shipment_items?: Prisma.shipment_itemsCreateNestedManyWithoutProductsInput
   purchase_order_items?: Prisma.purchase_order_itemsCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsCreateNestedManyWithoutProductsInput
 }
 
 export type productsUncheckedCreateWithoutInventory_levelsInput = {
@@ -1020,6 +1084,8 @@ export type productsUncheckedCreateWithoutInventory_levelsInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedCreateNestedManyWithoutProductsInput
   shipment_items?: Prisma.shipment_itemsUncheckedCreateNestedManyWithoutProductsInput
   purchase_order_items?: Prisma.purchase_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsUncheckedCreateNestedManyWithoutProductsInput
 }
 
 export type productsCreateOrConnectWithoutInventory_levelsInput = {
@@ -1056,6 +1122,8 @@ export type productsUpdateWithoutInventory_levelsInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUpdateManyWithoutProductsNestedInput
   shipment_items?: Prisma.shipment_itemsUpdateManyWithoutProductsNestedInput
   purchase_order_items?: Prisma.purchase_order_itemsUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUpdateManyWithoutProductsNestedInput
 }
 
 export type productsUncheckedUpdateWithoutInventory_levelsInput = {
@@ -1076,6 +1144,8 @@ export type productsUncheckedUpdateWithoutInventory_levelsInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedUpdateManyWithoutProductsNestedInput
   shipment_items?: Prisma.shipment_itemsUncheckedUpdateManyWithoutProductsNestedInput
   purchase_order_items?: Prisma.purchase_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUncheckedUpdateManyWithoutProductsNestedInput
 }
 
 export type productsCreateWithoutInventory_transactionsInput = {
@@ -1096,6 +1166,8 @@ export type productsCreateWithoutInventory_transactionsInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsCreateNestedManyWithoutProductsInput
   shipment_items?: Prisma.shipment_itemsCreateNestedManyWithoutProductsInput
   purchase_order_items?: Prisma.purchase_order_itemsCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsCreateNestedManyWithoutProductsInput
 }
 
 export type productsUncheckedCreateWithoutInventory_transactionsInput = {
@@ -1116,6 +1188,8 @@ export type productsUncheckedCreateWithoutInventory_transactionsInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedCreateNestedManyWithoutProductsInput
   shipment_items?: Prisma.shipment_itemsUncheckedCreateNestedManyWithoutProductsInput
   purchase_order_items?: Prisma.purchase_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsUncheckedCreateNestedManyWithoutProductsInput
 }
 
 export type productsCreateOrConnectWithoutInventory_transactionsInput = {
@@ -1152,6 +1226,8 @@ export type productsUpdateWithoutInventory_transactionsInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUpdateManyWithoutProductsNestedInput
   shipment_items?: Prisma.shipment_itemsUpdateManyWithoutProductsNestedInput
   purchase_order_items?: Prisma.purchase_order_itemsUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUpdateManyWithoutProductsNestedInput
 }
 
 export type productsUncheckedUpdateWithoutInventory_transactionsInput = {
@@ -1172,6 +1248,8 @@ export type productsUncheckedUpdateWithoutInventory_transactionsInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedUpdateManyWithoutProductsNestedInput
   shipment_items?: Prisma.shipment_itemsUncheckedUpdateManyWithoutProductsNestedInput
   purchase_order_items?: Prisma.purchase_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUncheckedUpdateManyWithoutProductsNestedInput
 }
 
 export type productsCreateWithoutPurchase_requisition_itemsInput = {
@@ -1192,6 +1270,8 @@ export type productsCreateWithoutPurchase_requisition_itemsInput = {
   categories?: Prisma.categoriesCreateNestedOneWithoutProductsInput
   shipment_items?: Prisma.shipment_itemsCreateNestedManyWithoutProductsInput
   purchase_order_items?: Prisma.purchase_order_itemsCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsCreateNestedManyWithoutProductsInput
 }
 
 export type productsUncheckedCreateWithoutPurchase_requisition_itemsInput = {
@@ -1212,6 +1292,8 @@ export type productsUncheckedCreateWithoutPurchase_requisition_itemsInput = {
   inventory_transactions?: Prisma.inventory_transactionsUncheckedCreateNestedManyWithoutProductsInput
   shipment_items?: Prisma.shipment_itemsUncheckedCreateNestedManyWithoutProductsInput
   purchase_order_items?: Prisma.purchase_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsUncheckedCreateNestedManyWithoutProductsInput
 }
 
 export type productsCreateOrConnectWithoutPurchase_requisition_itemsInput = {
@@ -1248,6 +1330,8 @@ export type productsUpdateWithoutPurchase_requisition_itemsInput = {
   categories?: Prisma.categoriesUpdateOneWithoutProductsNestedInput
   shipment_items?: Prisma.shipment_itemsUpdateManyWithoutProductsNestedInput
   purchase_order_items?: Prisma.purchase_order_itemsUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUpdateManyWithoutProductsNestedInput
 }
 
 export type productsUncheckedUpdateWithoutPurchase_requisition_itemsInput = {
@@ -1268,6 +1352,8 @@ export type productsUncheckedUpdateWithoutPurchase_requisition_itemsInput = {
   inventory_transactions?: Prisma.inventory_transactionsUncheckedUpdateManyWithoutProductsNestedInput
   shipment_items?: Prisma.shipment_itemsUncheckedUpdateManyWithoutProductsNestedInput
   purchase_order_items?: Prisma.purchase_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUncheckedUpdateManyWithoutProductsNestedInput
 }
 
 export type productsCreateWithoutShipment_itemsInput = {
@@ -1288,6 +1374,8 @@ export type productsCreateWithoutShipment_itemsInput = {
   categories?: Prisma.categoriesCreateNestedOneWithoutProductsInput
   purchase_requisition_items?: Prisma.purchase_requisition_itemsCreateNestedManyWithoutProductsInput
   purchase_order_items?: Prisma.purchase_order_itemsCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsCreateNestedManyWithoutProductsInput
 }
 
 export type productsUncheckedCreateWithoutShipment_itemsInput = {
@@ -1308,6 +1396,8 @@ export type productsUncheckedCreateWithoutShipment_itemsInput = {
   inventory_transactions?: Prisma.inventory_transactionsUncheckedCreateNestedManyWithoutProductsInput
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedCreateNestedManyWithoutProductsInput
   purchase_order_items?: Prisma.purchase_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsUncheckedCreateNestedManyWithoutProductsInput
 }
 
 export type productsCreateOrConnectWithoutShipment_itemsInput = {
@@ -1344,6 +1434,8 @@ export type productsUpdateWithoutShipment_itemsInput = {
   categories?: Prisma.categoriesUpdateOneWithoutProductsNestedInput
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUpdateManyWithoutProductsNestedInput
   purchase_order_items?: Prisma.purchase_order_itemsUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUpdateManyWithoutProductsNestedInput
 }
 
 export type productsUncheckedUpdateWithoutShipment_itemsInput = {
@@ -1364,6 +1456,8 @@ export type productsUncheckedUpdateWithoutShipment_itemsInput = {
   inventory_transactions?: Prisma.inventory_transactionsUncheckedUpdateManyWithoutProductsNestedInput
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedUpdateManyWithoutProductsNestedInput
   purchase_order_items?: Prisma.purchase_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUncheckedUpdateManyWithoutProductsNestedInput
 }
 
 export type productsCreateWithoutPurchase_order_itemsInput = {
@@ -1384,6 +1478,8 @@ export type productsCreateWithoutPurchase_order_itemsInput = {
   categories?: Prisma.categoriesCreateNestedOneWithoutProductsInput
   purchase_requisition_items?: Prisma.purchase_requisition_itemsCreateNestedManyWithoutProductsInput
   shipment_items?: Prisma.shipment_itemsCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsCreateNestedManyWithoutProductsInput
 }
 
 export type productsUncheckedCreateWithoutPurchase_order_itemsInput = {
@@ -1404,6 +1500,8 @@ export type productsUncheckedCreateWithoutPurchase_order_itemsInput = {
   inventory_transactions?: Prisma.inventory_transactionsUncheckedCreateNestedManyWithoutProductsInput
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedCreateNestedManyWithoutProductsInput
   shipment_items?: Prisma.shipment_itemsUncheckedCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsUncheckedCreateNestedManyWithoutProductsInput
 }
 
 export type productsCreateOrConnectWithoutPurchase_order_itemsInput = {
@@ -1440,6 +1538,8 @@ export type productsUpdateWithoutPurchase_order_itemsInput = {
   categories?: Prisma.categoriesUpdateOneWithoutProductsNestedInput
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUpdateManyWithoutProductsNestedInput
   shipment_items?: Prisma.shipment_itemsUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUpdateManyWithoutProductsNestedInput
 }
 
 export type productsUncheckedUpdateWithoutPurchase_order_itemsInput = {
@@ -1460,6 +1560,216 @@ export type productsUncheckedUpdateWithoutPurchase_order_itemsInput = {
   inventory_transactions?: Prisma.inventory_transactionsUncheckedUpdateManyWithoutProductsNestedInput
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedUpdateManyWithoutProductsNestedInput
   shipment_items?: Prisma.shipment_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUncheckedUpdateManyWithoutProductsNestedInput
+}
+
+export type productsCreateWithoutSales_order_itemsInput = {
+  id: string
+  sku: string
+  name: string
+  description?: string | null
+  unit: string
+  minimum_stock?: number
+  maximum_stock?: number | null
+  reorder_point?: number | null
+  created_at?: Date | string
+  updated_at: Date | string
+  adjustment_items?: Prisma.adjustment_itemsCreateNestedManyWithoutProductsInput
+  goods_received_items?: Prisma.goods_received_itemsCreateNestedManyWithoutProductsInput
+  inventory_levels?: Prisma.inventory_levelsCreateNestedOneWithoutProductsInput
+  inventory_transactions?: Prisma.inventory_transactionsCreateNestedManyWithoutProductsInput
+  categories?: Prisma.categoriesCreateNestedOneWithoutProductsInput
+  purchase_requisition_items?: Prisma.purchase_requisition_itemsCreateNestedManyWithoutProductsInput
+  shipment_items?: Prisma.shipment_itemsCreateNestedManyWithoutProductsInput
+  purchase_order_items?: Prisma.purchase_order_itemsCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsCreateNestedManyWithoutProductsInput
+}
+
+export type productsUncheckedCreateWithoutSales_order_itemsInput = {
+  id: string
+  sku: string
+  name: string
+  description?: string | null
+  category_id?: string | null
+  unit: string
+  minimum_stock?: number
+  maximum_stock?: number | null
+  reorder_point?: number | null
+  created_at?: Date | string
+  updated_at: Date | string
+  adjustment_items?: Prisma.adjustment_itemsUncheckedCreateNestedManyWithoutProductsInput
+  goods_received_items?: Prisma.goods_received_itemsUncheckedCreateNestedManyWithoutProductsInput
+  inventory_levels?: Prisma.inventory_levelsUncheckedCreateNestedOneWithoutProductsInput
+  inventory_transactions?: Prisma.inventory_transactionsUncheckedCreateNestedManyWithoutProductsInput
+  purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedCreateNestedManyWithoutProductsInput
+  shipment_items?: Prisma.shipment_itemsUncheckedCreateNestedManyWithoutProductsInput
+  purchase_order_items?: Prisma.purchase_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  return_items?: Prisma.return_itemsUncheckedCreateNestedManyWithoutProductsInput
+}
+
+export type productsCreateOrConnectWithoutSales_order_itemsInput = {
+  where: Prisma.productsWhereUniqueInput
+  create: Prisma.XOR<Prisma.productsCreateWithoutSales_order_itemsInput, Prisma.productsUncheckedCreateWithoutSales_order_itemsInput>
+}
+
+export type productsUpsertWithoutSales_order_itemsInput = {
+  update: Prisma.XOR<Prisma.productsUpdateWithoutSales_order_itemsInput, Prisma.productsUncheckedUpdateWithoutSales_order_itemsInput>
+  create: Prisma.XOR<Prisma.productsCreateWithoutSales_order_itemsInput, Prisma.productsUncheckedCreateWithoutSales_order_itemsInput>
+  where?: Prisma.productsWhereInput
+}
+
+export type productsUpdateToOneWithWhereWithoutSales_order_itemsInput = {
+  where?: Prisma.productsWhereInput
+  data: Prisma.XOR<Prisma.productsUpdateWithoutSales_order_itemsInput, Prisma.productsUncheckedUpdateWithoutSales_order_itemsInput>
+}
+
+export type productsUpdateWithoutSales_order_itemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sku?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.StringFieldUpdateOperationsInput | string
+  minimum_stock?: Prisma.IntFieldUpdateOperationsInput | number
+  maximum_stock?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  reorder_point?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  adjustment_items?: Prisma.adjustment_itemsUpdateManyWithoutProductsNestedInput
+  goods_received_items?: Prisma.goods_received_itemsUpdateManyWithoutProductsNestedInput
+  inventory_levels?: Prisma.inventory_levelsUpdateOneWithoutProductsNestedInput
+  inventory_transactions?: Prisma.inventory_transactionsUpdateManyWithoutProductsNestedInput
+  categories?: Prisma.categoriesUpdateOneWithoutProductsNestedInput
+  purchase_requisition_items?: Prisma.purchase_requisition_itemsUpdateManyWithoutProductsNestedInput
+  shipment_items?: Prisma.shipment_itemsUpdateManyWithoutProductsNestedInput
+  purchase_order_items?: Prisma.purchase_order_itemsUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUpdateManyWithoutProductsNestedInput
+}
+
+export type productsUncheckedUpdateWithoutSales_order_itemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sku?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.StringFieldUpdateOperationsInput | string
+  minimum_stock?: Prisma.IntFieldUpdateOperationsInput | number
+  maximum_stock?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  reorder_point?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  adjustment_items?: Prisma.adjustment_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  goods_received_items?: Prisma.goods_received_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  inventory_levels?: Prisma.inventory_levelsUncheckedUpdateOneWithoutProductsNestedInput
+  inventory_transactions?: Prisma.inventory_transactionsUncheckedUpdateManyWithoutProductsNestedInput
+  purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  shipment_items?: Prisma.shipment_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  purchase_order_items?: Prisma.purchase_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUncheckedUpdateManyWithoutProductsNestedInput
+}
+
+export type productsCreateWithoutReturn_itemsInput = {
+  id: string
+  sku: string
+  name: string
+  description?: string | null
+  unit: string
+  minimum_stock?: number
+  maximum_stock?: number | null
+  reorder_point?: number | null
+  created_at?: Date | string
+  updated_at: Date | string
+  adjustment_items?: Prisma.adjustment_itemsCreateNestedManyWithoutProductsInput
+  goods_received_items?: Prisma.goods_received_itemsCreateNestedManyWithoutProductsInput
+  inventory_levels?: Prisma.inventory_levelsCreateNestedOneWithoutProductsInput
+  inventory_transactions?: Prisma.inventory_transactionsCreateNestedManyWithoutProductsInput
+  categories?: Prisma.categoriesCreateNestedOneWithoutProductsInput
+  purchase_requisition_items?: Prisma.purchase_requisition_itemsCreateNestedManyWithoutProductsInput
+  shipment_items?: Prisma.shipment_itemsCreateNestedManyWithoutProductsInput
+  purchase_order_items?: Prisma.purchase_order_itemsCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsCreateNestedManyWithoutProductsInput
+}
+
+export type productsUncheckedCreateWithoutReturn_itemsInput = {
+  id: string
+  sku: string
+  name: string
+  description?: string | null
+  category_id?: string | null
+  unit: string
+  minimum_stock?: number
+  maximum_stock?: number | null
+  reorder_point?: number | null
+  created_at?: Date | string
+  updated_at: Date | string
+  adjustment_items?: Prisma.adjustment_itemsUncheckedCreateNestedManyWithoutProductsInput
+  goods_received_items?: Prisma.goods_received_itemsUncheckedCreateNestedManyWithoutProductsInput
+  inventory_levels?: Prisma.inventory_levelsUncheckedCreateNestedOneWithoutProductsInput
+  inventory_transactions?: Prisma.inventory_transactionsUncheckedCreateNestedManyWithoutProductsInput
+  purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedCreateNestedManyWithoutProductsInput
+  shipment_items?: Prisma.shipment_itemsUncheckedCreateNestedManyWithoutProductsInput
+  purchase_order_items?: Prisma.purchase_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedCreateNestedManyWithoutProductsInput
+}
+
+export type productsCreateOrConnectWithoutReturn_itemsInput = {
+  where: Prisma.productsWhereUniqueInput
+  create: Prisma.XOR<Prisma.productsCreateWithoutReturn_itemsInput, Prisma.productsUncheckedCreateWithoutReturn_itemsInput>
+}
+
+export type productsUpsertWithoutReturn_itemsInput = {
+  update: Prisma.XOR<Prisma.productsUpdateWithoutReturn_itemsInput, Prisma.productsUncheckedUpdateWithoutReturn_itemsInput>
+  create: Prisma.XOR<Prisma.productsCreateWithoutReturn_itemsInput, Prisma.productsUncheckedCreateWithoutReturn_itemsInput>
+  where?: Prisma.productsWhereInput
+}
+
+export type productsUpdateToOneWithWhereWithoutReturn_itemsInput = {
+  where?: Prisma.productsWhereInput
+  data: Prisma.XOR<Prisma.productsUpdateWithoutReturn_itemsInput, Prisma.productsUncheckedUpdateWithoutReturn_itemsInput>
+}
+
+export type productsUpdateWithoutReturn_itemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sku?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.StringFieldUpdateOperationsInput | string
+  minimum_stock?: Prisma.IntFieldUpdateOperationsInput | number
+  maximum_stock?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  reorder_point?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  adjustment_items?: Prisma.adjustment_itemsUpdateManyWithoutProductsNestedInput
+  goods_received_items?: Prisma.goods_received_itemsUpdateManyWithoutProductsNestedInput
+  inventory_levels?: Prisma.inventory_levelsUpdateOneWithoutProductsNestedInput
+  inventory_transactions?: Prisma.inventory_transactionsUpdateManyWithoutProductsNestedInput
+  categories?: Prisma.categoriesUpdateOneWithoutProductsNestedInput
+  purchase_requisition_items?: Prisma.purchase_requisition_itemsUpdateManyWithoutProductsNestedInput
+  shipment_items?: Prisma.shipment_itemsUpdateManyWithoutProductsNestedInput
+  purchase_order_items?: Prisma.purchase_order_itemsUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUpdateManyWithoutProductsNestedInput
+}
+
+export type productsUncheckedUpdateWithoutReturn_itemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  sku?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  unit?: Prisma.StringFieldUpdateOperationsInput | string
+  minimum_stock?: Prisma.IntFieldUpdateOperationsInput | number
+  maximum_stock?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  reorder_point?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  adjustment_items?: Prisma.adjustment_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  goods_received_items?: Prisma.goods_received_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  inventory_levels?: Prisma.inventory_levelsUncheckedUpdateOneWithoutProductsNestedInput
+  inventory_transactions?: Prisma.inventory_transactionsUncheckedUpdateManyWithoutProductsNestedInput
+  purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  shipment_items?: Prisma.shipment_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  purchase_order_items?: Prisma.purchase_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
 }
 
 export type productsCreateManyCategoriesInput = {
@@ -1493,6 +1803,8 @@ export type productsUpdateWithoutCategoriesInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUpdateManyWithoutProductsNestedInput
   shipment_items?: Prisma.shipment_itemsUpdateManyWithoutProductsNestedInput
   purchase_order_items?: Prisma.purchase_order_itemsUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUpdateManyWithoutProductsNestedInput
 }
 
 export type productsUncheckedUpdateWithoutCategoriesInput = {
@@ -1513,6 +1825,8 @@ export type productsUncheckedUpdateWithoutCategoriesInput = {
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedUpdateManyWithoutProductsNestedInput
   shipment_items?: Prisma.shipment_itemsUncheckedUpdateManyWithoutProductsNestedInput
   purchase_order_items?: Prisma.purchase_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  sales_order_items?: Prisma.sales_order_itemsUncheckedUpdateManyWithoutProductsNestedInput
+  return_items?: Prisma.return_itemsUncheckedUpdateManyWithoutProductsNestedInput
 }
 
 export type productsUncheckedUpdateManyWithoutCategoriesInput = {
@@ -1540,6 +1854,8 @@ export type ProductsCountOutputType = {
   purchase_requisition_items: number
   shipment_items: number
   purchase_order_items: number
+  sales_order_items: number
+  return_items: number
 }
 
 export type ProductsCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1549,6 +1865,8 @@ export type ProductsCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensio
   purchase_requisition_items?: boolean | ProductsCountOutputTypeCountPurchase_requisition_itemsArgs
   shipment_items?: boolean | ProductsCountOutputTypeCountShipment_itemsArgs
   purchase_order_items?: boolean | ProductsCountOutputTypeCountPurchase_order_itemsArgs
+  sales_order_items?: boolean | ProductsCountOutputTypeCountSales_order_itemsArgs
+  return_items?: boolean | ProductsCountOutputTypeCountReturn_itemsArgs
 }
 
 /**
@@ -1603,6 +1921,20 @@ export type ProductsCountOutputTypeCountPurchase_order_itemsArgs<ExtArgs extends
   where?: Prisma.purchase_order_itemsWhereInput
 }
 
+/**
+ * ProductsCountOutputType without action
+ */
+export type ProductsCountOutputTypeCountSales_order_itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.sales_order_itemsWhereInput
+}
+
+/**
+ * ProductsCountOutputType without action
+ */
+export type ProductsCountOutputTypeCountReturn_itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.return_itemsWhereInput
+}
+
 
 export type productsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1624,6 +1956,8 @@ export type productsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   purchase_requisition_items?: boolean | Prisma.products$purchase_requisition_itemsArgs<ExtArgs>
   shipment_items?: boolean | Prisma.products$shipment_itemsArgs<ExtArgs>
   purchase_order_items?: boolean | Prisma.products$purchase_order_itemsArgs<ExtArgs>
+  sales_order_items?: boolean | Prisma.products$sales_order_itemsArgs<ExtArgs>
+  return_items?: boolean | Prisma.products$return_itemsArgs<ExtArgs>
   _count?: boolean | Prisma.ProductsCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["products"]>
 
@@ -1681,6 +2015,8 @@ export type productsInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   purchase_requisition_items?: boolean | Prisma.products$purchase_requisition_itemsArgs<ExtArgs>
   shipment_items?: boolean | Prisma.products$shipment_itemsArgs<ExtArgs>
   purchase_order_items?: boolean | Prisma.products$purchase_order_itemsArgs<ExtArgs>
+  sales_order_items?: boolean | Prisma.products$sales_order_itemsArgs<ExtArgs>
+  return_items?: boolean | Prisma.products$return_itemsArgs<ExtArgs>
   _count?: boolean | Prisma.ProductsCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type productsIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1701,6 +2037,8 @@ export type $productsPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     purchase_requisition_items: Prisma.$purchase_requisition_itemsPayload<ExtArgs>[]
     shipment_items: Prisma.$shipment_itemsPayload<ExtArgs>[]
     purchase_order_items: Prisma.$purchase_order_itemsPayload<ExtArgs>[]
+    sales_order_items: Prisma.$sales_order_itemsPayload<ExtArgs>[]
+    return_items: Prisma.$return_itemsPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2116,6 +2454,8 @@ export interface Prisma__productsClient<T, Null = never, ExtArgs extends runtime
   purchase_requisition_items<T extends Prisma.products$purchase_requisition_itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.products$purchase_requisition_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$purchase_requisition_itemsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   shipment_items<T extends Prisma.products$shipment_itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.products$shipment_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$shipment_itemsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   purchase_order_items<T extends Prisma.products$purchase_order_itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.products$purchase_order_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$purchase_order_itemsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sales_order_items<T extends Prisma.products$sales_order_itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.products$sales_order_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$sales_order_itemsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  return_items<T extends Prisma.products$return_itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.products$return_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$return_itemsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2731,6 +3071,54 @@ export type products$purchase_order_itemsArgs<ExtArgs extends runtime.Types.Exte
   take?: number
   skip?: number
   distinct?: Prisma.Purchase_order_itemsScalarFieldEnum | Prisma.Purchase_order_itemsScalarFieldEnum[]
+}
+
+/**
+ * products.sales_order_items
+ */
+export type products$sales_order_itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the sales_order_items
+   */
+  select?: Prisma.sales_order_itemsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the sales_order_items
+   */
+  omit?: Prisma.sales_order_itemsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.sales_order_itemsInclude<ExtArgs> | null
+  where?: Prisma.sales_order_itemsWhereInput
+  orderBy?: Prisma.sales_order_itemsOrderByWithRelationInput | Prisma.sales_order_itemsOrderByWithRelationInput[]
+  cursor?: Prisma.sales_order_itemsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Sales_order_itemsScalarFieldEnum | Prisma.Sales_order_itemsScalarFieldEnum[]
+}
+
+/**
+ * products.return_items
+ */
+export type products$return_itemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the return_items
+   */
+  select?: Prisma.return_itemsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the return_items
+   */
+  omit?: Prisma.return_itemsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.return_itemsInclude<ExtArgs> | null
+  where?: Prisma.return_itemsWhereInput
+  orderBy?: Prisma.return_itemsOrderByWithRelationInput | Prisma.return_itemsOrderByWithRelationInput[]
+  cursor?: Prisma.return_itemsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.Return_itemsScalarFieldEnum | Prisma.Return_itemsScalarFieldEnum[]
 }
 
 /**
