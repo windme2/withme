@@ -259,3 +259,37 @@ export const returnsApi = {
         return response.data;
     },
 };
+
+export const usersApi = {
+    getMe: async () => {
+        const response = await api.get('/users/me');
+        return response.data;
+    },
+    updateMe: async (data: any) => {
+        const response = await api.put('/users/me', data);
+        return response.data;
+    },
+    getAll: async () => {
+        const response = await api.get('/users');
+        return response.data;
+    },
+};
+
+export const notificationsApi = {
+    getAll: async () => {
+        const response = await api.get("/notifications");
+        return response.data;
+    },
+    getUnreadCount: async () => {
+        const response = await api.get("/notifications/unread-count");
+        return response.data;
+    },
+    markAsRead: async (id: string) => {
+        const response = await api.patch(`/notifications/${id}/read`);
+        return response.data;
+    },
+    markAllAsRead: async () => {
+        const response = await api.patch("/notifications/read-all");
+        return response.data;
+    },
+};

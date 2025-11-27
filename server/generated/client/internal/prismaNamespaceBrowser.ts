@@ -73,7 +73,8 @@ export const ModelName = {
   sales_order_items: 'sales_order_items',
   customers: 'customers',
   sales_returns: 'sales_returns',
-  return_items: 'return_items'
+  return_items: 'return_items',
+  notifications: 'notifications'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -433,6 +434,20 @@ export const Return_itemsScalarFieldEnum = {
 } as const
 
 export type Return_itemsScalarFieldEnum = (typeof Return_itemsScalarFieldEnum)[keyof typeof Return_itemsScalarFieldEnum]
+
+
+export const NotificationsScalarFieldEnum = {
+  id: 'id',
+  user_id: 'user_id',
+  title: 'title',
+  message: 'message',
+  type: 'type',
+  is_read: 'is_read',
+  link: 'link',
+  created_at: 'created_at'
+} as const
+
+export type NotificationsScalarFieldEnum = (typeof NotificationsScalarFieldEnum)[keyof typeof NotificationsScalarFieldEnum]
 
 
 export const SortOrder = {

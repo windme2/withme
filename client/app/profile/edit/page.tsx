@@ -23,76 +23,110 @@ import { ArrowLeft, Save, Upload, Lock } from "lucide-react";
 
 import { MainLayout } from "@/components/layout/main-layout";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { usersApi } from "@/lib/api";
+import { toast } from "sonner";
 
 export default function EditProfilePage() {
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+
   const [formData, setFormData] = useState({
-    firstName: "John",
-    lastName: "Doe",
-    email: "admin@withme.com",
-    phone: "+66 12 345 6789",
-    department: "Administration",
-    position: "System Administrator",
-    bio: "Experienced system administrator with 5+ years in inventory management systems.",
-    address: "123 Main Street, Bangkok, Thailand 10110",
-    emergencyContact: "Jane Doe - +66 98 765 4321",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "", // Not in DB yet
+    department: "",
+    position: "", // Not in DB yet
+    bio: "", // Not in DB yet
+    address: "", // Not in DB yet
+    emergencyContact: "", // Not in DB yet
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
 
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setIsLoading(true);
+        const data = await usersApi.getMe();
+        setFormData(prev => ({
+          ...prev,
+          firstName: data.first_name || "",
+          lastName: data.last_name || "",
+          email: data.email || "",
+          department: data.department || "",
+          // Keep other fields empty or default as they are not in DB
+        }));
+      } catch (error) {
+        toast.error("Failed to load profile");
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validate password change if provided
     if (formData.newPassword) {
       if (formData.newPassword !== formData.confirmPassword) {
-        alert("New passwords do not match!");
+        toast.error("New passwords do not match!");
         return;
       }
       if (!formData.currentPassword) {
-        alert("Please enter your current password to change it.");
+        toast.error("Please enter your current password to change it.");
         return;
       }
     }
 
-    // Save to localStorage (in real app, this would be API call)
-    const profileData = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      email: formData.email,
-      phone: formData.phone,
-      department: formData.department,
-      position: formData.position,
-      bio: formData.bio,
-      address: formData.address,
-      emergencyContact: formData.emergencyContact,
-    };
+    try {
+      setIsSaving(true);
+      await usersApi.updateMe({
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        department: formData.department,
+        // Phone, bio, etc. are ignored by backend for now
+      });
 
-    localStorage.setItem("userProfile", JSON.stringify(profileData));
+      toast.success("Profile updated successfully!");
 
-    // If password was changed, update it too
-    if (formData.newPassword) {
-      localStorage.setItem("userPassword", formData.newPassword);
+      // Clear password fields
+      setFormData((prev) => ({
+        ...prev,
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      }));
+    } catch (error) {
+      toast.error("Failed to update profile");
+      console.error(error);
+    } finally {
+      setIsSaving(false);
     }
-
-    alert("Profile updated successfully!");
-
-    // Clear password fields
-    setFormData((prev) => ({
-      ...prev,
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    }));
   };
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="flex items-center justify-center h-96">
+          <div className="text-slate-500">Loading profile...</div>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
-      <div className="space-y-8">
+      <div className="space-y-8 p-1">
         <div className="flex justify-between items-start">
           <div className="space-y-2">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
@@ -120,8 +154,8 @@ export default function EditProfilePage() {
                 <Avatar className="w-32 h-32">
                   <AvatarImage src="/placeholder.svg?height=128&width=128" />
                   <AvatarFallback className="text-2xl bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                    {formData.firstName[0]}
-                    {formData.lastName[0]}
+                    {formData.firstName?.[0]}
+                    {formData.lastName?.[0]}
                   </AvatarFallback>
                 </Avatar>
                 <Button variant="outline" className="w-full bg-transparent">
@@ -181,6 +215,7 @@ export default function EditProfilePage() {
                     id="phone"
                     value={formData.phone}
                     onChange={(e) => handleInputChange("phone", e.target.value)}
+                    placeholder="Not saved in DB"
                   />
                 </div>
               </div>
@@ -195,7 +230,7 @@ export default function EditProfilePage() {
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue />
+                      <SelectValue placeholder="Select Department" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Administration">
@@ -216,6 +251,7 @@ export default function EditProfilePage() {
                     onChange={(e) =>
                       handleInputChange("position", e.target.value)
                     }
+                    placeholder="Not saved in DB"
                   />
                 </div>
               </div>
@@ -227,7 +263,7 @@ export default function EditProfilePage() {
                   rows={3}
                   value={formData.bio}
                   onChange={(e) => handleInputChange("bio", e.target.value)}
-                  placeholder="Tell us about yourself..."
+                  placeholder="Tell us about yourself... (Not saved in DB)"
                 />
               </div>
 
@@ -238,7 +274,7 @@ export default function EditProfilePage() {
                   rows={2}
                   value={formData.address}
                   onChange={(e) => handleInputChange("address", e.target.value)}
-                  placeholder="Your address..."
+                  placeholder="Your address... (Not saved in DB)"
                 />
               </div>
 
@@ -250,7 +286,7 @@ export default function EditProfilePage() {
                   onChange={(e) =>
                     handleInputChange("emergencyContact", e.target.value)
                   }
-                  placeholder="Name - Phone number"
+                  placeholder="Name - Phone number (Not saved in DB)"
                 />
               </div>
             </CardContent>
@@ -314,57 +350,7 @@ export default function EditProfilePage() {
           </CardContent>
         </Card>
 
-        {/* Account Settings */}
-        <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-          <CardHeader>
-            <CardTitle>Account Settings</CardTitle>
-            <CardDescription>Manage your account preferences</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="language">Preferred Language</Label>
-                <Select defaultValue="en">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="th">ไทย (Thai)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="timezone">Timezone</Label>
-                <Select defaultValue="asia-bangkok">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="asia-bangkok">Asia/Bangkok</SelectItem>
-                    <SelectItem value="utc">UTC</SelectItem>
-                    <SelectItem value="america-new_york">
-                      America/New_York
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="dateFormat">Date Format</Label>
-                <Select defaultValue="dd/mm/yyyy">
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="dd/mm/yyyy">DD/MM/YYYY</SelectItem>
-                    <SelectItem value="mm/dd/yyyy">MM/DD/YYYY</SelectItem>
-                    <SelectItem value="yyyy-mm-dd">YYYY-MM-DD</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+
 
         <div className="flex justify-end space-x-4">
           <Button variant="outline" onClick={() => router.back()}>
@@ -372,10 +358,11 @@ export default function EditProfilePage() {
           </Button>
           <Button
             onClick={handleSave}
+            disabled={isSaving}
             className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
           >
             <Save className="h-4 w-4 mr-2" />
-            Save Changes
+            {isSaving ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </div>

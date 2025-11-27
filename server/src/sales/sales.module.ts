@@ -6,9 +6,10 @@ import { SalesShipmentsController } from './sales-shipments.controller';
 import { SalesReturnsService } from './sales-returns.service';
 import { SalesReturnsController } from './sales-returns.controller';
 import { PrismaModule } from '../prisma/prisma.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-    imports: [PrismaModule],
+    imports: [PrismaModule, NotificationsModule],
     controllers: [SalesOrdersController, SalesShipmentsController, SalesReturnsController],
     providers: [SalesOrdersService, SalesShipmentsService, SalesReturnsService],
 })

@@ -116,7 +116,11 @@ export default function ShipmentsPage() {
                     </TableRow>
                   ) : (
                     shipments.map((shipment) => (
-                      <TableRow key={shipment.id} className="hover:bg-slate-50">
+                      <TableRow
+                        key={shipment.id}
+                        className="hover:bg-slate-50 cursor-pointer transition-colors"
+                        onClick={() => router.push(`/sales/shipments/${shipment.id}`)}
+                      >
                         <TableCell className="font-medium text-blue-600">{shipment.shipmentNumber}</TableCell>
                         <TableCell className="font-medium">{shipment.customerName}</TableCell>
                         <TableCell className="text-slate-600">{shipment.shippingAddress}</TableCell>

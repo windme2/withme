@@ -152,3 +152,8 @@ export type sales_returns = Prisma.sales_returnsModel
  * 
  */
 export type return_items = Prisma.return_itemsModel
+/**
+ * Model notifications
+ * 
+ */
+export type notifications = Prisma.notificationsModel

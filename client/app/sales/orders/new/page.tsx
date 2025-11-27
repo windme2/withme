@@ -326,7 +326,7 @@ export default function NewSalesOrderPage() {
                         <SelectContent>
                           {products.map((product) => (
                             <SelectItem key={product.id} value={product.id}>
-                              {product.name} - {product.sku} (คงเหลือ: {product.quantity} {product.unit})
+                              {product.name} - {product.sku} (คงเหลือ: {product.stock} {product.unit || 'pcs'})
                             </SelectItem>
                           ))}
                         </SelectContent>

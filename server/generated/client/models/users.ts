@@ -251,6 +251,7 @@ export type usersWhereInput = {
   sales_returns?: Prisma.Sales_returnsListRelationFilter
   user_permissions_user_permissions_granted_byTousers?: Prisma.User_permissionsListRelationFilter
   user_permissions_user_permissions_user_idTousers?: Prisma.User_permissionsListRelationFilter
+  notifications?: Prisma.NotificationsListRelationFilter
 }
 
 export type usersOrderByWithRelationInput = {
@@ -279,6 +280,7 @@ export type usersOrderByWithRelationInput = {
   sales_returns?: Prisma.sales_returnsOrderByRelationAggregateInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsOrderByRelationAggregateInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsOrderByRelationAggregateInput
+  notifications?: Prisma.notificationsOrderByRelationAggregateInput
 }
 
 export type usersWhereUniqueInput = Prisma.AtLeast<{
@@ -310,6 +312,7 @@ export type usersWhereUniqueInput = Prisma.AtLeast<{
   sales_returns?: Prisma.Sales_returnsListRelationFilter
   user_permissions_user_permissions_granted_byTousers?: Prisma.User_permissionsListRelationFilter
   user_permissions_user_permissions_user_idTousers?: Prisma.User_permissionsListRelationFilter
+  notifications?: Prisma.NotificationsListRelationFilter
 }, "id" | "username" | "email">
 
 export type usersOrderByWithAggregationInput = {
@@ -374,6 +377,7 @@ export type usersCreateInput = {
   sales_returns?: Prisma.sales_returnsCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateInput = {
@@ -402,6 +406,7 @@ export type usersUncheckedCreateInput = {
   sales_returns?: Prisma.sales_returnsUncheckedCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersUpdateInput = {
@@ -430,6 +435,7 @@ export type usersUpdateInput = {
   sales_returns?: Prisma.sales_returnsUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateInput = {
@@ -458,6 +464,7 @@ export type usersUncheckedUpdateInput = {
   sales_returns?: Prisma.sales_returnsUncheckedUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUncheckedUpdateManyWithoutUsersNestedInput
 }
 
 export type usersCreateManyInput = {
@@ -756,6 +763,22 @@ export type usersUpdateOneRequiredWithoutSales_returnsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutSales_returnsInput, Prisma.usersUpdateWithoutSales_returnsInput>, Prisma.usersUncheckedUpdateWithoutSales_returnsInput>
 }
 
+export type usersCreateNestedOneWithoutNotificationsInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutNotificationsInput, Prisma.usersUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutNotificationsInput
+  connect?: Prisma.usersWhereUniqueInput
+}
+
+export type usersUpdateOneWithoutNotificationsNestedInput = {
+  create?: Prisma.XOR<Prisma.usersCreateWithoutNotificationsInput, Prisma.usersUncheckedCreateWithoutNotificationsInput>
+  connectOrCreate?: Prisma.usersCreateOrConnectWithoutNotificationsInput
+  upsert?: Prisma.usersUpsertWithoutNotificationsInput
+  disconnect?: Prisma.usersWhereInput | boolean
+  delete?: Prisma.usersWhereInput | boolean
+  connect?: Prisma.usersWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.usersUpdateToOneWithWhereWithoutNotificationsInput, Prisma.usersUpdateWithoutNotificationsInput>, Prisma.usersUncheckedUpdateWithoutNotificationsInput>
+}
+
 export type usersCreateWithoutActivity_logsInput = {
   id: string
   username: string
@@ -781,6 +804,7 @@ export type usersCreateWithoutActivity_logsInput = {
   sales_returns?: Prisma.sales_returnsCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateWithoutActivity_logsInput = {
@@ -808,6 +832,7 @@ export type usersUncheckedCreateWithoutActivity_logsInput = {
   sales_returns?: Prisma.sales_returnsUncheckedCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersCreateOrConnectWithoutActivity_logsInput = {
@@ -851,6 +876,7 @@ export type usersUpdateWithoutActivity_logsInput = {
   sales_returns?: Prisma.sales_returnsUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateWithoutActivity_logsInput = {
@@ -878,6 +904,7 @@ export type usersUncheckedUpdateWithoutActivity_logsInput = {
   sales_returns?: Prisma.sales_returnsUncheckedUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUncheckedUpdateManyWithoutUsersNestedInput
 }
 
 export type usersCreateWithoutGoods_receivedInput = {
@@ -905,6 +932,7 @@ export type usersCreateWithoutGoods_receivedInput = {
   sales_returns?: Prisma.sales_returnsCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateWithoutGoods_receivedInput = {
@@ -932,6 +960,7 @@ export type usersUncheckedCreateWithoutGoods_receivedInput = {
   sales_returns?: Prisma.sales_returnsUncheckedCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersCreateOrConnectWithoutGoods_receivedInput = {
@@ -975,6 +1004,7 @@ export type usersUpdateWithoutGoods_receivedInput = {
   sales_returns?: Prisma.sales_returnsUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateWithoutGoods_receivedInput = {
@@ -1002,6 +1032,7 @@ export type usersUncheckedUpdateWithoutGoods_receivedInput = {
   sales_returns?: Prisma.sales_returnsUncheckedUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUncheckedUpdateManyWithoutUsersNestedInput
 }
 
 export type usersCreateWithoutInventory_adjustments_inventory_adjustments_adjusted_byTousersInput = {
@@ -1029,6 +1060,7 @@ export type usersCreateWithoutInventory_adjustments_inventory_adjustments_adjust
   sales_returns?: Prisma.sales_returnsCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateWithoutInventory_adjustments_inventory_adjustments_adjusted_byTousersInput = {
@@ -1056,6 +1088,7 @@ export type usersUncheckedCreateWithoutInventory_adjustments_inventory_adjustmen
   sales_returns?: Prisma.sales_returnsUncheckedCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersCreateOrConnectWithoutInventory_adjustments_inventory_adjustments_adjusted_byTousersInput = {
@@ -1088,6 +1121,7 @@ export type usersCreateWithoutInventory_adjustments_inventory_adjustments_approv
   sales_returns?: Prisma.sales_returnsCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateWithoutInventory_adjustments_inventory_adjustments_approved_byTousersInput = {
@@ -1115,6 +1149,7 @@ export type usersUncheckedCreateWithoutInventory_adjustments_inventory_adjustmen
   sales_returns?: Prisma.sales_returnsUncheckedCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersCreateOrConnectWithoutInventory_adjustments_inventory_adjustments_approved_byTousersInput = {
@@ -1158,6 +1193,7 @@ export type usersUpdateWithoutInventory_adjustments_inventory_adjustments_adjust
   sales_returns?: Prisma.sales_returnsUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateWithoutInventory_adjustments_inventory_adjustments_adjusted_byTousersInput = {
@@ -1185,6 +1221,7 @@ export type usersUncheckedUpdateWithoutInventory_adjustments_inventory_adjustmen
   sales_returns?: Prisma.sales_returnsUncheckedUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUncheckedUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUpsertWithoutInventory_adjustments_inventory_adjustments_approved_byTousersInput = {
@@ -1223,6 +1260,7 @@ export type usersUpdateWithoutInventory_adjustments_inventory_adjustments_approv
   sales_returns?: Prisma.sales_returnsUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateWithoutInventory_adjustments_inventory_adjustments_approved_byTousersInput = {
@@ -1250,6 +1288,7 @@ export type usersUncheckedUpdateWithoutInventory_adjustments_inventory_adjustmen
   sales_returns?: Prisma.sales_returnsUncheckedUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUncheckedUpdateManyWithoutUsersNestedInput
 }
 
 export type usersCreateWithoutInventory_levelsInput = {
@@ -1277,6 +1316,7 @@ export type usersCreateWithoutInventory_levelsInput = {
   sales_returns?: Prisma.sales_returnsCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateWithoutInventory_levelsInput = {
@@ -1304,6 +1344,7 @@ export type usersUncheckedCreateWithoutInventory_levelsInput = {
   sales_returns?: Prisma.sales_returnsUncheckedCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersCreateOrConnectWithoutInventory_levelsInput = {
@@ -1347,6 +1388,7 @@ export type usersUpdateWithoutInventory_levelsInput = {
   sales_returns?: Prisma.sales_returnsUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateWithoutInventory_levelsInput = {
@@ -1374,6 +1416,7 @@ export type usersUncheckedUpdateWithoutInventory_levelsInput = {
   sales_returns?: Prisma.sales_returnsUncheckedUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUncheckedUpdateManyWithoutUsersNestedInput
 }
 
 export type usersCreateWithoutInventory_transactionsInput = {
@@ -1401,6 +1444,7 @@ export type usersCreateWithoutInventory_transactionsInput = {
   sales_returns?: Prisma.sales_returnsCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateWithoutInventory_transactionsInput = {
@@ -1428,6 +1472,7 @@ export type usersUncheckedCreateWithoutInventory_transactionsInput = {
   sales_returns?: Prisma.sales_returnsUncheckedCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersCreateOrConnectWithoutInventory_transactionsInput = {
@@ -1471,6 +1516,7 @@ export type usersUpdateWithoutInventory_transactionsInput = {
   sales_returns?: Prisma.sales_returnsUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateWithoutInventory_transactionsInput = {
@@ -1498,6 +1544,7 @@ export type usersUncheckedUpdateWithoutInventory_transactionsInput = {
   sales_returns?: Prisma.sales_returnsUncheckedUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUncheckedUpdateManyWithoutUsersNestedInput
 }
 
 export type usersCreateWithoutPurchase_requisitions_purchase_requisitions_approved_byTousersInput = {
@@ -1525,6 +1572,7 @@ export type usersCreateWithoutPurchase_requisitions_purchase_requisitions_approv
   sales_returns?: Prisma.sales_returnsCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateWithoutPurchase_requisitions_purchase_requisitions_approved_byTousersInput = {
@@ -1552,6 +1600,7 @@ export type usersUncheckedCreateWithoutPurchase_requisitions_purchase_requisitio
   sales_returns?: Prisma.sales_returnsUncheckedCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersCreateOrConnectWithoutPurchase_requisitions_purchase_requisitions_approved_byTousersInput = {
@@ -1584,6 +1633,7 @@ export type usersCreateWithoutPurchase_requisitions_purchase_requisitions_reques
   sales_returns?: Prisma.sales_returnsCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateWithoutPurchase_requisitions_purchase_requisitions_requested_byTousersInput = {
@@ -1611,6 +1661,7 @@ export type usersUncheckedCreateWithoutPurchase_requisitions_purchase_requisitio
   sales_returns?: Prisma.sales_returnsUncheckedCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersCreateOrConnectWithoutPurchase_requisitions_purchase_requisitions_requested_byTousersInput = {
@@ -1654,6 +1705,7 @@ export type usersUpdateWithoutPurchase_requisitions_purchase_requisitions_approv
   sales_returns?: Prisma.sales_returnsUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateWithoutPurchase_requisitions_purchase_requisitions_approved_byTousersInput = {
@@ -1681,6 +1733,7 @@ export type usersUncheckedUpdateWithoutPurchase_requisitions_purchase_requisitio
   sales_returns?: Prisma.sales_returnsUncheckedUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUncheckedUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUpsertWithoutPurchase_requisitions_purchase_requisitions_requested_byTousersInput = {
@@ -1719,6 +1772,7 @@ export type usersUpdateWithoutPurchase_requisitions_purchase_requisitions_reques
   sales_returns?: Prisma.sales_returnsUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateWithoutPurchase_requisitions_purchase_requisitions_requested_byTousersInput = {
@@ -1746,6 +1800,7 @@ export type usersUncheckedUpdateWithoutPurchase_requisitions_purchase_requisitio
   sales_returns?: Prisma.sales_returnsUncheckedUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUncheckedUpdateManyWithoutUsersNestedInput
 }
 
 export type usersCreateWithoutSales_shipmentsInput = {
@@ -1773,6 +1828,7 @@ export type usersCreateWithoutSales_shipmentsInput = {
   sales_returns?: Prisma.sales_returnsCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateWithoutSales_shipmentsInput = {
@@ -1800,6 +1856,7 @@ export type usersUncheckedCreateWithoutSales_shipmentsInput = {
   sales_returns?: Prisma.sales_returnsUncheckedCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersCreateOrConnectWithoutSales_shipmentsInput = {
@@ -1843,6 +1900,7 @@ export type usersUpdateWithoutSales_shipmentsInput = {
   sales_returns?: Prisma.sales_returnsUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateWithoutSales_shipmentsInput = {
@@ -1870,6 +1928,7 @@ export type usersUncheckedUpdateWithoutSales_shipmentsInput = {
   sales_returns?: Prisma.sales_returnsUncheckedUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUncheckedUpdateManyWithoutUsersNestedInput
 }
 
 export type usersCreateWithoutUser_permissions_user_permissions_granted_byTousersInput = {
@@ -1897,6 +1956,7 @@ export type usersCreateWithoutUser_permissions_user_permissions_granted_byTouser
   sales_orders?: Prisma.sales_ordersCreateNestedManyWithoutUsersInput
   sales_returns?: Prisma.sales_returnsCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateWithoutUser_permissions_user_permissions_granted_byTousersInput = {
@@ -1924,6 +1984,7 @@ export type usersUncheckedCreateWithoutUser_permissions_user_permissions_granted
   sales_orders?: Prisma.sales_ordersUncheckedCreateNestedManyWithoutUsersInput
   sales_returns?: Prisma.sales_returnsUncheckedCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersCreateOrConnectWithoutUser_permissions_user_permissions_granted_byTousersInput = {
@@ -1956,6 +2017,7 @@ export type usersCreateWithoutUser_permissions_user_permissions_user_idTousersIn
   sales_orders?: Prisma.sales_ordersCreateNestedManyWithoutUsersInput
   sales_returns?: Prisma.sales_returnsCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
+  notifications?: Prisma.notificationsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateWithoutUser_permissions_user_permissions_user_idTousersInput = {
@@ -1983,6 +2045,7 @@ export type usersUncheckedCreateWithoutUser_permissions_user_permissions_user_id
   sales_orders?: Prisma.sales_ordersUncheckedCreateNestedManyWithoutUsersInput
   sales_returns?: Prisma.sales_returnsUncheckedCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
+  notifications?: Prisma.notificationsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersCreateOrConnectWithoutUser_permissions_user_permissions_user_idTousersInput = {
@@ -2026,6 +2089,7 @@ export type usersUpdateWithoutUser_permissions_user_permissions_granted_byTouser
   sales_orders?: Prisma.sales_ordersUpdateManyWithoutUsersNestedInput
   sales_returns?: Prisma.sales_returnsUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateWithoutUser_permissions_user_permissions_granted_byTousersInput = {
@@ -2053,6 +2117,7 @@ export type usersUncheckedUpdateWithoutUser_permissions_user_permissions_granted
   sales_orders?: Prisma.sales_ordersUncheckedUpdateManyWithoutUsersNestedInput
   sales_returns?: Prisma.sales_returnsUncheckedUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUncheckedUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUpsertWithoutUser_permissions_user_permissions_user_idTousersInput = {
@@ -2091,6 +2156,7 @@ export type usersUpdateWithoutUser_permissions_user_permissions_user_idTousersIn
   sales_orders?: Prisma.sales_ordersUpdateManyWithoutUsersNestedInput
   sales_returns?: Prisma.sales_returnsUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
+  notifications?: Prisma.notificationsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateWithoutUser_permissions_user_permissions_user_idTousersInput = {
@@ -2118,6 +2184,7 @@ export type usersUncheckedUpdateWithoutUser_permissions_user_permissions_user_id
   sales_orders?: Prisma.sales_ordersUncheckedUpdateManyWithoutUsersNestedInput
   sales_returns?: Prisma.sales_returnsUncheckedUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
+  notifications?: Prisma.notificationsUncheckedUpdateManyWithoutUsersNestedInput
 }
 
 export type usersCreateWithoutSales_ordersInput = {
@@ -2145,6 +2212,7 @@ export type usersCreateWithoutSales_ordersInput = {
   sales_returns?: Prisma.sales_returnsCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateWithoutSales_ordersInput = {
@@ -2172,6 +2240,7 @@ export type usersUncheckedCreateWithoutSales_ordersInput = {
   sales_returns?: Prisma.sales_returnsUncheckedCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersCreateOrConnectWithoutSales_ordersInput = {
@@ -2215,6 +2284,7 @@ export type usersUpdateWithoutSales_ordersInput = {
   sales_returns?: Prisma.sales_returnsUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateWithoutSales_ordersInput = {
@@ -2242,6 +2312,7 @@ export type usersUncheckedUpdateWithoutSales_ordersInput = {
   sales_returns?: Prisma.sales_returnsUncheckedUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUncheckedUpdateManyWithoutUsersNestedInput
 }
 
 export type usersCreateWithoutSales_returnsInput = {
@@ -2269,6 +2340,7 @@ export type usersCreateWithoutSales_returnsInput = {
   sales_orders?: Prisma.sales_ordersCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsCreateNestedManyWithoutUsersInput
 }
 
 export type usersUncheckedCreateWithoutSales_returnsInput = {
@@ -2296,6 +2368,7 @@ export type usersUncheckedCreateWithoutSales_returnsInput = {
   sales_orders?: Prisma.sales_ordersUncheckedCreateNestedManyWithoutUsersInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+  notifications?: Prisma.notificationsUncheckedCreateNestedManyWithoutUsersInput
 }
 
 export type usersCreateOrConnectWithoutSales_returnsInput = {
@@ -2339,6 +2412,7 @@ export type usersUpdateWithoutSales_returnsInput = {
   sales_orders?: Prisma.sales_ordersUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUpdateManyWithoutUsersNestedInput
 }
 
 export type usersUncheckedUpdateWithoutSales_returnsInput = {
@@ -2366,6 +2440,135 @@ export type usersUncheckedUpdateWithoutSales_returnsInput = {
   sales_orders?: Prisma.sales_ordersUncheckedUpdateManyWithoutUsersNestedInput
   user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
   user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+  notifications?: Prisma.notificationsUncheckedUpdateManyWithoutUsersNestedInput
+}
+
+export type usersCreateWithoutNotificationsInput = {
+  id: string
+  username: string
+  email: string
+  password_hash: string
+  first_name: string
+  last_name: string
+  role: $Enums.Role
+  department?: string | null
+  is_active?: boolean
+  last_login_at?: Date | string | null
+  created_at?: Date | string
+  updated_at: Date | string
+  activity_logs?: Prisma.activity_logsCreateNestedManyWithoutUsersInput
+  goods_received?: Prisma.goods_receivedCreateNestedManyWithoutUsersInput
+  inventory_adjustments_inventory_adjustments_adjusted_byTousers?: Prisma.inventory_adjustmentsCreateNestedManyWithoutUsers_inventory_adjustments_adjusted_byTousersInput
+  inventory_adjustments_inventory_adjustments_approved_byTousers?: Prisma.inventory_adjustmentsCreateNestedManyWithoutUsers_inventory_adjustments_approved_byTousersInput
+  inventory_levels?: Prisma.inventory_levelsCreateNestedManyWithoutUsersInput
+  inventory_transactions?: Prisma.inventory_transactionsCreateNestedManyWithoutUsersInput
+  purchase_requisitions_purchase_requisitions_approved_byTousers?: Prisma.purchase_requisitionsCreateNestedManyWithoutUsers_purchase_requisitions_approved_byTousersInput
+  purchase_requisitions_purchase_requisitions_requested_byTousers?: Prisma.purchase_requisitionsCreateNestedManyWithoutUsers_purchase_requisitions_requested_byTousersInput
+  sales_shipments?: Prisma.sales_shipmentsCreateNestedManyWithoutUsersInput
+  sales_orders?: Prisma.sales_ordersCreateNestedManyWithoutUsersInput
+  sales_returns?: Prisma.sales_returnsCreateNestedManyWithoutUsersInput
+  user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
+  user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+}
+
+export type usersUncheckedCreateWithoutNotificationsInput = {
+  id: string
+  username: string
+  email: string
+  password_hash: string
+  first_name: string
+  last_name: string
+  role: $Enums.Role
+  department?: string | null
+  is_active?: boolean
+  last_login_at?: Date | string | null
+  created_at?: Date | string
+  updated_at: Date | string
+  activity_logs?: Prisma.activity_logsUncheckedCreateNestedManyWithoutUsersInput
+  goods_received?: Prisma.goods_receivedUncheckedCreateNestedManyWithoutUsersInput
+  inventory_adjustments_inventory_adjustments_adjusted_byTousers?: Prisma.inventory_adjustmentsUncheckedCreateNestedManyWithoutUsers_inventory_adjustments_adjusted_byTousersInput
+  inventory_adjustments_inventory_adjustments_approved_byTousers?: Prisma.inventory_adjustmentsUncheckedCreateNestedManyWithoutUsers_inventory_adjustments_approved_byTousersInput
+  inventory_levels?: Prisma.inventory_levelsUncheckedCreateNestedManyWithoutUsersInput
+  inventory_transactions?: Prisma.inventory_transactionsUncheckedCreateNestedManyWithoutUsersInput
+  purchase_requisitions_purchase_requisitions_approved_byTousers?: Prisma.purchase_requisitionsUncheckedCreateNestedManyWithoutUsers_purchase_requisitions_approved_byTousersInput
+  purchase_requisitions_purchase_requisitions_requested_byTousers?: Prisma.purchase_requisitionsUncheckedCreateNestedManyWithoutUsers_purchase_requisitions_requested_byTousersInput
+  sales_shipments?: Prisma.sales_shipmentsUncheckedCreateNestedManyWithoutUsersInput
+  sales_orders?: Prisma.sales_ordersUncheckedCreateNestedManyWithoutUsersInput
+  sales_returns?: Prisma.sales_returnsUncheckedCreateNestedManyWithoutUsersInput
+  user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_granted_byTousersInput
+  user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedCreateNestedManyWithoutUsers_user_permissions_user_idTousersInput
+}
+
+export type usersCreateOrConnectWithoutNotificationsInput = {
+  where: Prisma.usersWhereUniqueInput
+  create: Prisma.XOR<Prisma.usersCreateWithoutNotificationsInput, Prisma.usersUncheckedCreateWithoutNotificationsInput>
+}
+
+export type usersUpsertWithoutNotificationsInput = {
+  update: Prisma.XOR<Prisma.usersUpdateWithoutNotificationsInput, Prisma.usersUncheckedUpdateWithoutNotificationsInput>
+  create: Prisma.XOR<Prisma.usersCreateWithoutNotificationsInput, Prisma.usersUncheckedCreateWithoutNotificationsInput>
+  where?: Prisma.usersWhereInput
+}
+
+export type usersUpdateToOneWithWhereWithoutNotificationsInput = {
+  where?: Prisma.usersWhereInput
+  data: Prisma.XOR<Prisma.usersUpdateWithoutNotificationsInput, Prisma.usersUncheckedUpdateWithoutNotificationsInput>
+}
+
+export type usersUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  first_name?: Prisma.StringFieldUpdateOperationsInput | string
+  last_name?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  department?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activity_logs?: Prisma.activity_logsUpdateManyWithoutUsersNestedInput
+  goods_received?: Prisma.goods_receivedUpdateManyWithoutUsersNestedInput
+  inventory_adjustments_inventory_adjustments_adjusted_byTousers?: Prisma.inventory_adjustmentsUpdateManyWithoutUsers_inventory_adjustments_adjusted_byTousersNestedInput
+  inventory_adjustments_inventory_adjustments_approved_byTousers?: Prisma.inventory_adjustmentsUpdateManyWithoutUsers_inventory_adjustments_approved_byTousersNestedInput
+  inventory_levels?: Prisma.inventory_levelsUpdateManyWithoutUsersNestedInput
+  inventory_transactions?: Prisma.inventory_transactionsUpdateManyWithoutUsersNestedInput
+  purchase_requisitions_purchase_requisitions_approved_byTousers?: Prisma.purchase_requisitionsUpdateManyWithoutUsers_purchase_requisitions_approved_byTousersNestedInput
+  purchase_requisitions_purchase_requisitions_requested_byTousers?: Prisma.purchase_requisitionsUpdateManyWithoutUsers_purchase_requisitions_requested_byTousersNestedInput
+  sales_shipments?: Prisma.sales_shipmentsUpdateManyWithoutUsersNestedInput
+  sales_orders?: Prisma.sales_ordersUpdateManyWithoutUsersNestedInput
+  sales_returns?: Prisma.sales_returnsUpdateManyWithoutUsersNestedInput
+  user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
+  user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
+}
+
+export type usersUncheckedUpdateWithoutNotificationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password_hash?: Prisma.StringFieldUpdateOperationsInput | string
+  first_name?: Prisma.StringFieldUpdateOperationsInput | string
+  last_name?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  department?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  is_active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  last_login_at?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  activity_logs?: Prisma.activity_logsUncheckedUpdateManyWithoutUsersNestedInput
+  goods_received?: Prisma.goods_receivedUncheckedUpdateManyWithoutUsersNestedInput
+  inventory_adjustments_inventory_adjustments_adjusted_byTousers?: Prisma.inventory_adjustmentsUncheckedUpdateManyWithoutUsers_inventory_adjustments_adjusted_byTousersNestedInput
+  inventory_adjustments_inventory_adjustments_approved_byTousers?: Prisma.inventory_adjustmentsUncheckedUpdateManyWithoutUsers_inventory_adjustments_approved_byTousersNestedInput
+  inventory_levels?: Prisma.inventory_levelsUncheckedUpdateManyWithoutUsersNestedInput
+  inventory_transactions?: Prisma.inventory_transactionsUncheckedUpdateManyWithoutUsersNestedInput
+  purchase_requisitions_purchase_requisitions_approved_byTousers?: Prisma.purchase_requisitionsUncheckedUpdateManyWithoutUsers_purchase_requisitions_approved_byTousersNestedInput
+  purchase_requisitions_purchase_requisitions_requested_byTousers?: Prisma.purchase_requisitionsUncheckedUpdateManyWithoutUsers_purchase_requisitions_requested_byTousersNestedInput
+  sales_shipments?: Prisma.sales_shipmentsUncheckedUpdateManyWithoutUsersNestedInput
+  sales_orders?: Prisma.sales_ordersUncheckedUpdateManyWithoutUsersNestedInput
+  sales_returns?: Prisma.sales_returnsUncheckedUpdateManyWithoutUsersNestedInput
+  user_permissions_user_permissions_granted_byTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_granted_byTousersNestedInput
+  user_permissions_user_permissions_user_idTousers?: Prisma.user_permissionsUncheckedUpdateManyWithoutUsers_user_permissions_user_idTousersNestedInput
 }
 
 
@@ -2387,6 +2590,7 @@ export type UsersCountOutputType = {
   sales_returns: number
   user_permissions_user_permissions_granted_byTousers: number
   user_permissions_user_permissions_user_idTousers: number
+  notifications: number
 }
 
 export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2403,6 +2607,7 @@ export type UsersCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.
   sales_returns?: boolean | UsersCountOutputTypeCountSales_returnsArgs
   user_permissions_user_permissions_granted_byTousers?: boolean | UsersCountOutputTypeCountUser_permissions_user_permissions_granted_byTousersArgs
   user_permissions_user_permissions_user_idTousers?: boolean | UsersCountOutputTypeCountUser_permissions_user_permissions_user_idTousersArgs
+  notifications?: boolean | UsersCountOutputTypeCountNotificationsArgs
 }
 
 /**
@@ -2506,6 +2711,13 @@ export type UsersCountOutputTypeCountUser_permissions_user_permissions_user_idTo
   where?: Prisma.user_permissionsWhereInput
 }
 
+/**
+ * UsersCountOutputType without action
+ */
+export type UsersCountOutputTypeCountNotificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.notificationsWhereInput
+}
+
 
 export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2533,6 +2745,7 @@ export type usersSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   sales_returns?: boolean | Prisma.users$sales_returnsArgs<ExtArgs>
   user_permissions_user_permissions_granted_byTousers?: boolean | Prisma.users$user_permissions_user_permissions_granted_byTousersArgs<ExtArgs>
   user_permissions_user_permissions_user_idTousers?: boolean | Prisma.users$user_permissions_user_permissions_user_idTousersArgs<ExtArgs>
+  notifications?: boolean | Prisma.users$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["users"]>
 
@@ -2596,6 +2809,7 @@ export type usersInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   sales_returns?: boolean | Prisma.users$sales_returnsArgs<ExtArgs>
   user_permissions_user_permissions_granted_byTousers?: boolean | Prisma.users$user_permissions_user_permissions_granted_byTousersArgs<ExtArgs>
   user_permissions_user_permissions_user_idTousers?: boolean | Prisma.users$user_permissions_user_permissions_user_idTousersArgs<ExtArgs>
+  notifications?: boolean | Prisma.users$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.UsersCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type usersIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2617,6 +2831,7 @@ export type $usersPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     sales_returns: Prisma.$sales_returnsPayload<ExtArgs>[]
     user_permissions_user_permissions_granted_byTousers: Prisma.$user_permissionsPayload<ExtArgs>[]
     user_permissions_user_permissions_user_idTousers: Prisma.$user_permissionsPayload<ExtArgs>[]
+    notifications: Prisma.$notificationsPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3038,6 +3253,7 @@ export interface Prisma__usersClient<T, Null = never, ExtArgs extends runtime.Ty
   sales_returns<T extends Prisma.users$sales_returnsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$sales_returnsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$sales_returnsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   user_permissions_user_permissions_granted_byTousers<T extends Prisma.users$user_permissions_user_permissions_granted_byTousersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$user_permissions_user_permissions_granted_byTousersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$user_permissionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   user_permissions_user_permissions_user_idTousers<T extends Prisma.users$user_permissions_user_permissions_user_idTousersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$user_permissions_user_permissions_user_idTousersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$user_permissionsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  notifications<T extends Prisma.users$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.users$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$notificationsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3776,6 +3992,30 @@ export type users$user_permissions_user_permissions_user_idTousersArgs<ExtArgs e
   take?: number
   skip?: number
   distinct?: Prisma.User_permissionsScalarFieldEnum | Prisma.User_permissionsScalarFieldEnum[]
+}
+
+/**
+ * users.notifications
+ */
+export type users$notificationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the notifications
+   */
+  select?: Prisma.notificationsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the notifications
+   */
+  omit?: Prisma.notificationsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.notificationsInclude<ExtArgs> | null
+  where?: Prisma.notificationsWhereInput
+  orderBy?: Prisma.notificationsOrderByWithRelationInput | Prisma.notificationsOrderByWithRelationInput[]
+  cursor?: Prisma.notificationsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.NotificationsScalarFieldEnum | Prisma.NotificationsScalarFieldEnum[]
 }
 
 /**

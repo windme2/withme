@@ -73,43 +73,76 @@ export class SalesReturnsService {
     }
 
     async create(data: any) {
-        return this.prisma.$transaction(async (tx) => {
-            const returnNumber = `RET-${new Date().getFullYear()}-${Date.now().toString().slice(-3).padStart(3, '0')}`;
-            const totalAmount = data.items.reduce((sum: number, item: any) =>
-                sum + (item.quantity * item.unitPrice), 0);
+        try {
+            return await this.prisma.$transaction(async (tx) => {
+                // Fetch Sales Order to get ID
+                const salesOrder = await tx.sales_orders.findUnique({
+                    where: { so_number: data.soNumber }
+                });
 
-            const salesReturn = await tx.sales_returns.create({
-                data: {
-                    id: `ret-${Date.now()}`,
-                    return_number: returnNumber,
-                    so_number: data.soNumber,
-                    customer_name: data.customerName,
-                    return_date: new Date(),
-                    status: 'pending' as any,
-                    reason: data.reason,
-                    total_amount: totalAmount,
-                    refund_method: data.refundMethod,
-                    handled_by: 'user-admin-001',
-                    notes: data.notes,
+                if (!salesOrder) {
+                    throw new Error('Sales Order not found');
                 }
-            });
 
-            for (const item of data.items) {
-                await tx.return_items.create({
+                // Prepare items with prices
+                const itemsWithPrice: any[] = [];
+                let totalAmount = 0;
+
+                for (const item of data.items) {
+                    const soItem = await tx.sales_order_items.findFirst({
+                        where: {
+                            so_id: salesOrder.id,
+                            product_id: item.productId
+                        }
+                    });
+
+                    const unitPrice = soItem ? Number(soItem.unit_price) : 0;
+                    totalAmount += Number(item.quantity) * unitPrice;
+
+                    itemsWithPrice.push({
+                        ...item,
+                        unitPrice
+                    });
+                }
+
+                const returnNumber = `RET-${new Date().getFullYear()}-${Date.now().toString().slice(-3).padStart(3, '0')}`;
+
+                const salesReturn = await tx.sales_returns.create({
                     data: {
-                        id: `reti-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                        return_id: salesReturn.id,
-                        product_id: item.productId,
-                        quantity: Number(item.quantity),
-                        unit_price: Number(item.unitPrice),
-                        total_price: Number(item.quantity) * Number(item.unitPrice),
-                        condition: item.condition,
+                        id: `ret-${Date.now()}`,
+                        return_number: returnNumber,
+                        so_number: data.soNumber,
+                        customer_name: data.customerName,
+                        return_date: new Date(),
+                        status: 'pending' as any,
+                        reason: data.reason,
+                        total_amount: totalAmount,
+                        refund_method: data.refundMethod,
+                        notes: data.notes,
+                        users: { connect: { id: 'user-admin-001' } }
                     }
                 });
-            }
 
-            return salesReturn;
-        });
+                for (const item of itemsWithPrice) {
+                    await tx.return_items.create({
+                        data: {
+                            id: `reti-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                            return_id: salesReturn.id,
+                            product_id: item.productId,
+                            quantity: Number(item.quantity),
+                            unit_price: item.unitPrice,
+                            total_price: Number(item.quantity) * item.unitPrice,
+                            condition: item.condition,
+                        }
+                    });
+                }
+
+                return salesReturn;
+            });
+        } catch (error) {
+            console.error('Error creating sales return:', error);
+            throw error;
+        }
     }
 
     async updateStatus(id: string, status: string) {

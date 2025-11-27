@@ -35,35 +35,40 @@ export class SalesOrdersService {
         }));
     }
 
-    async findOne(id: string) {
+    async findOne(id: string): Promise<any> {
         const order = await this.prisma.sales_orders.findUnique({
             where: { so_number: id },
             include: {
-                sales_order_items: { include: { products: true } }
-            }
+                sales_order_items: {
+                    include: {
+                        products: true,
+                    },
+                },
+            },
         });
+
         if (!order) return null;
 
         return {
             id: order.so_number,
-            customer: order.customer_name,
+            soNumber: order.so_number,
+            customerName: order.customer_name,
             contactPerson: order.contact_person,
-            email: order.customer_email,
-            phone: order.customer_phone,
-            date: order.order_date.toISOString().split('T')[0],
+            customerEmail: order.customer_email,
+            customerPhone: order.customer_phone,
+            orderDate: order.order_date,
             dueDate: order.due_date ? order.due_date.toISOString().split('T')[0] : null,
             status: this.mapStatus(order.status),
             notes: order.notes,
-            items: order.sales_order_items.map(item => ({
+            salesOrderItems: order.sales_order_items.map(item => ({
                 id: item.id,
-                name: item.products.name,
-                sku: item.products.sku,
-                qty: item.quantity,
-                price: Number(item.unit_price),
-                unit: item.products.unit,
+                productId: item.product_id,
+                quantity: item.quantity,
+                unitPrice: Number(item.unit_price),
+                totalPrice: Number(item.total_price),
+                products: item.products
             })),
-            totalQty: order.sales_order_items.reduce((sum, item) => sum + item.quantity, 0),
-            totalValue: Number(order.total_amount),
+            totalAmount: Number(order.total_amount),
         };
     }
 

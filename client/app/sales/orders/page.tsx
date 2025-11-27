@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -303,8 +304,14 @@ export default function SalesOrdersPage() {
                         className="hover:bg-slate-50/60 transition-colors cursor-pointer"
                         onClick={() => handleRowClick(order)}
                       >
-                        <TableCell className="font-medium text-blue-600 pl-6 py-4">
-                          {order.id}
+                        <TableCell className="font-medium pl-6 py-4">
+                          <Link
+                            href={`/sales/orders/${order.id}`}
+                            className="text-blue-600 hover:underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {order.soNumber || order.id}
+                          </Link>
                         </TableCell>
                         <TableCell className="text-slate-500 text-sm py-4">
                           {order.date}

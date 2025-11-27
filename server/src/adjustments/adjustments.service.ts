@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
+import { NotificationsService } from '../notifications/notifications.service';
+
 @Injectable()
 export class AdjustmentsService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private notificationsService: NotificationsService
+    ) { }
 
     async findAll(type?: string, search?: string) {
         const where: any = {};
@@ -116,7 +121,7 @@ export class AdjustmentsService {
         };
         const adjustmentType = typeMap[type] || 'other';
 
-        return this.prisma.$transaction(async (tx) => {
+        const result = await this.prisma.$transaction(async (tx) => {
             // 1. Create Adjustment Header
             const adjustment = await tx.inventory_adjustments.create({
                 data: {
@@ -132,11 +137,14 @@ export class AdjustmentsService {
                 },
             });
 
+            const lowStockAlerts: any[] = [];
+
             // 2. Process Items
             for (const item of items) {
                 // Get current stock
                 const currentStock = await tx.inventory_levels.findUnique({
                     where: { product_id: item.productId },
+                    include: { products: true }
                 });
 
                 const quantityBefore = currentStock?.quantity || 0;
@@ -177,9 +185,36 @@ export class AdjustmentsService {
                         updated_at: new Date(),
                     },
                 });
+
+                // Check for Low Stock
+                if (currentStock && currentStock.products) {
+                    const product = currentStock.products;
+                    if (quantityAfter <= product.minimum_stock) {
+                        lowStockAlerts.push({
+                            productName: product.name,
+                            sku: product.sku,
+                            quantity: quantityAfter,
+                            minStock: product.minimum_stock
+                        });
+                    }
+                }
             }
 
-            return adjustment;
+            return { adjustment, lowStockAlerts };
         });
+
+        // Send Notifications (outside transaction)
+        if (result.lowStockAlerts && result.lowStockAlerts.length > 0) {
+            for (const alert of result.lowStockAlerts) {
+                await this.notificationsService.create({
+                    title: 'Low Stock Alert',
+                    message: `Product ${alert.productName} (${alert.sku}) is low on stock. Current: ${alert.quantity}, Min: ${alert.minStock}`,
+                    type: 'warning',
+                    link: '/inventory/items'
+                });
+            }
+        }
+
+        return result.adjustment;
     }
 }

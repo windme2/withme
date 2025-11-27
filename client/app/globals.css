@@ -149,9 +149,7 @@ body[data-scroll-locked] {
   z-index: 9999 !important;
 }
 
-[data-state="open"] {
-  transform: none !important;
-}
+
 
 /* =========================================
    Sidebar Animation

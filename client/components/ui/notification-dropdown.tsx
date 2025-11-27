@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,111 +15,85 @@ import {
   AlertTriangle,
   CheckCircle2,
   Clock,
-  X,
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { notificationsApi } from "@/lib/api";
+import { toast } from "sonner";
 
 interface Notification {
   id: string;
-  type: "low-stock" | "approval" | "system" | "success";
+  type: string;
   title: string;
   message: string;
-  time: string;
-  read: boolean;
+  created_at: string;
+  is_read: boolean;
   link?: string;
 }
 
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    type: "low-stock",
-    title: "สินค้าใกล้หมด",
-    message: "Blue Ink Pen (SKU002) เหลือเพียง 12 ชิ้น",
-    time: "5 นาทีที่แล้ว",
-    read: false,
-    link: "/inventory/items",
-  },
-  {
-    id: "2",
-    type: "approval",
-    title: "รออนุมัติ",
-    message: "PR-2025-015 รอการอนุมัติจากคุณ",
-    time: "10 นาทีที่แล้ว",
-    read: false,
-    link: "/purchasing/status",
-  },
-  {
-    id: "3",
-    type: "success",
-    title: "ตรวจรับสินค้าสำเร็จ",
-    message: "GRN-2025-010 บันทึกเรียบร้อยแล้ว",
-    time: "1 ชั่วโมงที่แล้ว",
-    read: false,
-    link: "/inventory/goods-received",
-  },
-  {
-    id: "4",
-    type: "low-stock",
-    title: "สินค้าใกล้หมด",
-    message: "HB Pencil #2 (SKU004) หมดสต็อค",
-    time: "2 ชั่วโมงที่แล้ว",
-    read: true,
-    link: "/inventory/items",
-  },
-  {
-    id: "5",
-    type: "system",
-    title: "สำรองข้อมูล",
-    message: "ระบบทำ Backup อัตโนมัติเรียบร้อย",
-    time: "3 ชั่วโมงที่แล้ว",
-    read: true,
-    link: "/dashboard",
-  },
-  {
-    id: "6",
-    type: "approval",
-    title: "อนุมัติแล้ว",
-    message: "PR-2025-014 ได้รับการอนุมัติแล้ว",
-    time: "4 ชั่วโมงที่แล้ว",
-    read: true,
-    link: "/purchasing/status",
-  },
-];
-
 export function NotificationDropdown() {
   const router = useRouter();
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const handleMarkAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+  const fetchNotifications = async () => {
+    try {
+      const data = await notificationsApi.getAll();
+      setNotifications(data);
+      setUnreadCount(data.filter((n: Notification) => !n.is_read).length);
+    } catch (error) {
+      console.error("Failed to fetch notifications", error);
+    }
   };
 
-  const handleNotificationClick = (notification: Notification) => {
+  useEffect(() => {
+    fetchNotifications();
+    // Poll every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleMarkAsRead = async (id: string) => {
+    try {
+      await notificationsApi.markAsRead(id);
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
+      );
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error("Failed to mark as read", error);
+    }
+  };
+
+  const handleNotificationClick = async (notification: Notification) => {
+    if (!notification.is_read) {
+      await handleMarkAsRead(notification.id);
+    }
+
     if (notification.link) {
-      handleMarkAsRead(notification.id);
       router.push(notification.link);
       setOpen(false);
     }
   };
 
-  const handleMarkAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  const handleMarkAllAsRead = async () => {
+    try {
+      await notificationsApi.markAllAsRead();
+      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      setUnreadCount(0);
+      toast.success("Marked all as read");
+    } catch (error) {
+      toast.error("Failed to mark all as read");
+    }
   };
 
-  const handleClearAll = () => {
-    setNotifications([]);
-  };
-
-  const getIcon = (type: Notification["type"]) => {
+  const getIcon = (type: string) => {
     switch (type) {
+      case "warning":
       case "low-stock":
         return <AlertTriangle className="h-4 w-4 text-amber-600" />;
+      case "info":
       case "approval":
         return <Clock className="h-4 w-4 text-blue-600" />;
       case "system":
@@ -131,10 +105,12 @@ export function NotificationDropdown() {
     }
   };
 
-  const getIconBg = (type: Notification["type"]) => {
+  const getIconBg = (type: string) => {
     switch (type) {
+      case "warning":
       case "low-stock":
         return "bg-amber-50";
+      case "info":
       case "approval":
         return "bg-blue-50";
       case "system":
@@ -144,6 +120,21 @@ export function NotificationDropdown() {
       default:
         return "bg-slate-50";
     }
+  };
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (minutes < 1) return "Just now";
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    return `${days}d ago`;
   };
 
   return (
@@ -169,26 +160,22 @@ export function NotificationDropdown() {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b bg-slate-50/50">
           <div>
-            <h3 className="font-semibold text-slate-900">การแจ้งเตือน</h3>
+            <h3 className="font-semibold text-slate-900">Notifications</h3>
             {unreadCount > 0 && (
               <p className="text-xs text-slate-500 mt-0.5">
-                คุณมี {unreadCount} การแจ้งเตือนใหม่
+                You have {unreadCount} unread notifications
               </p>
             )}
           </div>
-          {notifications.length > 0 && (
-            <div className="flex gap-1">
-              {unreadCount > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleMarkAllAsRead}
-                  className="h-8 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                >
-                  อ่านทั้งหมด
-                </Button>
-              )}
-            </div>
+          {notifications.length > 0 && unreadCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleMarkAllAsRead}
+              className="h-8 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+            >
+              Mark all read
+            </Button>
           )}
         </div>
 
@@ -197,8 +184,8 @@ export function NotificationDropdown() {
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-slate-400">
               <Bell className="h-12 w-12 mb-3 opacity-50" />
-              <p className="text-sm font-medium">ไม่มีการแจ้งเตือน</p>
-              <p className="text-xs mt-1">คุณดูการแจ้งเตือนทั้งหมดแล้ว</p>
+              <p className="text-sm font-medium">No notifications</p>
+              <p className="text-xs mt-1">You're all caught up!</p>
             </div>
           ) : (
             <div className="divide-y divide-slate-100">
@@ -207,7 +194,7 @@ export function NotificationDropdown() {
                   key={notification.id}
                   className={cn(
                     "p-4 hover:bg-slate-50/50 transition-colors cursor-pointer relative group",
-                    !notification.read && "bg-blue-50/30"
+                    !notification.is_read && "bg-blue-50/30"
                   )}
                   onClick={() => handleNotificationClick(notification)}
                 >
@@ -225,12 +212,12 @@ export function NotificationDropdown() {
                         <h4
                           className={cn(
                             "text-sm font-medium text-slate-900",
-                            !notification.read && "font-semibold"
+                            !notification.is_read && "font-semibold"
                           )}
                         >
                           {notification.title}
                         </h4>
-                        {!notification.read && (
+                        {!notification.is_read && (
                           <div className="h-2 w-2 rounded-full bg-blue-600 flex-shrink-0 mt-1.5" />
                         )}
                       </div>
@@ -238,7 +225,7 @@ export function NotificationDropdown() {
                         {notification.message}
                       </p>
                       <p className="text-xs text-slate-400 mt-1">
-                        {notification.time}
+                        {formatTime(notification.created_at)}
                       </p>
                     </div>
                   </div>
@@ -247,24 +234,6 @@ export function NotificationDropdown() {
             </div>
           )}
         </div>
-
-        {/* Footer */}
-        {notifications.length > 0 && (
-          <>
-            <Separator />
-            <div className="p-3 bg-slate-50/50">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleClearAll}
-                className="w-full h-8 text-sm text-slate-600 hover:text-slate-900"
-              >
-                <X className="h-4 w-4 mr-2" />
-                ล้างการแจ้งเตือนทั้งหมด
-              </Button>
-            </div>
-          </>
-        )}
       </PopoverContent>
     </Popover>
   );

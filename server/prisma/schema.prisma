@@ -251,6 +251,7 @@ model users {
   sales_returns                                                   sales_returns[]
   user_permissions_user_permissions_granted_byTousers             user_permissions[]       @relation("user_permissions_granted_byTousers")
   user_permissions_user_permissions_user_idTousers                user_permissions[]       @relation("user_permissions_user_idTousers")
+  notifications                                                   notifications[]
 }
 
 enum GoodsReceivedStatus {
@@ -437,4 +438,17 @@ enum ReturnStatus {
   approved
   rejected
   completed
+}
+
+model notifications {
+  id          String   @id
+  user_id     String?
+  title       String
+  message     String
+  type        String
+  is_read     Boolean  @default(false)
+  link        String?
+  created_at  DateTime @default(now())
+  
+  users       users?   @relation(fields: [user_id], references: [id])
 }

@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
+import { NotificationsService } from '../notifications/notifications.service';
+
 @Injectable()
 export class PurchasingService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private notificationsService: NotificationsService
+    ) { }
 
     async findAll(status?: string, search?: string) {
         const where: any = {};
@@ -83,7 +88,7 @@ export class PurchasingService {
     async create(data: any) {
         const { items, notes, userId, priority } = data;
 
-        return this.prisma.$transaction(async (tx) => {
+        const result = await this.prisma.$transaction(async (tx) => {
             const pr = await tx.purchase_requisitions.create({
                 data: {
                     id: `pr-${Date.now()}`,
@@ -111,6 +116,16 @@ export class PurchasingService {
 
             return pr;
         });
+
+        // Send Notification (outside transaction)
+        await this.notificationsService.create({
+            title: 'New Purchase Requisition',
+            message: `PR ${result.pr_number} created by user and is pending approval.`,
+            type: 'approval',
+            link: `/purchasing/requisition/${result.pr_number}`
+        });
+
+        return result;
     }
 
     async updateStatus(id: string, status: string) {

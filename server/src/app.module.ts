@@ -13,6 +13,8 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { PurchasingModule } from './purchasing/purchasing.module';
 import { SalesModule } from './sales/sales.module';
 import { CustomersModule } from './customers/customers.module';
+import { UsersModule } from './users/users.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -30,9 +32,10 @@ import { CustomersModule } from './customers/customers.module';
     PurchasingModule,
     SalesModule,
     CustomersModule,
+    UsersModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule { }
-

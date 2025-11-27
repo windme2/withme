@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class SalesShipmentsService {
-    constructor(private prisma: PrismaService) { }
+    constructor(
+        private prisma: PrismaService,
+        private notificationsService: NotificationsService
+    ) { }
 
     async findAll(status?: string, search?: string) {
         const where: any = {};
@@ -71,39 +75,110 @@ export class SalesShipmentsService {
     }
 
     async create(data: any) {
-        return this.prisma.$transaction(async (tx) => {
+        const result = await this.prisma.$transaction(async (tx) => {
+            // Fetch Sales Order to get customer details
+            const salesOrder = await tx.sales_orders.findUnique({
+                where: { so_number: data.salesOrderId } // Assuming salesOrderId is the SO Number (e.g. SO-2025-...)
+            });
+
+            if (!salesOrder) {
+                throw new Error('Sales Order not found');
+            }
+
             const shipmentNumber = `SH-${new Date().getFullYear()}-${Date.now().toString().slice(-3).padStart(3, '0')}`;
 
             const shipment = await tx.sales_shipments.create({
                 data: {
                     id: `ship-${Date.now()}`,
                     shipment_number: shipmentNumber,
-                    customer_name: data.customerName,
-                    shipping_address: data.shippingAddress,
-                    status: 'pending' as any,
+                    customer_name: salesOrder.customer_name,
+                    shipping_address: salesOrder.contact_person || 'Address not provided', // Fallback as address is not in SO table
+                    status: 'shipped' as any,
                     shipment_date: data.shipmentDate ? new Date(data.shipmentDate) : null,
                     tracking_number: data.trackingNumber,
                     notes: data.notes,
-                    handled_by: 'user-admin-001',
+                    users: { connect: { id: 'user-admin-001' } },
                     updated_at: new Date(),
                 }
             });
 
+            const lowStockAlerts: any[] = [];
+
             for (const item of data.items) {
-                await tx.shipment_items.create({
-                    data: {
-                        id: `shi-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-                        shipment_id: shipment.id,
-                        product_id: item.productId,
-                        quantity: Number(item.quantity),
-                        unit_price: Number(item.unitPrice),
-                        total_price: Number(item.quantity) * Number(item.unitPrice),
-                    }
+                // Fetch product details for unit price if not provided
+                const soItem = await tx.sales_order_items.findUnique({
+                    where: { id: item.salesOrderItemId },
+                    include: { products: true }
                 });
+
+                if (soItem) {
+                    await tx.shipment_items.create({
+                        data: {
+                            id: `shi-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                            shipment_id: shipment.id,
+                            product_id: soItem.product_id,
+                            quantity: Number(item.quantity),
+                            unit_price: Number(soItem.unit_price),
+                            total_price: Number(item.quantity) * Number(soItem.unit_price),
+                        }
+                    });
+
+                    // Update Inventory Level (Decrease stock)
+                    const currentStock = await tx.inventory_levels.findUnique({
+                        where: { product_id: soItem.product_id },
+                    });
+
+                    const quantityBefore = currentStock?.quantity || 0;
+                    const quantityAfter = quantityBefore - Number(item.quantity);
+
+                    await tx.inventory_levels.upsert({
+                        where: { product_id: soItem.product_id },
+                        update: {
+                            quantity: quantityAfter,
+                            updated_at: new Date(),
+                        },
+                        create: {
+                            product_id: soItem.product_id,
+                            quantity: quantityAfter,
+                            updated_at: new Date(),
+                        },
+                    });
+
+                    // Check for Low Stock
+                    const product = soItem.products;
+                    if (quantityAfter <= product.minimum_stock) {
+                        lowStockAlerts.push({
+                            productName: product.name,
+                            sku: product.sku,
+                            quantity: quantityAfter,
+                            minStock: product.minimum_stock
+                        });
+                    }
+                }
             }
 
-            return shipment;
+            // Update SO status to Shipped if fully shipped (simplified logic)
+            await tx.sales_orders.update({
+                where: { id: salesOrder.id },
+                data: { status: 'shipped' as any }
+            });
+
+            return { shipment, lowStockAlerts };
         });
+
+        // Send Notifications (outside transaction)
+        if (result.lowStockAlerts && result.lowStockAlerts.length > 0) {
+            for (const alert of result.lowStockAlerts) {
+                await this.notificationsService.create({
+                    title: 'Low Stock Alert',
+                    message: `Product ${alert.productName} (${alert.sku}) is low on stock. Current: ${alert.quantity}, Min: ${alert.minStock}`,
+                    type: 'warning',
+                    link: '/inventory/items'
+                });
+            }
+        }
+
+        return result.shipment;
     }
 
     async updateStatus(id: string, status: string) {
