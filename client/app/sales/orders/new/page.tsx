@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { MainLayout } from "@/components/layout/main-layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,13 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Table,
   TableBody,
   TableCell,
@@ -23,9 +16,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft, Plus, Trash2, Save, ShoppingCart } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ArrowLeft, Plus, Trash2, Save, ShoppingCart, Check, ChevronsUpDown, Search } from "lucide-react";
 import { toast } from "sonner";
 import { salesOrdersApi, inventoryApi } from "@/lib/api";
+import { cn } from "@/lib/utils";
 
 interface OrderItem {
   productId: string;
@@ -53,24 +52,44 @@ export default function NewSalesOrderPage() {
   const [selectedProductId, setSelectedProductId] = useState("");
   const [quantity, setQuantity] = useState(1);
 
+  // Searchable Select State
+  const [openCombobox, setOpenCombobox] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
   // Products from API
   const [products, setProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
         const data = await inventoryApi.getAll();
-        setProducts(data);
+        setProducts(data || []);
       } catch (error) {
         toast.error("Failed to load products");
+        console.error("Error loading products:", error);
       } finally {
         setIsLoading(false);
       }
     };
     fetchProducts();
   }, []);
+
+  // Filter products based on search term
+  const filteredProducts = useMemo(() => {
+    if (!searchTerm) return products;
+    const lowerTerm = searchTerm.toLowerCase();
+    return products.filter(p =>
+      (p.name && p.name.toLowerCase().includes(lowerTerm)) ||
+      (p.sku && p.sku.toLowerCase().includes(lowerTerm))
+    );
+  }, [products, searchTerm]);
 
   // Calculate Totals
   const subtotal = items.reduce((sum, item) => sum + item.total, 0);
@@ -125,6 +144,7 @@ export default function NewSalesOrderPage() {
     // Reset selection
     setSelectedProductId("");
     setQuantity(1);
+    setSearchTerm("");
   };
 
   const handleRemoveItem = (index: number) => {
@@ -183,7 +203,7 @@ export default function NewSalesOrderPage() {
     }
   };
 
-  if (isLoading) {
+  if (!mounted || isLoading) {
     return (
       <MainLayout>
         <div className="flex items-center justify-center h-96">
@@ -194,7 +214,7 @@ export default function NewSalesOrderPage() {
   }
 
   return (
-    <MainLayout>
+    <div className="p-4">
       <div className="space-y-6 p-1">
         {/* Header */}
         <div className="flex items-center gap-4">
@@ -289,7 +309,7 @@ export default function NewSalesOrderPage() {
                       type="date"
                       value={dueDate}
                       onChange={(e) => setDueDate(e.target.value)}
-                      min={new Date().toISOString().split("T")[0]}
+                      min=""
                     />
                   </div>
 
@@ -319,18 +339,69 @@ export default function NewSalesOrderPage() {
                       <Label htmlFor="product" className="text-sm font-medium text-slate-700">
                         สินค้า
                       </Label>
-                      <Select value={selectedProductId} onValueChange={setSelectedProductId}>
-                        <SelectTrigger id="product">
-                          <SelectValue placeholder="เลือกสินค้า" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {products.map((product) => (
-                            <SelectItem key={product.id} value={product.id}>
-                              {product.name} - {product.sku} (คงเหลือ: {product.stock} {product.unit || 'pcs'})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+
+                      <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={openCombobox}
+                            className="w-full justify-between"
+                          >
+                            {selectedProductId
+                              ? products.find((product) => product.id === selectedProductId)?.name
+                              : "เลือกสินค้า..."}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[400px] p-0" align="start">
+                          <div className="p-2 border-b">
+                            <div className="flex items-center border rounded-md px-3 bg-white">
+                              <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                              <input
+                                className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                placeholder="ค้นหาสินค้า..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                              />
+                            </div>
+                          </div>
+                          <div className="max-h-[300px] overflow-y-auto p-1">
+                            {filteredProducts.length === 0 ? (
+                              <div className="py-6 text-center text-sm text-slate-500">
+                                ไม่พบสินค้า
+                              </div>
+                            ) : (
+                              filteredProducts.map((product) => (
+                                <div
+                                  key={product.id}
+                                  className={cn(
+                                    "relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none hover:bg-slate-100 cursor-pointer",
+                                    selectedProductId === product.id ? "bg-slate-100" : ""
+                                  )}
+                                  onClick={() => {
+                                    setSelectedProductId(product.id === selectedProductId ? "" : product.id);
+                                    setOpenCombobox(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      selectedProductId === product.id ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  <div className="flex flex-col">
+                                    <span className="font-medium">{product.name}</span>
+                                    <span className="text-xs text-slate-500">
+                                      SKU: {product.sku} | คงเหลือ: {product.stock} {product.unit}
+                                    </span>
+                                  </div>
+                                </div>
+                              ))
+                            )}
+                          </div>
+                        </PopoverContent>
+                      </Popover>
                     </div>
 
                     <div className="w-32 space-y-2">
@@ -521,6 +592,6 @@ export default function NewSalesOrderPage() {
           </div>
         </form>
       </div>
-    </MainLayout>
+    </div>
   );
 }

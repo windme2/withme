@@ -9,10 +9,6 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Settings, Bell, Send } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { notificationsApi } from "@/lib/api";
-import { toast } from "sonner";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function SystemSettingsPage() {
     const router = useRouter();
