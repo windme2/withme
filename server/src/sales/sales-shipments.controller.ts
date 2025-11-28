@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Patch, Body, Query, Param } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Body, Query, Param, UseGuards, Request } from '@nestjs/common';
 import { SalesShipmentsService } from './sales-shipments.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('sales/shipments')
 export class SalesShipmentsController {
@@ -16,8 +17,9 @@ export class SalesShipmentsController {
     }
 
     @Post()
-    create(@Body() createDto: any) {
-        return this.shipmentsService.create(createDto);
+    @UseGuards(JwtAuthGuard)
+    create(@Body() createDto: any, @Request() req: any) {
+        return this.shipmentsService.create(createDto, req.user.id);
     }
 
     @Patch(':id/status')

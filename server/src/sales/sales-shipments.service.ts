@@ -74,7 +74,7 @@ export class SalesShipmentsService {
         };
     }
 
-    async create(data: any) {
+    async create(data: any, userId: string) {
         const result = await this.prisma.$transaction(async (tx) => {
             // Fetch Sales Order to get customer details
             const salesOrder = await tx.sales_orders.findUnique({
@@ -97,7 +97,7 @@ export class SalesShipmentsService {
                     shipment_date: data.shipmentDate ? new Date(data.shipmentDate) : null,
                     tracking_number: data.trackingNumber,
                     notes: data.notes,
-                    users: { connect: { id: 'user-admin-001' } },
+                    users: { connect: { id: userId } },
                     updated_at: new Date(),
                 }
             });

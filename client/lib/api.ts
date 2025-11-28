@@ -273,6 +273,26 @@ export const usersApi = {
         const response = await api.get('/users');
         return response.data;
     },
+    getOne: async (id: string) => {
+        const response = await api.get(`/users/${id}`);
+        return response.data;
+    },
+    create: async (data: any) => {
+        const response = await api.post('/users', data);
+        return response.data;
+    },
+    update: async (id: string, data: any) => {
+        const response = await api.put(`/users/${id}`, data);
+        return response.data;
+    },
+    deactivate: async (id: string) => {
+        const response = await api.delete(`/users/${id}`);
+        return response.data;
+    },
+    resetPassword: async (id: string, password: string) => {
+        const response = await api.patch(`/users/${id}/reset-password`, { password });
+        return response.data;
+    },
 };
 
 export const notificationsApi = {

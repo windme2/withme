@@ -92,8 +92,7 @@ const sidebarModules: SidebarModule[] = [
     icon: Users,
     emoji: "👥",
     items: [
-      { name: "จัดการผู้ใช้", path: "/admin/user-management" },
-      { name: "กิจกรรมล่าสุด", path: "/admin/activity-log" },
+      { name: "จัดการผู้ใช้", path: "/admin/users" },
     ],
     defaultOpen: true,
     adminOnly: true,
@@ -119,7 +118,7 @@ export function Sidebar() {
       if (saved) {
         try {
           setExpandedModules(new Set(JSON.parse(saved)));
-        } catch {}
+        } catch { }
       } else {
         setExpandedModules(new Set(sidebarModules.map((m) => m.label)));
       }

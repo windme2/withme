@@ -12,15 +12,10 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-    const order = await prisma.sales_orders.findUnique({
-        where: { so_number: 'SO-2025-628' } // I need to be careful with the ID, I'll use findFirst if I'm not sure of the exact number, but I saw it in the logs
+    const admin = await prisma.users.findUnique({
+        where: { email: 'admin@example.com' }
     });
-    // Actually, let's find the latest order
-    const latestOrder = await prisma.sales_orders.findFirst({
-        orderBy: { created_at: 'desc' },
-        include: { sales_order_items: true }
-    });
-    console.log('Latest Order:', JSON.stringify(latestOrder, null, 2));
+    console.log('Admin user:', JSON.stringify(admin, null, 2));
 }
 
 main()

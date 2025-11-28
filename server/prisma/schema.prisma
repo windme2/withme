@@ -9,13 +9,15 @@ datasource db {
 
 model activity_logs {
   id          String   @id
-  user_id     String
+  user_id     String?
   action_type String
   entity_type String
-  entity_id   String
+  entity_id   String?
   description String?
+  ip_address  String?
+  user_agent  String?
   created_at  DateTime @default(now())
-  users       users    @relation(fields: [user_id], references: [id])
+  users       users?   @relation(fields: [user_id], references: [id])
 }
 
 model adjustment_items {

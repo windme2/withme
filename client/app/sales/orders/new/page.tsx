@@ -214,384 +214,386 @@ export default function NewSalesOrderPage() {
   }
 
   return (
-    <div className="p-4">
-      <div className="space-y-6 p-1">
-        {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => router.back()}
-            className="h-9 w-9"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-              สร้าง Sales Order ใหม่
-            </h1>
-            <p className="text-slate-500 mt-1">กรอกข้อมูลคำสั่งซื้อและเลือกสินค้า</p>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column: Order Information */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Basic Information Card */}
-              <Card className="border-slate-200 shadow-sm">
-                <CardHeader className="border-b bg-slate-50/50">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <ShoppingCart className="h-5 w-5 text-blue-600" />
-                    ข้อมูลคำสั่งซื้อ
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6 space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="customerName" className="text-sm font-medium text-slate-700">
-                        ชื่อลูกค้า <span className="text-red-500">*</span>
-                      </Label>
-                      <Input
-                        id="customerName"
-                        placeholder="ชื่อบริษัทหรือลูกค้า"
-                        value={customerName}
-                        onChange={(e) => setCustomerName(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="contactPerson" className="text-sm font-medium text-slate-700">
-                        ผู้ติดต่อ
-                      </Label>
-                      <Input
-                        id="contactPerson"
-                        placeholder="ชื่อผู้ติดต่อ"
-                        value={contactPerson}
-                        onChange={(e) => setContactPerson(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="text-sm font-medium text-slate-700">
-                        อีเมล
-                      </Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="email@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-sm font-medium text-slate-700">
-                        เบอร์โทร
-                      </Label>
-                      <Input
-                        id="phone"
-                        placeholder="02-xxx-xxxx"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="dueDate" className="text-sm font-medium text-slate-700">
-                      วันครบกำหนด <span className="text-red-500">*</span>
-                    </Label>
-                    <Input
-                      id="dueDate"
-                      type="date"
-                      value={dueDate}
-                      onChange={(e) => setDueDate(e.target.value)}
-                      min=""
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="remarks" className="text-sm font-medium text-slate-700">
-                      หมายเหตุ
-                    </Label>
-                    <Textarea
-                      id="remarks"
-                      placeholder="ข้อมูลเพิ่มเติม หรือเงื่อนไขพิเศษ..."
-                      value={remarks}
-                      onChange={(e) => setRemarks(e.target.value)}
-                      rows={3}
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Add Items Card */}
-              <Card className="border-slate-200 shadow-sm">
-                <CardHeader className="border-b bg-slate-50/50">
-                  <CardTitle className="text-lg">เพิ่มรายการสินค้า</CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row gap-4">
-                    <div className="flex-1 space-y-2">
-                      <Label htmlFor="product" className="text-sm font-medium text-slate-700">
-                        สินค้า
-                      </Label>
-
-                      <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            role="combobox"
-                            aria-expanded={openCombobox}
-                            className="w-full justify-between"
-                          >
-                            {selectedProductId
-                              ? products.find((product) => product.id === selectedProductId)?.name
-                              : "เลือกสินค้า..."}
-                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-[400px] p-0" align="start">
-                          <div className="p-2 border-b">
-                            <div className="flex items-center border rounded-md px-3 bg-white">
-                              <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
-                              <input
-                                className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
-                                placeholder="ค้นหาสินค้า..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                              />
-                            </div>
-                          </div>
-                          <div className="max-h-[300px] overflow-y-auto p-1">
-                            {filteredProducts.length === 0 ? (
-                              <div className="py-6 text-center text-sm text-slate-500">
-                                ไม่พบสินค้า
-                              </div>
-                            ) : (
-                              filteredProducts.map((product) => (
-                                <div
-                                  key={product.id}
-                                  className={cn(
-                                    "relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none hover:bg-slate-100 cursor-pointer",
-                                    selectedProductId === product.id ? "bg-slate-100" : ""
-                                  )}
-                                  onClick={() => {
-                                    setSelectedProductId(product.id === selectedProductId ? "" : product.id);
-                                    setOpenCombobox(false);
-                                  }}
-                                >
-                                  <Check
-                                    className={cn(
-                                      "mr-2 h-4 w-4",
-                                      selectedProductId === product.id ? "opacity-100" : "opacity-0"
-                                    )}
-                                  />
-                                  <div className="flex flex-col">
-                                    <span className="font-medium">{product.name}</span>
-                                    <span className="text-xs text-slate-500">
-                                      SKU: {product.sku} | คงเหลือ: {product.stock} {product.unit}
-                                    </span>
-                                  </div>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-
-                    <div className="w-32 space-y-2">
-                      <Label htmlFor="quantity" className="text-sm font-medium text-slate-700">
-                        จำนวน
-                      </Label>
-                      <Input
-                        id="quantity"
-                        type="number"
-                        min="1"
-                        value={quantity}
-                        onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
-                      />
-                    </div>
-
-                    <div className="flex items-end">
-                      <Button
-                        type="button"
-                        onClick={handleAddItem}
-                        className="bg-emerald-600 hover:bg-emerald-700"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        เพิ่ม
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Items Table */}
-              <Card className="border-slate-200 shadow-sm">
-                <CardHeader className="border-b bg-slate-50/50">
-                  <CardTitle className="text-lg">
-                    รายการสินค้า ({items.length} รายการ)
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-6">
-                  {items.length === 0 ? (
-                    <div className="text-center py-12 text-slate-400">
-                      <ShoppingCart className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                      <p>ยังไม่มีรายการสินค้า</p>
-                      <p className="text-sm mt-1">กรุณาเพิ่มสินค้าจากด้านบน</p>
-                    </div>
-                  ) : (
-                    <div className="rounded-lg border border-slate-200 overflow-hidden">
-                      <Table>
-                        <TableHeader className="bg-slate-50">
-                          <TableRow>
-                            <TableHead className="font-semibold text-slate-700">SKU</TableHead>
-                            <TableHead className="font-semibold text-slate-700">
-                              ชื่อสินค้า
-                            </TableHead>
-                            <TableHead className="text-right font-semibold text-slate-700">
-                              ราคา/หน่วย
-                            </TableHead>
-                            <TableHead className="text-center font-semibold text-slate-700">
-                              จำนวน
-                            </TableHead>
-                            <TableHead className="text-right font-semibold text-slate-700">
-                              รวม
-                            </TableHead>
-                            <TableHead className="w-[50px]"></TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {items.map((item, index) => (
-                            <TableRow key={index}>
-                              <TableCell className="font-medium text-slate-600">
-                                {item.sku}
-                              </TableCell>
-                              <TableCell className="font-medium text-slate-900">
-                                {item.name}
-                              </TableCell>
-                              <TableCell className="text-right">
-                                <Input
-                                  type="number"
-                                  min="0"
-                                  step="0.01"
-                                  value={item.price}
-                                  onChange={(e) => handleUpdatePrice(index, parseFloat(e.target.value) || 0)}
-                                  className="w-24 text-right"
-                                />
-                              </TableCell>
-                              <TableCell className="text-center font-medium text-slate-900">
-                                {item.qty} {item.unit}
-                              </TableCell>
-                              <TableCell className="text-right font-bold text-slate-900">
-                                ฿{item.total.toLocaleString()}
-                              </TableCell>
-                              <TableCell>
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleRemoveItem(index)}
-                                  className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+    <MainLayout>
+      <div className="p-4">
+        <div className="space-y-6 p-1">
+          {/* Header */}
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.back()}
+              className="h-9 w-9"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
+                สร้าง Sales Order ใหม่
+              </h1>
+              <p className="text-slate-500 mt-1">กรอกข้อมูลคำสั่งซื้อและเลือกสินค้า</p>
             </div>
+          </div>
 
-            {/* Right Column: Summary */}
-            <div className="space-y-6">
-              {/* Customer Info Card */}
-              {customerName && (
+          <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left Column: Order Information */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Basic Information Card */}
                 <Card className="border-slate-200 shadow-sm">
                   <CardHeader className="border-b bg-slate-50/50">
-                    <CardTitle className="text-lg">ข้อมูลลูกค้า</CardTitle>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <ShoppingCart className="h-5 w-5 text-blue-600" />
+                      ข้อมูลคำสั่งซื้อ
+                    </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-4 space-y-2">
-                    <div>
-                      <p className="text-xs text-slate-500">ชื่อบริษัท</p>
-                      <p className="text-sm font-medium text-slate-900">
-                        {customerName}
-                      </p>
+                  <CardContent className="p-6 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="customerName" className="text-sm font-medium text-slate-700">
+                          ชื่อลูกค้า <span className="text-red-500">*</span>
+                        </Label>
+                        <Input
+                          id="customerName"
+                          placeholder="ชื่อบริษัทหรือลูกค้า"
+                          value={customerName}
+                          onChange={(e) => setCustomerName(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="contactPerson" className="text-sm font-medium text-slate-700">
+                          ผู้ติดต่อ
+                        </Label>
+                        <Input
+                          id="contactPerson"
+                          placeholder="ชื่อผู้ติดต่อ"
+                          value={contactPerson}
+                          onChange={(e) => setContactPerson(e.target.value)}
+                        />
+                      </div>
                     </div>
-                    {contactPerson && (
-                      <div>
-                        <p className="text-xs text-slate-500">ผู้ติดต่อ</p>
-                        <p className="text-sm font-medium text-slate-900">
-                          {contactPerson}
-                        </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="text-sm font-medium text-slate-700">
+                          อีเมล
+                        </Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="email@example.com"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="phone" className="text-sm font-medium text-slate-700">
+                          เบอร์โทร
+                        </Label>
+                        <Input
+                          id="phone"
+                          placeholder="02-xxx-xxxx"
+                          value={phone}
+                          onChange={(e) => setPhone(e.target.value)}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="dueDate" className="text-sm font-medium text-slate-700">
+                        วันครบกำหนด <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="dueDate"
+                        type="date"
+                        value={dueDate}
+                        onChange={(e) => setDueDate(e.target.value)}
+                        min=""
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="remarks" className="text-sm font-medium text-slate-700">
+                        หมายเหตุ
+                      </Label>
+                      <Textarea
+                        id="remarks"
+                        placeholder="ข้อมูลเพิ่มเติม หรือเงื่อนไขพิเศษ..."
+                        value={remarks}
+                        onChange={(e) => setRemarks(e.target.value)}
+                        rows={3}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Add Items Card */}
+                <Card className="border-slate-200 shadow-sm">
+                  <CardHeader className="border-b bg-slate-50/50">
+                    <CardTitle className="text-lg">เพิ่มรายการสินค้า</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row gap-4">
+                      <div className="flex-1 space-y-2">
+                        <Label htmlFor="product" className="text-sm font-medium text-slate-700">
+                          สินค้า
+                        </Label>
+
+                        <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant="outline"
+                              role="combobox"
+                              aria-expanded={openCombobox}
+                              className="w-full justify-between"
+                            >
+                              {selectedProductId
+                                ? products.find((product) => product.id === selectedProductId)?.name
+                                : "เลือกสินค้า..."}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[400px] p-0" align="start">
+                            <div className="p-2 border-b">
+                              <div className="flex items-center border rounded-md px-3 bg-white">
+                                <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                                <input
+                                  className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
+                                  placeholder="ค้นหาสินค้า..."
+                                  value={searchTerm}
+                                  onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                              </div>
+                            </div>
+                            <div className="max-h-[300px] overflow-y-auto p-1">
+                              {filteredProducts.length === 0 ? (
+                                <div className="py-6 text-center text-sm text-slate-500">
+                                  ไม่พบสินค้า
+                                </div>
+                              ) : (
+                                filteredProducts.map((product) => (
+                                  <div
+                                    key={product.id}
+                                    className={cn(
+                                      "relative flex cursor-default select-none items-center rounded-sm px-2 py-2 text-sm outline-none hover:bg-slate-100 cursor-pointer",
+                                      selectedProductId === product.id ? "bg-slate-100" : ""
+                                    )}
+                                    onClick={() => {
+                                      setSelectedProductId(product.id === selectedProductId ? "" : product.id);
+                                      setOpenCombobox(false);
+                                    }}
+                                  >
+                                    <Check
+                                      className={cn(
+                                        "mr-2 h-4 w-4",
+                                        selectedProductId === product.id ? "opacity-100" : "opacity-0"
+                                      )}
+                                    />
+                                    <div className="flex flex-col">
+                                      <span className="font-medium">{product.name}</span>
+                                      <span className="text-xs text-slate-500">
+                                        SKU: {product.sku} | คงเหลือ: {product.stock} {product.unit}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </div>
+
+                      <div className="w-32 space-y-2">
+                        <Label htmlFor="quantity" className="text-sm font-medium text-slate-700">
+                          จำนวน
+                        </Label>
+                        <Input
+                          id="quantity"
+                          type="number"
+                          min="1"
+                          value={quantity}
+                          onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
+                        />
+                      </div>
+
+                      <div className="flex items-end">
+                        <Button
+                          type="button"
+                          onClick={handleAddItem}
+                          className="bg-emerald-600 hover:bg-emerald-700"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          เพิ่ม
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Items Table */}
+                <Card className="border-slate-200 shadow-sm">
+                  <CardHeader className="border-b bg-slate-50/50">
+                    <CardTitle className="text-lg">
+                      รายการสินค้า ({items.length} รายการ)
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    {items.length === 0 ? (
+                      <div className="text-center py-12 text-slate-400">
+                        <ShoppingCart className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                        <p>ยังไม่มีรายการสินค้า</p>
+                        <p className="text-sm mt-1">กรุณาเพิ่มสินค้าจากด้านบน</p>
+                      </div>
+                    ) : (
+                      <div className="rounded-lg border border-slate-200 overflow-hidden">
+                        <Table>
+                          <TableHeader className="bg-slate-50">
+                            <TableRow>
+                              <TableHead className="font-semibold text-slate-700">SKU</TableHead>
+                              <TableHead className="font-semibold text-slate-700">
+                                ชื่อสินค้า
+                              </TableHead>
+                              <TableHead className="text-right font-semibold text-slate-700">
+                                ราคา/หน่วย
+                              </TableHead>
+                              <TableHead className="text-center font-semibold text-slate-700">
+                                จำนวน
+                              </TableHead>
+                              <TableHead className="text-right font-semibold text-slate-700">
+                                รวม
+                              </TableHead>
+                              <TableHead className="w-[50px]"></TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {items.map((item, index) => (
+                              <TableRow key={index}>
+                                <TableCell className="font-medium text-slate-600">
+                                  {item.sku}
+                                </TableCell>
+                                <TableCell className="font-medium text-slate-900">
+                                  {item.name}
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <Input
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    value={item.price}
+                                    onChange={(e) => handleUpdatePrice(index, parseFloat(e.target.value) || 0)}
+                                    className="w-24 text-right"
+                                  />
+                                </TableCell>
+                                <TableCell className="text-center font-medium text-slate-900">
+                                  {item.qty} {item.unit}
+                                </TableCell>
+                                <TableCell className="text-right font-bold text-slate-900">
+                                  ฿{item.total.toLocaleString()}
+                                </TableCell>
+                                <TableCell>
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => handleRemoveItem(index)}
+                                    className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
                       </div>
                     )}
                   </CardContent>
                 </Card>
-              )}
+              </div>
 
-              {/* Order Summary Card */}
-              <Card className="border-slate-200 shadow-sm sticky top-6">
-                <CardHeader className="border-b bg-slate-50/50">
-                  <CardTitle className="text-lg">สรุปคำสั่งซื้อ</CardTitle>
-                </CardHeader>
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-sm text-slate-500">ยอดรวม</span>
-                    <span className="text-sm font-medium text-slate-900">
-                      ฿{subtotal.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-sm text-slate-500">VAT 7%</span>
-                    <span className="text-sm font-medium text-slate-900">
-                      ฿{vatAmount.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="border-t border-slate-200 pt-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-base font-semibold text-slate-900">
-                        ยอดรวมทั้งสิ้น
-                      </span>
-                      <span className="text-xl font-bold text-blue-600">
-                        ฿{grandTotal.toLocaleString()}
+              {/* Right Column: Summary */}
+              <div className="space-y-6">
+                {/* Customer Info Card */}
+                {customerName && (
+                  <Card className="border-slate-200 shadow-sm">
+                    <CardHeader className="border-b bg-slate-50/50">
+                      <CardTitle className="text-lg">ข้อมูลลูกค้า</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4 space-y-2">
+                      <div>
+                        <p className="text-xs text-slate-500">ชื่อบริษัท</p>
+                        <p className="text-sm font-medium text-slate-900">
+                          {customerName}
+                        </p>
+                      </div>
+                      {contactPerson && (
+                        <div>
+                          <p className="text-xs text-slate-500">ผู้ติดต่อ</p>
+                          <p className="text-sm font-medium text-slate-900">
+                            {contactPerson}
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Order Summary Card */}
+                <Card className="border-slate-200 shadow-sm sticky top-6">
+                  <CardHeader className="border-b bg-slate-50/50">
+                    <CardTitle className="text-lg">สรุปคำสั่งซื้อ</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-sm text-slate-500">ยอดรวม</span>
+                      <span className="text-sm font-medium text-slate-900">
+                        ฿{subtotal.toLocaleString()}
                       </span>
                     </div>
-                  </div>
+                    <div className="flex justify-between items-center py-2">
+                      <span className="text-sm text-slate-500">VAT 7%</span>
+                      <span className="text-sm font-medium text-slate-900">
+                        ฿{vatAmount.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="border-t border-slate-200 pt-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-base font-semibold text-slate-900">
+                          ยอดรวมทั้งสิ้น
+                        </span>
+                        <span className="text-xl font-bold text-blue-600">
+                          ฿{grandTotal.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
 
-                  <div className="pt-4 space-y-2">
-                    <Button
-                      type="submit"
-                      className="w-full bg-blue-600 hover:bg-blue-700"
-                      disabled={items.length === 0}
-                    >
-                      <Save className="h-4 w-4 mr-2" />
-                      สร้าง Sales Order
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => router.back()}
-                    >
-                      ยกเลิก
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+                    <div className="pt-4 space-y-2">
+                      <Button
+                        type="submit"
+                        className="w-full bg-blue-600 hover:bg-blue-700"
+                        disabled={items.length === 0}
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        สร้าง Sales Order
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => router.back()}
+                      >
+                        ยกเลิก
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
+    </MainLayout>
   );
 }

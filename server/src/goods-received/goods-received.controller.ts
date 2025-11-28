@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { GoodsReceivedService } from './goods-received.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('goods-received')
 export class GoodsReceivedController {
@@ -20,9 +21,8 @@ export class GoodsReceivedController {
         return this.goodsReceivedService.findOne(id);
     }
     @Post()
-    create(@Body() body: any) {
-        // Mock user ID for now
-        const userId = 'user-admin-001';
-        return this.goodsReceivedService.create({ ...body, userId });
+    @UseGuards(JwtAuthGuard)
+    create(@Body() body: any, @Request() req: any) {
+        return this.goodsReceivedService.create({ ...body, userId: req.user.id });
     }
 }

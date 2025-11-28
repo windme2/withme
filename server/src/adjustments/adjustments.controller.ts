@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, UseGuards, Request } from '@nestjs/common';
 import { AdjustmentsService } from './adjustments.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('adjustments')
 export class AdjustmentsController {
@@ -20,9 +21,8 @@ export class AdjustmentsController {
         return this.adjustmentsService.findOne(id);
     }
     @Post()
-    create(@Body() body: any) {
-        // Mock user ID for now, in real app get from request/auth
-        const userId = 'user-admin-001';
-        return this.adjustmentsService.create({ ...body, userId });
+    @UseGuards(JwtAuthGuard)
+    create(@Body() body: any, @Request() req: any) {
+        return this.adjustmentsService.create({ ...body, userId: req.user.id });
     }
 }

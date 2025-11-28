@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Body, Query, Param, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Param, Patch, UseGuards, Request } from '@nestjs/common';
 import { PurchasingService } from './purchasing.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('purchasing/requisitions')
 export class PurchasingController {
@@ -16,10 +17,9 @@ export class PurchasingController {
     }
 
     @Post()
-    create(@Body() createDto: any) {
-        // Hardcoded userId for now until Auth is implemented
-        const userId = 'user-admin-001';
-        return this.purchasingService.create({ ...createDto, userId });
+    @UseGuards(JwtAuthGuard)
+    create(@Body() createDto: any, @Request() req: any) {
+        return this.purchasingService.create({ ...createDto, userId: req.user.id });
     }
 
     @Patch(':id/status')

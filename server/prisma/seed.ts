@@ -2,6 +2,7 @@ import { PrismaClient } from '../generated/client/client';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import * as dotenv from 'dotenv';
+import * as bcrypt from 'bcrypt';
 
 dotenv.config();
 
@@ -14,6 +15,9 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
     console.log('🌱 Starting seed...');
 
+    // Hash the admin password
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+
     // 1. Create Admin User
     const adminUser = await prisma.users.upsert({
         where: { username: 'admin' },
@@ -22,7 +26,7 @@ async function main() {
             id: 'user-admin-001',
             email: 'admin@example.com',
             username: 'admin',
-            password_hash: 'admin123',
+            password_hash: hashedPassword,
             first_name: 'Admin',
             last_name: 'User',
             role: 'admin',

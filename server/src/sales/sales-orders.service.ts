@@ -72,7 +72,7 @@ export class SalesOrdersService {
         };
     }
 
-    async create(data: any) {
+    async create(data: any, userId: string) {
         const { customerName, contactPerson, email, phone, dueDate, items, notes } = data;
 
         return this.prisma.$transaction(async (tx) => {
@@ -92,7 +92,7 @@ export class SalesOrdersService {
                     due_date: dueDate ? new Date(dueDate) : null,
                     total_amount: totalAmount,
                     notes: notes,
-                    created_by: 'user-admin-001', // TODO: Replace with actual user ID
+                    created_by: userId,
                 }
             });
 
