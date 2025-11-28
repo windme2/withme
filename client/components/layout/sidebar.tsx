@@ -104,6 +104,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
+  const [mounted, setMounted] = useState(false);
   const [userRole, setUserRole] = useState<string>("user");
   const [expandedModules, setExpandedModules] = useState<Set<string>>(
     new Set()
@@ -112,7 +113,11 @@ export function Sidebar() {
   const prevCollapsedRef = useRef(collapsed);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (mounted) {
       setUserRole(localStorage.getItem("userRole") || "user");
       const saved = localStorage.getItem("sidebar-expanded-modules");
       if (saved) {
@@ -123,7 +128,7 @@ export function Sidebar() {
         setExpandedModules(new Set(sidebarModules.map((m) => m.label)));
       }
     }
-  }, []);
+  }, [mounted]);
 
   useEffect(() => {
     if (prevCollapsedRef.current === true && collapsed === false) {
@@ -134,13 +139,13 @@ export function Sidebar() {
   }, [collapsed]);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (mounted) {
       localStorage.setItem(
         "sidebar-expanded-modules",
         JSON.stringify(Array.from(expandedModules))
       );
     }
-  }, [expandedModules]);
+  }, [expandedModules, mounted]);
 
   const toggleModule = (label: string) => {
     setExpandedModules((prev) => {

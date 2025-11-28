@@ -33,11 +33,17 @@ interface Notification {
 
 export function NotificationDropdown() {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
   const fetchNotifications = async () => {
+    // Check if user is logged in
+    if (typeof window === "undefined") return;
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
     try {
       const data = await notificationsApi.getAll();
       setNotifications(data);
@@ -48,11 +54,17 @@ export function NotificationDropdown() {
   };
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+
     fetchNotifications();
     // Poll every 30 seconds
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [mounted]);
 
   const handleMarkAsRead = async (id: string) => {
     try {
