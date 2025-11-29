@@ -23,7 +23,11 @@ export class PurchasingController {
     }
 
     @Patch(':id/status')
-    updateStatus(@Param('id') id: string, @Body('status') status: string) {
-        return this.purchasingService.updateStatus(id, status);
+    updateStatus(
+        @Param('id') id: string,
+        @Body() body: { status: string; supplierId?: string; approverId?: string }
+    ) {
+        // approverId must be provided by client (from auth) — server will validate role
+        return this.purchasingService.updateStatus(id, body.status, body.approverId, body.supplierId);
     }
 }

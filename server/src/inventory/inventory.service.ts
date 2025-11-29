@@ -13,15 +13,24 @@ export class InventoryService {
             }
         });
 
-        return products.map(product => ({
-            id: product.id,
-            name: product.name,
-            sku: product.sku,
-            category: product.categories?.name || 'Uncategorized',
-            stock: product.inventory_levels?.quantity || 0,
-            price: 0, // Placeholder as price is not in products table
-            status: this.determineStatus(product.inventory_levels?.quantity || 0, product.minimum_stock),
-        }));
+        return products.map(product => {
+            const quantity = product.inventory_levels?.quantity || 0;
+            const unitPrice = Number(product.unit_price) || 0;
+            const amount = quantity * unitPrice;
+            
+            return {
+                id: product.id,
+                name: product.name,
+                sku: product.sku,
+                category: product.categories?.name || 'Uncategorized',
+                stock: quantity,
+                unitPrice: unitPrice,
+                amount: amount,
+                minStock: product.minimum_stock,
+                maxStock: product.maximum_stock || product.minimum_stock * 2,
+                status: this.determineStatus(quantity, product.minimum_stock),
+            };
+        });
     }
 
     private determineStatus(stock: number, minStock: number): string {
@@ -35,14 +44,11 @@ export class InventoryService {
         return this.prisma.products.update({
             where: { id },
             data: {
-                name: data.name,
-                // sku: data.sku, // SKU usually not editable
-                // category: ... // logic to update category relation
-                inventory_levels: {
-                    update: {
-                        quantity: data.stock
-                    }
-                }
+                category_id: data.categoryId,
+                unit_price: data.unitPrice,
+                minimum_stock: data.minStock,
+                maximum_stock: data.maxStock,
+                updated_at: new Date(),
             },
             include: {
                 inventory_levels: true,

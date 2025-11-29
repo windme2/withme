@@ -145,6 +145,20 @@ export class SalesReturnsService {
         }
     }
 
+    async createWithNotification(data: any, notificationsService: any) {
+        const salesReturn = await this.create(data);
+        
+        // Send notification
+        await notificationsService.create({
+            title: 'New Return Created',
+            message: `Return ${salesReturn.return_number} from ${data.customerName}`,
+            type: 'info',
+            link: '/sales/returns'
+        });
+        
+        return salesReturn;
+    }
+
     async updateStatus(id: string, status: string) {
         return this.prisma.sales_returns.update({
             where: { return_number: id },

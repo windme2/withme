@@ -208,6 +208,7 @@ export const ProductsScalarFieldEnum = {
   description: 'description',
   category_id: 'category_id',
   unit: 'unit',
+  unit_price: 'unit_price',
   minimum_stock: 'minimum_stock',
   maximum_stock: 'maximum_stock',
   reorder_point: 'reorder_point',
@@ -223,6 +224,7 @@ export const Purchase_requisition_itemsScalarFieldEnum = {
   pr_id: 'pr_id',
   product_id: 'product_id',
   quantity: 'quantity',
+  estimated_unit_price: 'estimated_unit_price',
   required_date: 'required_date',
   status: 'status',
   notes: 'notes'
@@ -235,6 +237,7 @@ export const Purchase_requisitionsScalarFieldEnum = {
   id: 'id',
   pr_number: 'pr_number',
   requested_by: 'requested_by',
+  supplier_id: 'supplier_id',
   department: 'department',
   status: 'status',
   requested_date: 'requested_date',

@@ -60,8 +60,7 @@ export type PurchaseRequisitionStatus = (typeof PurchaseRequisitionStatus)[keyof
 
 export const Role = {
   admin: 'admin',
-  manager: 'manager',
-  staff: 'staff'
+  user: 'user'
 } as const
 
 export type Role = (typeof Role)[keyof typeof Role]

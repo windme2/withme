@@ -31,10 +31,10 @@ export default function LoginPage() {
       const response = await authApi.login({ email, password });
 
       if (response && response.token) {
-        localStorage.setItem("isAuthenticated", "true");
-        localStorage.setItem("userEmail", response.user.email);
-        localStorage.setItem("userRole", response.user.role);
         localStorage.setItem("token", response.token);
+        localStorage.setItem("user", JSON.stringify(response.user));
+        localStorage.setItem("isAuthenticated", "true");
+        localStorage.setItem("userRole", response.user.role);
 
         setIsLoading(false);
         setShowLoadingScreen(true);
@@ -46,7 +46,7 @@ export default function LoginPage() {
       }
     } catch (error) {
       console.error("Login error:", error);
-      alert("Invalid email or password. Please try again.");
+      alert("Invalid username or password. Please try again.");
       setIsLoading(false);
     }
   };
@@ -57,42 +57,39 @@ export default function LoginPage() {
       {showLoadingScreen && <CustomLoadingScreen />}
 
       {/* Main Container */}
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950 p-4 relative overflow-hidden">
-        {/* Decorative Background (Blue Only - No Purple) */}
-        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-slate-700/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="min-h-screen flex items-center justify-center bg-white p-4 relative overflow-hidden">
+        {/* Decorative Background (Subtle) */}
+        <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-50 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-slate-50 rounded-full blur-[100px] pointer-events-none" />
 
         <div className="w-full max-w-md relative z-10 flex flex-col items-center">
           {/* --- Logo Section (Monotone Blue/Slate) --- */}
           <div className="mb-8 flex flex-col items-center">
             <div className="relative w-20 h-20 flex items-center justify-center mb-4 group cursor-default">
-              {/* Layer 1: Shadow Base */}
-              <div className="absolute inset-0 bg-slate-800 rounded-2xl transform rotate-6 opacity-80 blur-[1px] border border-slate-700/50 transition-transform duration-500 group-hover:rotate-12"></div>
-
-              {/* Layer 2: Main Box */}
+              {/* Main Box */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl shadow-2xl flex items-center justify-center border border-blue-400/20 group-hover:scale-105 transition-transform duration-300">
                 <Layers className="w-10 h-10 text-white drop-shadow-md" />
               </div>
 
-              {/* Layer 3: Shine Effect */}
+              {/* Shine Effect */}
               <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-white/10 to-transparent rounded-t-2xl"></div>
             </div>
 
-            <h1 className="text-3xl font-bold text-white tracking-tight mb-1">
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-1">
               Withme
             </h1>
-            <p className="text-slate-400 text-sm font-light tracking-wide uppercase">
+            <p className="text-slate-600 text-sm font-light tracking-wide uppercase">
               Inventory Management System
             </p>
           </div>
 
           {/* --- Login Card --- */}
-          <Card className="w-full border border-slate-700/50 shadow-2xl bg-slate-900/80 backdrop-blur-xl">
+          <Card className="w-full border border-slate-200 shadow-2xl bg-white">
             <CardHeader className="text-center pb-2 space-y-1">
-              <CardTitle className="text-xl font-medium text-white">
+              <CardTitle className="text-xl font-medium text-slate-900">
                 Login
               </CardTitle>
-              <p className="text-slate-400 text-xs">
+              <p className="text-slate-600 text-xs">
                 Enter your credentials to access the dashboard
               </p>
             </CardHeader>
@@ -101,7 +98,7 @@ export default function LoginPage() {
               <form onSubmit={handleLogin} className="space-y-5">
                 {/* Email */}
                 <div className="space-y-2">
-                  <Label htmlFor="email" className="text-sm text-slate-300">
+                  <Label htmlFor="email" className="text-sm text-slate-700">
                     Username / Email
                   </Label>
                   <div className="relative">
@@ -112,7 +109,7 @@ export default function LoginPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="h-11 pl-4 bg-slate-950/50 border-slate-700 text-slate-100 placeholder:text-slate-600 focus:border-blue-500 focus:ring-blue-500/20 transition-all"
+                      className="h-11 pl-4 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20 transition-all"
                       disabled={isLoading}
                     />
                   </div>
@@ -123,7 +120,7 @@ export default function LoginPage() {
                   <div className="flex justify-between items-center">
                     <Label
                       htmlFor="password"
-                      className="text-sm text-slate-300"
+                      className="text-sm text-slate-700"
                     >
                       Password
                     </Label>
@@ -135,7 +132,7 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="h-11 pl-4 bg-slate-950/50 border-slate-700 text-slate-100 placeholder:text-slate-600 focus:border-blue-500 focus:ring-blue-500/20 transition-all"
+                    className="h-11 pl-4 bg-white border-slate-300 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-blue-500/20 transition-all"
                     disabled={isLoading}
                   />
                 </div>
@@ -150,21 +147,15 @@ export default function LoginPage() {
                         setRememberMe(checked as boolean)
                       }
                       disabled={isLoading}
-                      className="border-slate-600 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+                      className="border-slate-300 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
                     />
                     <Label
                       htmlFor="remember"
-                      className="text-slate-300 font-normal cursor-pointer hover:text-white transition-colors"
+                      className="text-slate-700 font-normal cursor-pointer hover:text-slate-900 transition-colors"
                     >
                       Remember me
                     </Label>
                   </div>
-                  <Link
-                    href="/forgot-password"
-                    className="text-blue-400 hover:text-blue-300 transition-colors font-medium"
-                  >
-                    Forgot password?
-                  </Link>
                 </div>
 
                 {/* Button */}
@@ -188,7 +179,7 @@ export default function LoginPage() {
 
           {/* --- Footer --- */}
           <div className="mt-8 text-center">
-            <p className="text-white text-xs font-medium tracking-wide opacity-90">
+            <p className="text-slate-600 text-xs font-medium tracking-wide">
               © 2025 Withme | All rights reserved.
             </p>
           </div>

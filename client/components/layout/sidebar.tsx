@@ -35,7 +35,7 @@ interface SidebarModule {
   noCollapse?: boolean;
 }
 
-const sidebarModules: SidebarModule[] = [
+const getSidebarModules = (userRole: string): SidebarModule[] => [
   {
     label: "Dashboard",
     icon: LayoutDashboard,
@@ -50,7 +50,7 @@ const sidebarModules: SidebarModule[] = [
     items: [
       { name: "รายการสินค้าทั้งหมด", path: "/inventory/items" },
       { name: "รายการสินค้ารับเข้า", path: "/inventory/goods-received" },
-      { name: "ปรับปรุงรายการสินค้า", path: "/inventory/adjustments" },
+      ...(userRole === 'admin' ? [{ name: "ปรับปรุงรายการสินค้า", path: "/inventory/adjustments" }] : []),
     ],
     defaultOpen: true,
   },
@@ -62,7 +62,7 @@ const sidebarModules: SidebarModule[] = [
       { name: "รายการใบขอซื้อ (PR)", path: "/purchasing/requisition" },
       { name: "สถานะคำขอ (PR)", path: "/purchasing/status" },
       { name: "รายการใบสั่งซื้อ (PO)", path: "/purchasing/orders" },
-      { name: "รายชื่อ Suppliers", path: "/purchasing/suppliers" },
+      ...(userRole === 'admin' ? [{ name: "รายชื่อ Suppliers", path: "/purchasing/suppliers" }] : []),
     ],
     defaultOpen: true,
   },
@@ -93,7 +93,6 @@ const sidebarModules: SidebarModule[] = [
     emoji: "👥",
     items: [
       { name: "จัดการผู้ใช้", path: "/admin/user-management" },
-      { name: "กิจกรรมล่าสุด", path: "/admin/activity-log" },
     ],
     defaultOpen: true,
     adminOnly: true,
@@ -106,6 +105,7 @@ export function Sidebar() {
   const router = useRouter();
 
   const [userRole, setUserRole] = useState<string>("user");
+  const [sidebarModules, setSidebarModules] = useState<SidebarModule[]>([]);
   const [expandedModules, setExpandedModules] = useState<Set<string>>(
     new Set()
   );
@@ -114,14 +114,18 @@ export function Sidebar() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      setUserRole(localStorage.getItem("userRole") || "user");
+      const role = localStorage.getItem("userRole") || "user";
+      setUserRole(role);
+      const modules = getSidebarModules(role);
+      setSidebarModules(modules);
+      
       const saved = localStorage.getItem("sidebar-expanded-modules");
       if (saved) {
         try {
           setExpandedModules(new Set(JSON.parse(saved)));
         } catch {}
       } else {
-        setExpandedModules(new Set(sidebarModules.map((m) => m.label)));
+        setExpandedModules(new Set(modules.map((m) => m.label)));
       }
     }
   }, []);

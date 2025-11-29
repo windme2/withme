@@ -238,7 +238,7 @@ export default function StockAdjustmentPage() {
                           Type
                         </TableHead>
                         <TableHead className="font-semibold text-slate-700 pr-6 h-12">
-                          Remark
+                          Reason
                         </TableHead>
                       </TableRow>
                     </TableHeader>
@@ -331,10 +331,10 @@ export default function StockAdjustmentPage() {
               <SheetHeader className="mb-6 border-b pb-4">
                 <SheetTitle className="text-xl flex items-center gap-2">
                   <FileClock className="h-5 w-5 text-blue-600" />
-                  Adjustment Details
+                  Stock Adjustment
                 </SheetTitle>
                 <SheetDescription>
-                  Review history for {selectedAdjustment.id}.
+                  Review Details for {selectedAdjustment.id}
                 </SheetDescription>
               </SheetHeader>
 

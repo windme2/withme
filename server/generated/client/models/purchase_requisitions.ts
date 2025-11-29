@@ -28,6 +28,7 @@ export type Purchase_requisitionsMinAggregateOutputType = {
   id: string | null
   pr_number: string | null
   requested_by: string | null
+  supplier_id: string | null
   department: string | null
   status: $Enums.PurchaseRequisitionStatus | null
   requested_date: Date | null
@@ -42,6 +43,7 @@ export type Purchase_requisitionsMaxAggregateOutputType = {
   id: string | null
   pr_number: string | null
   requested_by: string | null
+  supplier_id: string | null
   department: string | null
   status: $Enums.PurchaseRequisitionStatus | null
   requested_date: Date | null
@@ -56,6 +58,7 @@ export type Purchase_requisitionsCountAggregateOutputType = {
   id: number
   pr_number: number
   requested_by: number
+  supplier_id: number
   department: number
   status: number
   requested_date: number
@@ -72,6 +75,7 @@ export type Purchase_requisitionsMinAggregateInputType = {
   id?: true
   pr_number?: true
   requested_by?: true
+  supplier_id?: true
   department?: true
   status?: true
   requested_date?: true
@@ -86,6 +90,7 @@ export type Purchase_requisitionsMaxAggregateInputType = {
   id?: true
   pr_number?: true
   requested_by?: true
+  supplier_id?: true
   department?: true
   status?: true
   requested_date?: true
@@ -100,6 +105,7 @@ export type Purchase_requisitionsCountAggregateInputType = {
   id?: true
   pr_number?: true
   requested_by?: true
+  supplier_id?: true
   department?: true
   status?: true
   requested_date?: true
@@ -187,6 +193,7 @@ export type Purchase_requisitionsGroupByOutputType = {
   id: string
   pr_number: string
   requested_by: string
+  supplier_id: string | null
   department: string
   status: $Enums.PurchaseRequisitionStatus
   requested_date: Date
@@ -222,6 +229,7 @@ export type purchase_requisitionsWhereInput = {
   id?: Prisma.StringFilter<"purchase_requisitions"> | string
   pr_number?: Prisma.StringFilter<"purchase_requisitions"> | string
   requested_by?: Prisma.StringFilter<"purchase_requisitions"> | string
+  supplier_id?: Prisma.StringNullableFilter<"purchase_requisitions"> | string | null
   department?: Prisma.StringFilter<"purchase_requisitions"> | string
   status?: Prisma.EnumPurchaseRequisitionStatusFilter<"purchase_requisitions"> | $Enums.PurchaseRequisitionStatus
   requested_date?: Prisma.DateTimeFilter<"purchase_requisitions"> | Date | string
@@ -231,6 +239,7 @@ export type purchase_requisitionsWhereInput = {
   created_at?: Prisma.DateTimeFilter<"purchase_requisitions"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"purchase_requisitions"> | Date | string
   purchase_requisition_items?: Prisma.Purchase_requisition_itemsListRelationFilter
+  suppliers?: Prisma.XOR<Prisma.SuppliersNullableScalarRelationFilter, Prisma.suppliersWhereInput> | null
   users_purchase_requisitions_approved_byTousers?: Prisma.XOR<Prisma.UsersNullableScalarRelationFilter, Prisma.usersWhereInput> | null
   users_purchase_requisitions_requested_byTousers?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
 }
@@ -239,6 +248,7 @@ export type purchase_requisitionsOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   pr_number?: Prisma.SortOrder
   requested_by?: Prisma.SortOrder
+  supplier_id?: Prisma.SortOrderInput | Prisma.SortOrder
   department?: Prisma.SortOrder
   status?: Prisma.SortOrder
   requested_date?: Prisma.SortOrder
@@ -248,6 +258,7 @@ export type purchase_requisitionsOrderByWithRelationInput = {
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
   purchase_requisition_items?: Prisma.purchase_requisition_itemsOrderByRelationAggregateInput
+  suppliers?: Prisma.suppliersOrderByWithRelationInput
   users_purchase_requisitions_approved_byTousers?: Prisma.usersOrderByWithRelationInput
   users_purchase_requisitions_requested_byTousers?: Prisma.usersOrderByWithRelationInput
 }
@@ -259,6 +270,7 @@ export type purchase_requisitionsWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.purchase_requisitionsWhereInput[]
   NOT?: Prisma.purchase_requisitionsWhereInput | Prisma.purchase_requisitionsWhereInput[]
   requested_by?: Prisma.StringFilter<"purchase_requisitions"> | string
+  supplier_id?: Prisma.StringNullableFilter<"purchase_requisitions"> | string | null
   department?: Prisma.StringFilter<"purchase_requisitions"> | string
   status?: Prisma.EnumPurchaseRequisitionStatusFilter<"purchase_requisitions"> | $Enums.PurchaseRequisitionStatus
   requested_date?: Prisma.DateTimeFilter<"purchase_requisitions"> | Date | string
@@ -268,6 +280,7 @@ export type purchase_requisitionsWhereUniqueInput = Prisma.AtLeast<{
   created_at?: Prisma.DateTimeFilter<"purchase_requisitions"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"purchase_requisitions"> | Date | string
   purchase_requisition_items?: Prisma.Purchase_requisition_itemsListRelationFilter
+  suppliers?: Prisma.XOR<Prisma.SuppliersNullableScalarRelationFilter, Prisma.suppliersWhereInput> | null
   users_purchase_requisitions_approved_byTousers?: Prisma.XOR<Prisma.UsersNullableScalarRelationFilter, Prisma.usersWhereInput> | null
   users_purchase_requisitions_requested_byTousers?: Prisma.XOR<Prisma.UsersScalarRelationFilter, Prisma.usersWhereInput>
 }, "id" | "pr_number">
@@ -276,6 +289,7 @@ export type purchase_requisitionsOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   pr_number?: Prisma.SortOrder
   requested_by?: Prisma.SortOrder
+  supplier_id?: Prisma.SortOrderInput | Prisma.SortOrder
   department?: Prisma.SortOrder
   status?: Prisma.SortOrder
   requested_date?: Prisma.SortOrder
@@ -296,6 +310,7 @@ export type purchase_requisitionsScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"purchase_requisitions"> | string
   pr_number?: Prisma.StringWithAggregatesFilter<"purchase_requisitions"> | string
   requested_by?: Prisma.StringWithAggregatesFilter<"purchase_requisitions"> | string
+  supplier_id?: Prisma.StringNullableWithAggregatesFilter<"purchase_requisitions"> | string | null
   department?: Prisma.StringWithAggregatesFilter<"purchase_requisitions"> | string
   status?: Prisma.EnumPurchaseRequisitionStatusWithAggregatesFilter<"purchase_requisitions"> | $Enums.PurchaseRequisitionStatus
   requested_date?: Prisma.DateTimeWithAggregatesFilter<"purchase_requisitions"> | Date | string
@@ -317,6 +332,7 @@ export type purchase_requisitionsCreateInput = {
   created_at?: Date | string
   updated_at: Date | string
   purchase_requisition_items?: Prisma.purchase_requisition_itemsCreateNestedManyWithoutPurchase_requisitionsInput
+  suppliers?: Prisma.suppliersCreateNestedOneWithoutPurchase_requisitionsInput
   users_purchase_requisitions_approved_byTousers?: Prisma.usersCreateNestedOneWithoutPurchase_requisitions_purchase_requisitions_approved_byTousersInput
   users_purchase_requisitions_requested_byTousers: Prisma.usersCreateNestedOneWithoutPurchase_requisitions_purchase_requisitions_requested_byTousersInput
 }
@@ -325,6 +341,7 @@ export type purchase_requisitionsUncheckedCreateInput = {
   id: string
   pr_number: string
   requested_by: string
+  supplier_id?: string | null
   department: string
   status: $Enums.PurchaseRequisitionStatus
   requested_date: Date | string
@@ -347,6 +364,7 @@ export type purchase_requisitionsUpdateInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUpdateManyWithoutPurchase_requisitionsNestedInput
+  suppliers?: Prisma.suppliersUpdateOneWithoutPurchase_requisitionsNestedInput
   users_purchase_requisitions_approved_byTousers?: Prisma.usersUpdateOneWithoutPurchase_requisitions_purchase_requisitions_approved_byTousersNestedInput
   users_purchase_requisitions_requested_byTousers?: Prisma.usersUpdateOneRequiredWithoutPurchase_requisitions_purchase_requisitions_requested_byTousersNestedInput
 }
@@ -355,6 +373,7 @@ export type purchase_requisitionsUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   pr_number?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by?: Prisma.StringFieldUpdateOperationsInput | string
+  supplier_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPurchaseRequisitionStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionStatus
   requested_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -370,6 +389,7 @@ export type purchase_requisitionsCreateManyInput = {
   id: string
   pr_number: string
   requested_by: string
+  supplier_id?: string | null
   department: string
   status: $Enums.PurchaseRequisitionStatus
   requested_date: Date | string
@@ -396,6 +416,7 @@ export type purchase_requisitionsUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   pr_number?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by?: Prisma.StringFieldUpdateOperationsInput | string
+  supplier_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPurchaseRequisitionStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionStatus
   requested_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -415,6 +436,7 @@ export type purchase_requisitionsCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   pr_number?: Prisma.SortOrder
   requested_by?: Prisma.SortOrder
+  supplier_id?: Prisma.SortOrder
   department?: Prisma.SortOrder
   status?: Prisma.SortOrder
   requested_date?: Prisma.SortOrder
@@ -429,6 +451,7 @@ export type purchase_requisitionsMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   pr_number?: Prisma.SortOrder
   requested_by?: Prisma.SortOrder
+  supplier_id?: Prisma.SortOrder
   department?: Prisma.SortOrder
   status?: Prisma.SortOrder
   requested_date?: Prisma.SortOrder
@@ -443,6 +466,7 @@ export type purchase_requisitionsMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   pr_number?: Prisma.SortOrder
   requested_by?: Prisma.SortOrder
+  supplier_id?: Prisma.SortOrder
   department?: Prisma.SortOrder
   status?: Prisma.SortOrder
   requested_date?: Prisma.SortOrder
@@ -479,6 +503,48 @@ export type purchase_requisitionsUpdateOneRequiredWithoutPurchase_requisition_it
 
 export type EnumPurchaseRequisitionStatusFieldUpdateOperationsInput = {
   set?: $Enums.PurchaseRequisitionStatus
+}
+
+export type purchase_requisitionsCreateNestedManyWithoutSuppliersInput = {
+  create?: Prisma.XOR<Prisma.purchase_requisitionsCreateWithoutSuppliersInput, Prisma.purchase_requisitionsUncheckedCreateWithoutSuppliersInput> | Prisma.purchase_requisitionsCreateWithoutSuppliersInput[] | Prisma.purchase_requisitionsUncheckedCreateWithoutSuppliersInput[]
+  connectOrCreate?: Prisma.purchase_requisitionsCreateOrConnectWithoutSuppliersInput | Prisma.purchase_requisitionsCreateOrConnectWithoutSuppliersInput[]
+  createMany?: Prisma.purchase_requisitionsCreateManySuppliersInputEnvelope
+  connect?: Prisma.purchase_requisitionsWhereUniqueInput | Prisma.purchase_requisitionsWhereUniqueInput[]
+}
+
+export type purchase_requisitionsUncheckedCreateNestedManyWithoutSuppliersInput = {
+  create?: Prisma.XOR<Prisma.purchase_requisitionsCreateWithoutSuppliersInput, Prisma.purchase_requisitionsUncheckedCreateWithoutSuppliersInput> | Prisma.purchase_requisitionsCreateWithoutSuppliersInput[] | Prisma.purchase_requisitionsUncheckedCreateWithoutSuppliersInput[]
+  connectOrCreate?: Prisma.purchase_requisitionsCreateOrConnectWithoutSuppliersInput | Prisma.purchase_requisitionsCreateOrConnectWithoutSuppliersInput[]
+  createMany?: Prisma.purchase_requisitionsCreateManySuppliersInputEnvelope
+  connect?: Prisma.purchase_requisitionsWhereUniqueInput | Prisma.purchase_requisitionsWhereUniqueInput[]
+}
+
+export type purchase_requisitionsUpdateManyWithoutSuppliersNestedInput = {
+  create?: Prisma.XOR<Prisma.purchase_requisitionsCreateWithoutSuppliersInput, Prisma.purchase_requisitionsUncheckedCreateWithoutSuppliersInput> | Prisma.purchase_requisitionsCreateWithoutSuppliersInput[] | Prisma.purchase_requisitionsUncheckedCreateWithoutSuppliersInput[]
+  connectOrCreate?: Prisma.purchase_requisitionsCreateOrConnectWithoutSuppliersInput | Prisma.purchase_requisitionsCreateOrConnectWithoutSuppliersInput[]
+  upsert?: Prisma.purchase_requisitionsUpsertWithWhereUniqueWithoutSuppliersInput | Prisma.purchase_requisitionsUpsertWithWhereUniqueWithoutSuppliersInput[]
+  createMany?: Prisma.purchase_requisitionsCreateManySuppliersInputEnvelope
+  set?: Prisma.purchase_requisitionsWhereUniqueInput | Prisma.purchase_requisitionsWhereUniqueInput[]
+  disconnect?: Prisma.purchase_requisitionsWhereUniqueInput | Prisma.purchase_requisitionsWhereUniqueInput[]
+  delete?: Prisma.purchase_requisitionsWhereUniqueInput | Prisma.purchase_requisitionsWhereUniqueInput[]
+  connect?: Prisma.purchase_requisitionsWhereUniqueInput | Prisma.purchase_requisitionsWhereUniqueInput[]
+  update?: Prisma.purchase_requisitionsUpdateWithWhereUniqueWithoutSuppliersInput | Prisma.purchase_requisitionsUpdateWithWhereUniqueWithoutSuppliersInput[]
+  updateMany?: Prisma.purchase_requisitionsUpdateManyWithWhereWithoutSuppliersInput | Prisma.purchase_requisitionsUpdateManyWithWhereWithoutSuppliersInput[]
+  deleteMany?: Prisma.purchase_requisitionsScalarWhereInput | Prisma.purchase_requisitionsScalarWhereInput[]
+}
+
+export type purchase_requisitionsUncheckedUpdateManyWithoutSuppliersNestedInput = {
+  create?: Prisma.XOR<Prisma.purchase_requisitionsCreateWithoutSuppliersInput, Prisma.purchase_requisitionsUncheckedCreateWithoutSuppliersInput> | Prisma.purchase_requisitionsCreateWithoutSuppliersInput[] | Prisma.purchase_requisitionsUncheckedCreateWithoutSuppliersInput[]
+  connectOrCreate?: Prisma.purchase_requisitionsCreateOrConnectWithoutSuppliersInput | Prisma.purchase_requisitionsCreateOrConnectWithoutSuppliersInput[]
+  upsert?: Prisma.purchase_requisitionsUpsertWithWhereUniqueWithoutSuppliersInput | Prisma.purchase_requisitionsUpsertWithWhereUniqueWithoutSuppliersInput[]
+  createMany?: Prisma.purchase_requisitionsCreateManySuppliersInputEnvelope
+  set?: Prisma.purchase_requisitionsWhereUniqueInput | Prisma.purchase_requisitionsWhereUniqueInput[]
+  disconnect?: Prisma.purchase_requisitionsWhereUniqueInput | Prisma.purchase_requisitionsWhereUniqueInput[]
+  delete?: Prisma.purchase_requisitionsWhereUniqueInput | Prisma.purchase_requisitionsWhereUniqueInput[]
+  connect?: Prisma.purchase_requisitionsWhereUniqueInput | Prisma.purchase_requisitionsWhereUniqueInput[]
+  update?: Prisma.purchase_requisitionsUpdateWithWhereUniqueWithoutSuppliersInput | Prisma.purchase_requisitionsUpdateWithWhereUniqueWithoutSuppliersInput[]
+  updateMany?: Prisma.purchase_requisitionsUpdateManyWithWhereWithoutSuppliersInput | Prisma.purchase_requisitionsUpdateManyWithWhereWithoutSuppliersInput[]
+  deleteMany?: Prisma.purchase_requisitionsScalarWhereInput | Prisma.purchase_requisitionsScalarWhereInput[]
 }
 
 export type purchase_requisitionsCreateNestedManyWithoutUsers_purchase_requisitions_approved_byTousersInput = {
@@ -575,6 +641,7 @@ export type purchase_requisitionsCreateWithoutPurchase_requisition_itemsInput = 
   notes?: string | null
   created_at?: Date | string
   updated_at: Date | string
+  suppliers?: Prisma.suppliersCreateNestedOneWithoutPurchase_requisitionsInput
   users_purchase_requisitions_approved_byTousers?: Prisma.usersCreateNestedOneWithoutPurchase_requisitions_purchase_requisitions_approved_byTousersInput
   users_purchase_requisitions_requested_byTousers: Prisma.usersCreateNestedOneWithoutPurchase_requisitions_purchase_requisitions_requested_byTousersInput
 }
@@ -583,6 +650,7 @@ export type purchase_requisitionsUncheckedCreateWithoutPurchase_requisition_item
   id: string
   pr_number: string
   requested_by: string
+  supplier_id?: string | null
   department: string
   status: $Enums.PurchaseRequisitionStatus
   requested_date: Date | string
@@ -619,6 +687,7 @@ export type purchase_requisitionsUpdateWithoutPurchase_requisition_itemsInput = 
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  suppliers?: Prisma.suppliersUpdateOneWithoutPurchase_requisitionsNestedInput
   users_purchase_requisitions_approved_byTousers?: Prisma.usersUpdateOneWithoutPurchase_requisitions_purchase_requisitions_approved_byTousersNestedInput
   users_purchase_requisitions_requested_byTousers?: Prisma.usersUpdateOneRequiredWithoutPurchase_requisitions_purchase_requisitions_requested_byTousersNestedInput
 }
@@ -627,6 +696,7 @@ export type purchase_requisitionsUncheckedUpdateWithoutPurchase_requisition_item
   id?: Prisma.StringFieldUpdateOperationsInput | string
   pr_number?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by?: Prisma.StringFieldUpdateOperationsInput | string
+  supplier_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPurchaseRequisitionStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionStatus
   requested_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -635,6 +705,80 @@ export type purchase_requisitionsUncheckedUpdateWithoutPurchase_requisition_item
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type purchase_requisitionsCreateWithoutSuppliersInput = {
+  id: string
+  pr_number: string
+  department: string
+  status: $Enums.PurchaseRequisitionStatus
+  requested_date: Date | string
+  approved_date?: Date | string | null
+  notes?: string | null
+  created_at?: Date | string
+  updated_at: Date | string
+  purchase_requisition_items?: Prisma.purchase_requisition_itemsCreateNestedManyWithoutPurchase_requisitionsInput
+  users_purchase_requisitions_approved_byTousers?: Prisma.usersCreateNestedOneWithoutPurchase_requisitions_purchase_requisitions_approved_byTousersInput
+  users_purchase_requisitions_requested_byTousers: Prisma.usersCreateNestedOneWithoutPurchase_requisitions_purchase_requisitions_requested_byTousersInput
+}
+
+export type purchase_requisitionsUncheckedCreateWithoutSuppliersInput = {
+  id: string
+  pr_number: string
+  requested_by: string
+  department: string
+  status: $Enums.PurchaseRequisitionStatus
+  requested_date: Date | string
+  approved_by?: string | null
+  approved_date?: Date | string | null
+  notes?: string | null
+  created_at?: Date | string
+  updated_at: Date | string
+  purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedCreateNestedManyWithoutPurchase_requisitionsInput
+}
+
+export type purchase_requisitionsCreateOrConnectWithoutSuppliersInput = {
+  where: Prisma.purchase_requisitionsWhereUniqueInput
+  create: Prisma.XOR<Prisma.purchase_requisitionsCreateWithoutSuppliersInput, Prisma.purchase_requisitionsUncheckedCreateWithoutSuppliersInput>
+}
+
+export type purchase_requisitionsCreateManySuppliersInputEnvelope = {
+  data: Prisma.purchase_requisitionsCreateManySuppliersInput | Prisma.purchase_requisitionsCreateManySuppliersInput[]
+  skipDuplicates?: boolean
+}
+
+export type purchase_requisitionsUpsertWithWhereUniqueWithoutSuppliersInput = {
+  where: Prisma.purchase_requisitionsWhereUniqueInput
+  update: Prisma.XOR<Prisma.purchase_requisitionsUpdateWithoutSuppliersInput, Prisma.purchase_requisitionsUncheckedUpdateWithoutSuppliersInput>
+  create: Prisma.XOR<Prisma.purchase_requisitionsCreateWithoutSuppliersInput, Prisma.purchase_requisitionsUncheckedCreateWithoutSuppliersInput>
+}
+
+export type purchase_requisitionsUpdateWithWhereUniqueWithoutSuppliersInput = {
+  where: Prisma.purchase_requisitionsWhereUniqueInput
+  data: Prisma.XOR<Prisma.purchase_requisitionsUpdateWithoutSuppliersInput, Prisma.purchase_requisitionsUncheckedUpdateWithoutSuppliersInput>
+}
+
+export type purchase_requisitionsUpdateManyWithWhereWithoutSuppliersInput = {
+  where: Prisma.purchase_requisitionsScalarWhereInput
+  data: Prisma.XOR<Prisma.purchase_requisitionsUpdateManyMutationInput, Prisma.purchase_requisitionsUncheckedUpdateManyWithoutSuppliersInput>
+}
+
+export type purchase_requisitionsScalarWhereInput = {
+  AND?: Prisma.purchase_requisitionsScalarWhereInput | Prisma.purchase_requisitionsScalarWhereInput[]
+  OR?: Prisma.purchase_requisitionsScalarWhereInput[]
+  NOT?: Prisma.purchase_requisitionsScalarWhereInput | Prisma.purchase_requisitionsScalarWhereInput[]
+  id?: Prisma.StringFilter<"purchase_requisitions"> | string
+  pr_number?: Prisma.StringFilter<"purchase_requisitions"> | string
+  requested_by?: Prisma.StringFilter<"purchase_requisitions"> | string
+  supplier_id?: Prisma.StringNullableFilter<"purchase_requisitions"> | string | null
+  department?: Prisma.StringFilter<"purchase_requisitions"> | string
+  status?: Prisma.EnumPurchaseRequisitionStatusFilter<"purchase_requisitions"> | $Enums.PurchaseRequisitionStatus
+  requested_date?: Prisma.DateTimeFilter<"purchase_requisitions"> | Date | string
+  approved_by?: Prisma.StringNullableFilter<"purchase_requisitions"> | string | null
+  approved_date?: Prisma.DateTimeNullableFilter<"purchase_requisitions"> | Date | string | null
+  notes?: Prisma.StringNullableFilter<"purchase_requisitions"> | string | null
+  created_at?: Prisma.DateTimeFilter<"purchase_requisitions"> | Date | string
+  updated_at?: Prisma.DateTimeFilter<"purchase_requisitions"> | Date | string
 }
 
 export type purchase_requisitionsCreateWithoutUsers_purchase_requisitions_approved_byTousersInput = {
@@ -648,6 +792,7 @@ export type purchase_requisitionsCreateWithoutUsers_purchase_requisitions_approv
   created_at?: Date | string
   updated_at: Date | string
   purchase_requisition_items?: Prisma.purchase_requisition_itemsCreateNestedManyWithoutPurchase_requisitionsInput
+  suppliers?: Prisma.suppliersCreateNestedOneWithoutPurchase_requisitionsInput
   users_purchase_requisitions_requested_byTousers: Prisma.usersCreateNestedOneWithoutPurchase_requisitions_purchase_requisitions_requested_byTousersInput
 }
 
@@ -655,6 +800,7 @@ export type purchase_requisitionsUncheckedCreateWithoutUsers_purchase_requisitio
   id: string
   pr_number: string
   requested_by: string
+  supplier_id?: string | null
   department: string
   status: $Enums.PurchaseRequisitionStatus
   requested_date: Date | string
@@ -686,12 +832,14 @@ export type purchase_requisitionsCreateWithoutUsers_purchase_requisitions_reques
   created_at?: Date | string
   updated_at: Date | string
   purchase_requisition_items?: Prisma.purchase_requisition_itemsCreateNestedManyWithoutPurchase_requisitionsInput
+  suppliers?: Prisma.suppliersCreateNestedOneWithoutPurchase_requisitionsInput
   users_purchase_requisitions_approved_byTousers?: Prisma.usersCreateNestedOneWithoutPurchase_requisitions_purchase_requisitions_approved_byTousersInput
 }
 
 export type purchase_requisitionsUncheckedCreateWithoutUsers_purchase_requisitions_requested_byTousersInput = {
   id: string
   pr_number: string
+  supplier_id?: string | null
   department: string
   status: $Enums.PurchaseRequisitionStatus
   requested_date: Date | string
@@ -729,23 +877,6 @@ export type purchase_requisitionsUpdateManyWithWhereWithoutUsers_purchase_requis
   data: Prisma.XOR<Prisma.purchase_requisitionsUpdateManyMutationInput, Prisma.purchase_requisitionsUncheckedUpdateManyWithoutUsers_purchase_requisitions_approved_byTousersInput>
 }
 
-export type purchase_requisitionsScalarWhereInput = {
-  AND?: Prisma.purchase_requisitionsScalarWhereInput | Prisma.purchase_requisitionsScalarWhereInput[]
-  OR?: Prisma.purchase_requisitionsScalarWhereInput[]
-  NOT?: Prisma.purchase_requisitionsScalarWhereInput | Prisma.purchase_requisitionsScalarWhereInput[]
-  id?: Prisma.StringFilter<"purchase_requisitions"> | string
-  pr_number?: Prisma.StringFilter<"purchase_requisitions"> | string
-  requested_by?: Prisma.StringFilter<"purchase_requisitions"> | string
-  department?: Prisma.StringFilter<"purchase_requisitions"> | string
-  status?: Prisma.EnumPurchaseRequisitionStatusFilter<"purchase_requisitions"> | $Enums.PurchaseRequisitionStatus
-  requested_date?: Prisma.DateTimeFilter<"purchase_requisitions"> | Date | string
-  approved_by?: Prisma.StringNullableFilter<"purchase_requisitions"> | string | null
-  approved_date?: Prisma.DateTimeNullableFilter<"purchase_requisitions"> | Date | string | null
-  notes?: Prisma.StringNullableFilter<"purchase_requisitions"> | string | null
-  created_at?: Prisma.DateTimeFilter<"purchase_requisitions"> | Date | string
-  updated_at?: Prisma.DateTimeFilter<"purchase_requisitions"> | Date | string
-}
-
 export type purchase_requisitionsUpsertWithWhereUniqueWithoutUsers_purchase_requisitions_requested_byTousersInput = {
   where: Prisma.purchase_requisitionsWhereUniqueInput
   update: Prisma.XOR<Prisma.purchase_requisitionsUpdateWithoutUsers_purchase_requisitions_requested_byTousersInput, Prisma.purchase_requisitionsUncheckedUpdateWithoutUsers_purchase_requisitions_requested_byTousersInput>
@@ -762,10 +893,69 @@ export type purchase_requisitionsUpdateManyWithWhereWithoutUsers_purchase_requis
   data: Prisma.XOR<Prisma.purchase_requisitionsUpdateManyMutationInput, Prisma.purchase_requisitionsUncheckedUpdateManyWithoutUsers_purchase_requisitions_requested_byTousersInput>
 }
 
+export type purchase_requisitionsCreateManySuppliersInput = {
+  id: string
+  pr_number: string
+  requested_by: string
+  department: string
+  status: $Enums.PurchaseRequisitionStatus
+  requested_date: Date | string
+  approved_by?: string | null
+  approved_date?: Date | string | null
+  notes?: string | null
+  created_at?: Date | string
+  updated_at: Date | string
+}
+
+export type purchase_requisitionsUpdateWithoutSuppliersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  department?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumPurchaseRequisitionStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionStatus
+  requested_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approved_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  purchase_requisition_items?: Prisma.purchase_requisition_itemsUpdateManyWithoutPurchase_requisitionsNestedInput
+  users_purchase_requisitions_approved_byTousers?: Prisma.usersUpdateOneWithoutPurchase_requisitions_purchase_requisitions_approved_byTousersNestedInput
+  users_purchase_requisitions_requested_byTousers?: Prisma.usersUpdateOneRequiredWithoutPurchase_requisitions_purchase_requisitions_requested_byTousersNestedInput
+}
+
+export type purchase_requisitionsUncheckedUpdateWithoutSuppliersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  requested_by?: Prisma.StringFieldUpdateOperationsInput | string
+  department?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumPurchaseRequisitionStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionStatus
+  requested_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approved_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approved_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  purchase_requisition_items?: Prisma.purchase_requisition_itemsUncheckedUpdateManyWithoutPurchase_requisitionsNestedInput
+}
+
+export type purchase_requisitionsUncheckedUpdateManyWithoutSuppliersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  requested_by?: Prisma.StringFieldUpdateOperationsInput | string
+  department?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.EnumPurchaseRequisitionStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionStatus
+  requested_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approved_by?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  approved_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type purchase_requisitionsCreateManyUsers_purchase_requisitions_approved_byTousersInput = {
   id: string
   pr_number: string
   requested_by: string
+  supplier_id?: string | null
   department: string
   status: $Enums.PurchaseRequisitionStatus
   requested_date: Date | string
@@ -778,6 +968,7 @@ export type purchase_requisitionsCreateManyUsers_purchase_requisitions_approved_
 export type purchase_requisitionsCreateManyUsers_purchase_requisitions_requested_byTousersInput = {
   id: string
   pr_number: string
+  supplier_id?: string | null
   department: string
   status: $Enums.PurchaseRequisitionStatus
   requested_date: Date | string
@@ -799,6 +990,7 @@ export type purchase_requisitionsUpdateWithoutUsers_purchase_requisitions_approv
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUpdateManyWithoutPurchase_requisitionsNestedInput
+  suppliers?: Prisma.suppliersUpdateOneWithoutPurchase_requisitionsNestedInput
   users_purchase_requisitions_requested_byTousers?: Prisma.usersUpdateOneRequiredWithoutPurchase_requisitions_purchase_requisitions_requested_byTousersNestedInput
 }
 
@@ -806,6 +998,7 @@ export type purchase_requisitionsUncheckedUpdateWithoutUsers_purchase_requisitio
   id?: Prisma.StringFieldUpdateOperationsInput | string
   pr_number?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by?: Prisma.StringFieldUpdateOperationsInput | string
+  supplier_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPurchaseRequisitionStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionStatus
   requested_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -820,6 +1013,7 @@ export type purchase_requisitionsUncheckedUpdateManyWithoutUsers_purchase_requis
   id?: Prisma.StringFieldUpdateOperationsInput | string
   pr_number?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by?: Prisma.StringFieldUpdateOperationsInput | string
+  supplier_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPurchaseRequisitionStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionStatus
   requested_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -840,12 +1034,14 @@ export type purchase_requisitionsUpdateWithoutUsers_purchase_requisitions_reques
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   purchase_requisition_items?: Prisma.purchase_requisition_itemsUpdateManyWithoutPurchase_requisitionsNestedInput
+  suppliers?: Prisma.suppliersUpdateOneWithoutPurchase_requisitionsNestedInput
   users_purchase_requisitions_approved_byTousers?: Prisma.usersUpdateOneWithoutPurchase_requisitions_purchase_requisitions_approved_byTousersNestedInput
 }
 
 export type purchase_requisitionsUncheckedUpdateWithoutUsers_purchase_requisitions_requested_byTousersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  supplier_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPurchaseRequisitionStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionStatus
   requested_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -860,6 +1056,7 @@ export type purchase_requisitionsUncheckedUpdateWithoutUsers_purchase_requisitio
 export type purchase_requisitionsUncheckedUpdateManyWithoutUsers_purchase_requisitions_requested_byTousersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  supplier_id?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   department?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPurchaseRequisitionStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionStatus
   requested_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -905,6 +1102,7 @@ export type purchase_requisitionsSelect<ExtArgs extends runtime.Types.Extensions
   id?: boolean
   pr_number?: boolean
   requested_by?: boolean
+  supplier_id?: boolean
   department?: boolean
   status?: boolean
   requested_date?: boolean
@@ -914,6 +1112,7 @@ export type purchase_requisitionsSelect<ExtArgs extends runtime.Types.Extensions
   created_at?: boolean
   updated_at?: boolean
   purchase_requisition_items?: boolean | Prisma.purchase_requisitions$purchase_requisition_itemsArgs<ExtArgs>
+  suppliers?: boolean | Prisma.purchase_requisitions$suppliersArgs<ExtArgs>
   users_purchase_requisitions_approved_byTousers?: boolean | Prisma.purchase_requisitions$users_purchase_requisitions_approved_byTousersArgs<ExtArgs>
   users_purchase_requisitions_requested_byTousers?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.Purchase_requisitionsCountOutputTypeDefaultArgs<ExtArgs>
@@ -923,6 +1122,7 @@ export type purchase_requisitionsSelectCreateManyAndReturn<ExtArgs extends runti
   id?: boolean
   pr_number?: boolean
   requested_by?: boolean
+  supplier_id?: boolean
   department?: boolean
   status?: boolean
   requested_date?: boolean
@@ -931,6 +1131,7 @@ export type purchase_requisitionsSelectCreateManyAndReturn<ExtArgs extends runti
   notes?: boolean
   created_at?: boolean
   updated_at?: boolean
+  suppliers?: boolean | Prisma.purchase_requisitions$suppliersArgs<ExtArgs>
   users_purchase_requisitions_approved_byTousers?: boolean | Prisma.purchase_requisitions$users_purchase_requisitions_approved_byTousersArgs<ExtArgs>
   users_purchase_requisitions_requested_byTousers?: boolean | Prisma.usersDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["purchase_requisitions"]>
@@ -939,6 +1140,7 @@ export type purchase_requisitionsSelectUpdateManyAndReturn<ExtArgs extends runti
   id?: boolean
   pr_number?: boolean
   requested_by?: boolean
+  supplier_id?: boolean
   department?: boolean
   status?: boolean
   requested_date?: boolean
@@ -947,6 +1149,7 @@ export type purchase_requisitionsSelectUpdateManyAndReturn<ExtArgs extends runti
   notes?: boolean
   created_at?: boolean
   updated_at?: boolean
+  suppliers?: boolean | Prisma.purchase_requisitions$suppliersArgs<ExtArgs>
   users_purchase_requisitions_approved_byTousers?: boolean | Prisma.purchase_requisitions$users_purchase_requisitions_approved_byTousersArgs<ExtArgs>
   users_purchase_requisitions_requested_byTousers?: boolean | Prisma.usersDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["purchase_requisitions"]>
@@ -955,6 +1158,7 @@ export type purchase_requisitionsSelectScalar = {
   id?: boolean
   pr_number?: boolean
   requested_by?: boolean
+  supplier_id?: boolean
   department?: boolean
   status?: boolean
   requested_date?: boolean
@@ -965,18 +1169,21 @@ export type purchase_requisitionsSelectScalar = {
   updated_at?: boolean
 }
 
-export type purchase_requisitionsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "pr_number" | "requested_by" | "department" | "status" | "requested_date" | "approved_by" | "approved_date" | "notes" | "created_at" | "updated_at", ExtArgs["result"]["purchase_requisitions"]>
+export type purchase_requisitionsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "pr_number" | "requested_by" | "supplier_id" | "department" | "status" | "requested_date" | "approved_by" | "approved_date" | "notes" | "created_at" | "updated_at", ExtArgs["result"]["purchase_requisitions"]>
 export type purchase_requisitionsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   purchase_requisition_items?: boolean | Prisma.purchase_requisitions$purchase_requisition_itemsArgs<ExtArgs>
+  suppliers?: boolean | Prisma.purchase_requisitions$suppliersArgs<ExtArgs>
   users_purchase_requisitions_approved_byTousers?: boolean | Prisma.purchase_requisitions$users_purchase_requisitions_approved_byTousersArgs<ExtArgs>
   users_purchase_requisitions_requested_byTousers?: boolean | Prisma.usersDefaultArgs<ExtArgs>
   _count?: boolean | Prisma.Purchase_requisitionsCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type purchase_requisitionsIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  suppliers?: boolean | Prisma.purchase_requisitions$suppliersArgs<ExtArgs>
   users_purchase_requisitions_approved_byTousers?: boolean | Prisma.purchase_requisitions$users_purchase_requisitions_approved_byTousersArgs<ExtArgs>
   users_purchase_requisitions_requested_byTousers?: boolean | Prisma.usersDefaultArgs<ExtArgs>
 }
 export type purchase_requisitionsIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  suppliers?: boolean | Prisma.purchase_requisitions$suppliersArgs<ExtArgs>
   users_purchase_requisitions_approved_byTousers?: boolean | Prisma.purchase_requisitions$users_purchase_requisitions_approved_byTousersArgs<ExtArgs>
   users_purchase_requisitions_requested_byTousers?: boolean | Prisma.usersDefaultArgs<ExtArgs>
 }
@@ -985,6 +1192,7 @@ export type $purchase_requisitionsPayload<ExtArgs extends runtime.Types.Extensio
   name: "purchase_requisitions"
   objects: {
     purchase_requisition_items: Prisma.$purchase_requisition_itemsPayload<ExtArgs>[]
+    suppliers: Prisma.$suppliersPayload<ExtArgs> | null
     users_purchase_requisitions_approved_byTousers: Prisma.$usersPayload<ExtArgs> | null
     users_purchase_requisitions_requested_byTousers: Prisma.$usersPayload<ExtArgs>
   }
@@ -992,6 +1200,7 @@ export type $purchase_requisitionsPayload<ExtArgs extends runtime.Types.Extensio
     id: string
     pr_number: string
     requested_by: string
+    supplier_id: string | null
     department: string
     status: $Enums.PurchaseRequisitionStatus
     requested_date: Date
@@ -1395,6 +1604,7 @@ readonly fields: purchase_requisitionsFieldRefs;
 export interface Prisma__purchase_requisitionsClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   purchase_requisition_items<T extends Prisma.purchase_requisitions$purchase_requisition_itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.purchase_requisitions$purchase_requisition_itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$purchase_requisition_itemsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  suppliers<T extends Prisma.purchase_requisitions$suppliersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.purchase_requisitions$suppliersArgs<ExtArgs>>): Prisma.Prisma__suppliersClient<runtime.Types.Result.GetResult<Prisma.$suppliersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   users_purchase_requisitions_approved_byTousers<T extends Prisma.purchase_requisitions$users_purchase_requisitions_approved_byTousersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.purchase_requisitions$users_purchase_requisitions_approved_byTousersArgs<ExtArgs>>): Prisma.Prisma__usersClient<runtime.Types.Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   users_purchase_requisitions_requested_byTousers<T extends Prisma.usersDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.usersDefaultArgs<ExtArgs>>): Prisma.Prisma__usersClient<runtime.Types.Result.GetResult<Prisma.$usersPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
@@ -1429,6 +1639,7 @@ export interface purchase_requisitionsFieldRefs {
   readonly id: Prisma.FieldRef<"purchase_requisitions", 'String'>
   readonly pr_number: Prisma.FieldRef<"purchase_requisitions", 'String'>
   readonly requested_by: Prisma.FieldRef<"purchase_requisitions", 'String'>
+  readonly supplier_id: Prisma.FieldRef<"purchase_requisitions", 'String'>
   readonly department: Prisma.FieldRef<"purchase_requisitions", 'String'>
   readonly status: Prisma.FieldRef<"purchase_requisitions", 'PurchaseRequisitionStatus'>
   readonly requested_date: Prisma.FieldRef<"purchase_requisitions", 'DateTime'>
@@ -1854,6 +2065,25 @@ export type purchase_requisitions$purchase_requisition_itemsArgs<ExtArgs extends
   take?: number
   skip?: number
   distinct?: Prisma.Purchase_requisition_itemsScalarFieldEnum | Prisma.Purchase_requisition_itemsScalarFieldEnum[]
+}
+
+/**
+ * purchase_requisitions.suppliers
+ */
+export type purchase_requisitions$suppliersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the suppliers
+   */
+  select?: Prisma.suppliersSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the suppliers
+   */
+  omit?: Prisma.suppliersOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.suppliersInclude<ExtArgs> | null
+  where?: Prisma.suppliersWhereInput
 }
 
 /**

@@ -132,8 +132,11 @@ export const purchasingApi = {
         const response = await api.post("/purchasing/requisitions", data);
         return response.data;
     },
-    updateStatus: async (id: string, status: string) => {
-        const response = await api.patch(`/purchasing/requisitions/${id}/status`, { status });
+    updateStatus: async (id: string, status: string, supplierId?: string, approverId?: string) => {
+        const payload: any = { status };
+        if (supplierId) payload.supplierId = supplierId;
+        if (approverId) payload.approverId = approverId;
+        const response = await api.patch(`/purchasing/requisitions/${id}/status`, payload);
         return response.data;
     },
 };
@@ -271,6 +274,10 @@ export const usersApi = {
     },
     getAll: async () => {
         const response = await api.get('/users');
+        return response.data;
+    },
+    update: async (id: string, data: any) => {
+        const response = await api.put(`/users/${id}`, data);
         return response.data;
     },
 };

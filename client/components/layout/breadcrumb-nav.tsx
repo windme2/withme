@@ -34,11 +34,10 @@ const pathNameMap: Record<string, string> = {
   returns: "รับคืนสินค้า",
   
   // Transactions sub-pages
-  movements: "Stock Movement",
+  movements: "ประวัติการเคลื่อนไหว",
   
   // Admin sub-pages
   "user-management": "จัดการผู้ใช้",
-  "activity-log": "ประวัติการใช้งาน",
   
   // Actions
   new: "เพิ่มใหม่",

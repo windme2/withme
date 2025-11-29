@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MainLayout } from "@/components/layout/main-layout";
+import { usersApi } from "@/lib/api";
+import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -48,12 +51,15 @@ import {
 
 // --- Types ---
 type UserType = {
-  id: number;
-  name: string;
+  id: string;
   username: string;
+  email: string;
+  first_name: string;
+  last_name: string;
   role: string;
-  status: string;
-  lastLogin: string;
+  is_active: boolean;
+  last_login_at: string | null;
+  created_at: string;
 };
 
 type StatCardProps = {
@@ -64,55 +70,49 @@ type StatCardProps = {
   bg: string;
 };
 
-// --- Mock Data ---
-// Note: 'email' field is used as 'username' in the application logic
-const mockUsers = [
-  {
-    id: 1,
-    name: "Intouch C. ",
-    username: "wind",
-    role: "Admin",
-    status: "Active",
-    lastLogin: "2025-11-18 10:00",
-  },
-  {
-    id: 2,
-    name: "Thinnakrit C.",
-    username: "Jame",
-    role: "Admin",
-    status: "Active",
-    lastLogin: "2025-11-17 14:30",
-  },
-  {
-    id: 3,
-    name: "User Test",
-    username: "user3",
-    role: "User",
-    status: "Active",
-    lastLogin: "2025-11-18 09:00",
-  },
-];
-
 export default function UserManagementPage() {
   const router = useRouter();
+  const [users, setUsers] = useState<UserType[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterRole, setFilterRole] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedUser, setSelectedUser] = useState<UserType | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const data = await usersApi.getAll();
+      setUsers(data);
+    } catch (error: any) {
+      console.error("Failed to fetch users:", error);
+      toast.error(error.response?.data?.message || "Failed to load users");
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // --- Pagination State ---
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
   // --- Filter Logic ---
-  const filteredUsers = mockUsers.filter((user) => {
+  const filteredUsers = users.filter((user) => {
+    const fullName = `${user.first_name} ${user.last_name}`.toLowerCase();
     const matchesSearch =
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.username.toLowerCase().includes(searchTerm.toLowerCase());
+      fullName.includes(searchTerm.toLowerCase()) ||
+      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = filterRole === "all" || user.role === filterRole;
+    const status = user.is_active ? "Active" : "Inactive";
     const matchesStatus =
-      filterStatus === "all" || user.status === filterStatus;
+      filterStatus === "all" || status === filterStatus;
     return matchesSearch && matchesRole && matchesStatus;
   });
 
@@ -165,28 +165,28 @@ export default function UserManagementPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <StatCard
             title="Total Users"
-            value={mockUsers.length}
+            value={users.length}
             icon={Users}
             color="text-blue-600"
             bg="bg-blue-50"
           />
           <StatCard
             title="Active Accounts"
-            value={mockUsers.filter((u) => u.status === "Active").length}
+            value={users.filter((u) => u.is_active).length}
             icon={UserCheck}
             color="text-emerald-600"
             bg="bg-emerald-50"
           />
           <StatCard
             title="Admins"
-            value={mockUsers.filter((u) => u.role === "Admin").length}
+            value={users.filter((u) => u.role === "admin").length}
             icon={Key}
             color="text-purple-600"
             bg="bg-purple-50"
           />
           <StatCard
             title="Inactive Accounts"
-            value={mockUsers.filter((u) => u.status === "Inactive").length}
+            value={users.filter((u) => !u.is_active).length}
             icon={UserX}
             color="text-red-600"
             bg="bg-red-50"
@@ -268,7 +268,7 @@ export default function UserManagementPage() {
                       Name
                     </TableHead>
                     <TableHead className="font-semibold text-slate-700 h-12">
-                      Username
+                      Email
                     </TableHead>
                     <TableHead className="w-[140px] font-semibold text-slate-700 h-12">
                       Role
@@ -282,7 +282,23 @@ export default function UserManagementPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedUsers.map((user) => (
+                  {loading ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-12">
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="h-8 w-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                          <p className="text-slate-500">Loading users...</p>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : paginatedUsers.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-12">
+                        <p className="text-slate-500">No users found</p>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paginatedUsers.map((user) => (
                     <TableRow
                       key={user.id}
                       className="hover:bg-slate-50/60 transition-colors cursor-pointer group"
@@ -291,13 +307,13 @@ export default function UserManagementPage() {
                       {/* Name */}
                       <TableCell className="pl-6 py-4">
                         <span className="font-medium text-slate-900 group-hover:underline underline-offset-4">
-                          {user.name}
+                          {user.first_name} {user.last_name}
                         </span>
                       </TableCell>
 
-                      {/* Username (using email field) */}
+                      {/* Email */}
                       <TableCell className="text-slate-600 py-4">
-                        {user.username}
+                        {user.email}
                       </TableCell>
 
                       {/* Role */}
@@ -307,15 +323,18 @@ export default function UserManagementPage() {
 
                       {/* Last Login */}
                       <TableCell className="text-slate-500 text-sm py-4">
-                        {user.lastLogin.split(" ")[0]}
+                        {user.last_login_at
+                          ? new Date(user.last_login_at).toLocaleDateString()
+                          : "Never"}
                       </TableCell>
 
                       {/* Status */}
                       <TableCell className="text-center pr-6 py-4">
-                        <StatusBadge status={user.status} />
+                        <StatusBadge status={user.is_active ? "Active" : "Inactive"} />
                       </TableCell>
                     </TableRow>
-                  ))}
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </div>
@@ -371,62 +390,178 @@ export default function UserManagementPage() {
 
 // --- Detail/Edit Sheet Component (Simplified) ---
 function UserDetailSheet({ user }: { user: UserType }) {
-  // Mock function to simulate editing
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedUser, setEditedUser] = useState(user);
+  const [loading, setLoading] = useState(false);
+
   const handleEdit = () => {
-    alert(`Simulating edit fields for user: ${user.name}`);
-    // In a real app, this would enable input fields or open an edit modal
+    setIsEditing(true);
+  };
+
+  const handleSave = async () => {
+    try {
+      setLoading(true);
+      await usersApi.update(editedUser.id, {
+        first_name: editedUser.first_name,
+        last_name: editedUser.last_name,
+        email: editedUser.email,
+        role: editedUser.role,
+      });
+      toast.success('User updated successfully');
+      setIsEditing(false);
+      window.location.reload(); // Refresh to show updated data
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to update user');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditedUser(user);
+    setIsEditing(false);
+  };
+
+  const handleDeactivate = async () => {
+    if (!confirm(`Are you sure you want to deactivate ${user.first_name} ${user.last_name}?`)) {
+      return;
+    }
+    try {
+      setLoading(true);
+      await usersApi.update(user.id, { is_active: false });
+      toast.success('User deactivated successfully');
+      window.location.reload();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to deactivate user');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
       <SheetHeader className="mb-6 border-b pb-4">
-        <SheetTitle className="text-2xl font-bold flex items-center justify-between">
-          <span className="flex items-center gap-2">
-            <User className="h-6 w-6 text-blue-600" />
-            {user.name}
-          </span>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleEdit}
-            title="Edit User"
-          >
-            <Edit className="h-5 w-5 text-slate-500 hover:text-blue-600" />
-          </Button>
+        <SheetTitle className="text-2xl font-bold flex items-center gap-2 mb-2">
+          <User className="h-6 w-6 text-blue-600" />
+          User Management
         </SheetTitle>
-        <SheetDescription>
-          {/* Username in Description */}
-          Username: {user.username}
-        </SheetDescription>
+        <div className="flex items-center justify-between">
+          <SheetDescription>
+           Review Details for {user.first_name} {user.last_name}
+          </SheetDescription>
+          {!isEditing && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleEdit}
+              className="flex items-center gap-2 border-blue-200 text-blue-600 hover:bg-blue-50"
+            >
+              <Edit className="h-4 w-4" />
+              Edit
+            </Button>
+          )}
+        </div>
       </SheetHeader>
 
       <div className="space-y-6">
-        {/* Info Block */}
-        <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 space-y-3">
-          {/* Added Username Row */}
-          <InfoRow label="Username" value={user.username} icon={User} />
-          <InfoRow
-            label="Access Role"
-            value={<RoleBadge role={user.role} />}
-            icon={Key}
-          />
-          <InfoRow
-            label="Account Status"
-            value={<StatusBadge status={user.status} />}
-            icon={user.status === "Active" ? UserCheck : UserX}
-          />
-          <InfoRow label="Last Login" value={user.lastLogin} icon={Clock} />
-        </div>
+        {isEditing ? (
+          /* Edit Form */
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  id="firstName"
+                  value={editedUser.first_name}
+                  onChange={(e) => setEditedUser({ ...editedUser, first_name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  value={editedUser.last_name}
+                  onChange={(e) => setEditedUser({ ...editedUser, last_name: e.target.value })}
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={editedUser.email}
+                onChange={(e) => setEditedUser({ ...editedUser, email: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="role">Role</Label>
+              <Select
+                value={editedUser.role}
+                onValueChange={(value) => setEditedUser({ ...editedUser, role: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="admin">Admin</SelectItem>
+                  <SelectItem value="user">User</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button
+                onClick={handleSave}
+                disabled={loading}
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+              >
+                Save Changes
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleCancel}
+                disabled={loading}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        ) : (
+          /* Info Block */
+          <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 space-y-3">
+            <InfoRow label="Username" value={user.username} icon={User} />
+            <InfoRow label="Email" value={user.email} icon={User} />
+            <InfoRow
+              label="Access Role"
+              value={<RoleBadge role={user.role} />}
+              icon={Key}
+            />
+            <InfoRow
+              label="Account Status"
+              value={<StatusBadge status={user.is_active ? "Active" : "Inactive"} />}
+              icon={user.is_active ? UserCheck : UserX}
+            />
+            <InfoRow 
+              label="Last Login" 
+              value={user.last_login_at ? new Date(user.last_login_at).toLocaleString() : "Never"} 
+              icon={Clock} 
+            />
+          </div>
+        )}
       </div>
 
-      <SheetFooter className="mt-8 border-t pt-4">
-        <Button
-          className="w-full bg-red-600 hover:bg-red-700"
-          disabled={user.status === "Inactive"}
-        >
-          Deactivate User
-        </Button>
-      </SheetFooter>
+      {!isEditing && (
+        <SheetFooter className="mt-8 border-t pt-4">
+          <Button
+            onClick={handleDeactivate}
+            disabled={!user.is_active || loading}
+            className="w-full bg-red-600 hover:bg-red-700"
+          >
+            {loading ? 'Processing...' : 'Deactivate User'}
+          </Button>
+        </SheetFooter>
+      )}
     </>
   );
 }
@@ -470,15 +605,15 @@ function StatusBadge({ status }: { status: string }) {
 
 function RoleBadge({ role }: { role: string }) {
   const roleStyles: Record<string, string> = {
-    Admin: "bg-amber-50 text-amber-700 border-amber-200",
-    User: "bg-blue-50 text-blue-700 border-blue-200",
+    admin: "bg-amber-50 text-amber-700 border-amber-200",
+    user: "bg-blue-50 text-blue-700 border-blue-200",
   };
   const currentStyle =
-    roleStyles[role] || "bg-slate-100 text-slate-700 border-slate-200";
+    roleStyles[role.toLowerCase()] || "bg-slate-100 text-slate-700 border-slate-200";
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${currentStyle}`}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${currentStyle} capitalize`}
     >
       {role}
     </span>

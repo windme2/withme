@@ -9,9 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Search, Truck, Package, CheckCircle2, Clock } from "lucide-react";
+import { Plus, Search, Truck, Package, CheckCircle2, Clock, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { shipmentsApi } from "@/lib/api";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 export default function ShipmentsPage() {
   const router = useRouter();
@@ -19,6 +20,8 @@ export default function ShipmentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedShipment, setSelectedShipment] = useState<any | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   const fetchShipments = async () => {
     try {
@@ -39,6 +42,16 @@ export default function ShipmentsPage() {
   const pendingCount = shipments.filter(s => s.status === 'Pending').length;
   const shippedCount = shipments.filter(s => s.status === 'Shipped').length;
   const deliveredCount = shipments.filter(s => s.status === 'Delivered').length;
+
+  const handleRowClick = async (shipment: any) => {
+    try {
+      const details = await shipmentsApi.getOne(shipment.id);
+      setSelectedShipment(details);
+      setIsSheetOpen(true);
+    } catch (error) {
+      toast.error("Failed to fetch shipment details");
+    }
+  };
 
   return (
     <MainLayout>
@@ -119,7 +132,7 @@ export default function ShipmentsPage() {
                       <TableRow
                         key={shipment.id}
                         className="hover:bg-slate-50 cursor-pointer transition-colors"
-                        onClick={() => router.push(`/sales/shipments/${shipment.id}`)}
+                        onClick={() => handleRowClick(shipment)}
                       >
                         <TableCell className="font-medium text-blue-600">{shipment.shipmentNumber}</TableCell>
                         <TableCell className="font-medium">{shipment.customerName}</TableCell>
@@ -139,6 +152,121 @@ export default function ShipmentsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Detail Sheet */}
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+        <SheetContent className="w-[400px] sm:w-[600px] overflow-y-auto">
+          {selectedShipment && (
+            <>
+              <SheetHeader className="mb-6 border-b pb-4">
+                <SheetTitle className="text-xl flex items-center gap-2">
+                  <Truck className="h-5 w-5 text-blue-600" />
+                  Sales Shipments
+                </SheetTitle>
+                <SheetDescription>Review Details for {selectedShipment.shipmentNumber || selectedShipment.id || 'N/A'}</SheetDescription>
+              </SheetHeader>
+
+              <div className="space-y-6">
+                {/* Info Block */}
+                <div className="bg-slate-50 p-4 rounded-lg border space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 text-sm">Shipment No.</span>
+                    <span className="font-medium">{selectedShipment.shipmentNumber}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 text-sm">Customer</span>
+                    <span className="font-medium">{selectedShipment.customerName}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 text-sm">Shipment Date</span>
+                    <span className="font-medium">{selectedShipment.shipmentDate}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 text-sm">Tracking No.</span>
+                    <span className="font-medium">{selectedShipment.trackingNumber || '-'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 text-sm">Status</span>
+                    <StatusBadge status={selectedShipment.status} />
+                  </div>
+                </div>
+
+                {/* Shipping Address */}
+                <div>
+                  <h4 className="font-medium text-slate-900 mb-2">Shipping Address</h4>
+                  <p className="text-sm text-slate-600 p-3 bg-slate-50 rounded-lg border">
+                    {selectedShipment.shippingAddress}
+                  </p>
+                </div>
+
+                {/* Items */}
+                {selectedShipment.items && selectedShipment.items.length > 0 && (
+                  <div>
+                    <div className="border rounded-lg overflow-hidden">
+                      <div className="bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-500 uppercase grid grid-cols-12 gap-2">
+                        <div className="col-span-6">Item</div>
+                        <div className="col-span-3 text-right">Qty</div>
+                        <div className="col-span-3 text-right">Total</div>
+                      </div>
+                      <div className="divide-y max-h-[300px] overflow-y-auto">
+                        {selectedShipment.items.map((item: any, idx: number) => (
+                          <div key={idx} className="px-4 py-3 text-sm grid grid-cols-12 gap-2">
+                            <div className="col-span-6">
+                              <div className="font-medium">{item.name}</div>
+                              <div className="text-xs text-slate-400">{item.sku}</div>
+                            </div>
+                            <div className="col-span-3 text-right">{item.quantity}</div>
+                            <div className="col-span-3 text-right font-medium">
+                              ฿{(item.quantity * item.unitPrice).toLocaleString()}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Notes */}
+                {selectedShipment.notes && (
+                  <div>
+                    <h4 className="font-medium text-slate-900 mb-2">Notes</h4>
+                    <p className="text-sm text-slate-600 p-3 bg-slate-50 rounded-lg border">
+                      {selectedShipment.notes}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Footer */}
+              <div className="mt-6 pt-4 border-t">
+                {selectedShipment.status === "Draft" ? (
+                  <Button
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                    onClick={async () => {
+                      try {
+                        await shipmentsApi.updateStatus(selectedShipment.id, "shipped");
+                        toast.success(`Shipment ${selectedShipment.shipmentNumber} marked as shipped!`);
+                        setIsSheetOpen(false);
+                        fetchShipments();
+                      } catch (error) {
+                        toast.error("Failed to update shipment status");
+                      }
+                    }}
+                  >
+                    <Truck className="h-4 w-4 mr-2" />
+                    Mark as Shipped
+                  </Button>
+                ) : (
+                  <div className="w-full text-center text-slate-400 text-sm italic flex items-center justify-center gap-2">
+                    <CheckCircle2 className="h-4 w-4" />
+                    {selectedShipment.status === "Shipped" ? "Already Shipped" : "Completed"}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </MainLayout>
   );
 }

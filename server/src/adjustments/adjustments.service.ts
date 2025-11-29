@@ -204,6 +204,15 @@ export class AdjustmentsService {
         });
 
         // Send Notifications (outside transaction)
+        // Main notification for adjustment
+        await this.notificationsService.create({
+            title: 'Inventory Adjustment',
+            message: `Adjustment ${result.adjustment.adjustment_number} has been ${type === 'Add' ? 'added' : 'removed'}`,
+            type: 'info',
+            link: '/inventory/adjustments'
+        });
+
+        // Low stock alerts
         if (result.lowStockAlerts && result.lowStockAlerts.length > 0) {
             for (const alert of result.lowStockAlerts) {
                 await this.notificationsService.create({

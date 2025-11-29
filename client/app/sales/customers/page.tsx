@@ -6,27 +6,44 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Plus, Search, Users, CheckCircle2, Briefcase, TrendingUp } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { Plus, Search, Users, CheckCircle2, Briefcase, TrendingUp, Mail, Phone, MapPin, CreditCard, Calendar, Building2, Save, Edit } from "lucide-react";
 import { toast } from "sonner";
 import { customersApi } from "@/lib/api";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetFooter,
+} from "@/components/ui/sheet";
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    contactPerson: "",
-    email: "",
-    phone: "",
-    address: "",
-    taxId: "",
-    creditLimit: "",
-    paymentTerms: "",
-  });
+  const [userRole, setUserRole] = useState<string>("");
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isNew, setIsNew] = useState(false);
+  const [formData, setFormData] = useState<{
+    id: string | null;
+    name: string;
+    contactPerson: string;
+    email: string;
+    phone: string;
+    address: string;
+    taxId: string;
+    creditLimit: string;
+    paymentTerms: string;
+  } | null>(null);
+
+  useEffect(() => {
+    const role = localStorage.getItem("userRole") || "";
+    setUserRole(role);
+  }, []);
 
   const fetchCustomers = async () => {
     try {
@@ -44,37 +61,82 @@ export default function CustomersPage() {
     fetchCustomers();
   }, [searchTerm]);
 
-  const handleCreate = async () => {
-    if (!formData.name || !formData.contactPerson) {
+  const handleAddClick = () => {
+    setFormData({
+      id: null,
+      name: "",
+      contactPerson: "",
+      phone: "",
+      email: "",
+      address: "",
+      taxId: "",
+      creditLimit: "",
+      paymentTerms: "",
+    });
+    setIsNew(true);
+    setIsEditing(true);
+    setIsSheetOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData || !formData.name || !formData.contactPerson) {
       toast.error("Please fill in required fields");
       return;
     }
 
     try {
-      await customersApi.create({
-        ...formData,
+      const payload = {
+        name: formData.name,
+        contactPerson: formData.contactPerson,
+        email: formData.email || null,
+        phone: formData.phone || null,
+        address: formData.address || null,
+        taxId: formData.taxId || null,
         creditLimit: formData.creditLimit ? parseFloat(formData.creditLimit) : null,
         paymentTerms: formData.paymentTerms ? parseInt(formData.paymentTerms) : null,
-      });
-      toast.success("Customer created successfully!");
-      setIsDialogOpen(false);
-      setFormData({
-        name: "",
-        contactPerson: "",
-        email: "",
-        phone: "",
-        address: "",
-        taxId: "",
-        creditLimit: "",
-        paymentTerms: "",
-      });
+      };
+
+      if (isNew) {
+        await customersApi.create(payload);
+        toast.success("Customer created successfully!");
+      } else {
+        await customersApi.update(formData.id!, payload);
+        toast.success("Customer updated successfully!");
+      }
+      
+      setIsSheetOpen(false);
+      setIsEditing(false);
+      setFormData(null);
       fetchCustomers();
     } catch (error) {
-      toast.error("Failed to create customer");
+      toast.error(isNew ? "Failed to create customer" : "Failed to update customer");
     }
   };
 
   const activeCustomers = customers.filter(c => c.isActive).length;
+
+  const handleRowClick = async (customer: any) => {
+    try {
+      const details = await customersApi.getOne(customer.id);
+      setFormData({
+        id: details.id,
+        name: details.name || "",
+        contactPerson: details.contactPerson || "",
+        phone: details.phone || "",
+        email: details.email || "",
+        address: details.address || "",
+        taxId: details.taxId || "",
+        creditLimit: details.creditLimit?.toString() || "",
+        paymentTerms: details.paymentTerms?.toString() || "",
+      });
+      setIsNew(false);
+      setIsEditing(false);
+      setIsSheetOpen(true);
+    } catch (error) {
+      console.error("Failed to fetch customer details:", error);
+      toast.error("Failed to load customer details");
+    }
+  };
 
   return (
     <MainLayout>
@@ -85,10 +147,12 @@ export default function CustomersPage() {
             <h1 className="text-3xl font-bold text-slate-900">Customers</h1>
             <p className="text-slate-500 mt-1">จัดการข้อมูลลูกค้า</p>
           </div>
-          <Button onClick={() => setIsDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Customer
-          </Button>
+          {userRole === "admin" && (
+            <Button onClick={handleAddClick} className="bg-blue-600 hover:bg-blue-700">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Customer
+            </Button>
+          )}
         </div>
 
         {/* Stats */}
@@ -139,7 +203,11 @@ export default function CustomersPage() {
                     </TableRow>
                   ) : (
                     customers.map((customer) => (
-                      <TableRow key={customer.id} className="hover:bg-slate-50">
+                      <TableRow 
+                        key={customer.id} 
+                        className="hover:bg-slate-50 cursor-pointer transition-colors"
+                        onClick={() => handleRowClick(customer)}
+                      >
                         <TableCell className="font-medium text-blue-600">{customer.customerCode}</TableCell>
                         <TableCell className="font-medium">{customer.name}</TableCell>
                         <TableCell>{customer.contactPerson || '-'}</TableCell>
@@ -163,54 +231,155 @@ export default function CustomersPage() {
         </Card>
       </div>
 
-      {/* Create Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Add New Customer</DialogTitle>
-          </DialogHeader>
-          <div className="max-h-[70vh] overflow-y-auto px-1 py-2">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Name *</Label>
-                <Input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+      {/* Customer Detail/Edit Sheet */}
+      <Sheet open={isSheetOpen} onOpenChange={(open) => {
+        setIsSheetOpen(open);
+        if (!open) {
+          setIsEditing(false);
+          setFormData(null);
+        }
+      }}>
+        <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+          {formData && (
+            <>
+              <SheetHeader className="mb-6 border-b pb-4">
+                <SheetTitle className="text-xl flex items-center gap-2">
+                  <Building2 className="h-5 w-5 text-blue-600" />
+                  {isNew ? "Add New Customer" : "Customer Details"}
+                </SheetTitle>
+                <SheetDescription>
+                  Review Details for {formData.name}
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="space-y-5">
+                {/* Basic Information */}
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label>Company Name</Label>
+                    <Input
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      disabled={!isEditing}
+                      className={!isEditing ? "bg-slate-50" : ""}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Contact Person</Label>
+                    <Input
+                      value={formData.contactPerson}
+                      onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })}
+                      disabled={!isEditing}
+                      className={!isEditing ? "bg-slate-50" : ""}
+                    />
+                  </div>
+                </div>
+
+                {/* Contact Information */}
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label>Phone</Label>
+                    <Input
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      disabled={!isEditing}
+                      className={!isEditing ? "bg-slate-50" : ""}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Email</Label>
+                    <Input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      disabled={!isEditing}
+                      className={!isEditing ? "bg-slate-50" : ""}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Address</Label>
+                    <Textarea
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      disabled={!isEditing}
+                      className={!isEditing ? "bg-slate-50" : ""}
+                      rows={2}
+                    />
+                  </div>
+                </div>
+
+                {/* Business Information */}
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <Label>Tax ID</Label>
+                    <Input
+                      value={formData.taxId}
+                      onChange={(e) => setFormData({ ...formData, taxId: e.target.value })}
+                      disabled={!isEditing}
+                      className={!isEditing ? "bg-slate-50" : ""}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Credit Limit</Label>
+                    <Input
+                      type="number"
+                      value={formData.creditLimit}
+                      onChange={(e) => setFormData({ ...formData, creditLimit: e.target.value })}
+                      disabled={!isEditing}
+                      className={!isEditing ? "bg-slate-50" : ""}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Payment Terms (days)</Label>
+                    <Input
+                      type="number"
+                      value={formData.paymentTerms}
+                      onChange={(e) => setFormData({ ...formData, paymentTerms: e.target.value })}
+                      disabled={!isEditing}
+                      className={!isEditing ? "bg-slate-50" : ""}
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>Contact Person *</Label>
-                <Input value={formData.contactPerson} onChange={(e) => setFormData({ ...formData, contactPerson: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Email</Label>
-                <Input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Phone</Label>
-                <Input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
-              </div>
-              <div className="space-y-2 col-span-2">
-                <Label>Address</Label>
-                <Input value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Tax ID</Label>
-                <Input value={formData.taxId} onChange={(e) => setFormData({ ...formData, taxId: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Credit Limit</Label>
-                <Input type="number" value={formData.creditLimit} onChange={(e) => setFormData({ ...formData, creditLimit: e.target.value })} />
-              </div>
-              <div className="space-y-2">
-                <Label>Payment Terms (days)</Label>
-                <Input type="number" value={formData.paymentTerms} onChange={(e) => setFormData({ ...formData, paymentTerms: e.target.value })} />
-              </div>
-            </div>
-            <DialogFooter className="mt-6">
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleCreate} className="bg-blue-600 hover:bg-blue-700">Create Customer</Button>
-            </DialogFooter>
-          </div>
-        </DialogContent>
-      </Dialog>
+
+              <SheetFooter className="mt-6 border-t pt-4">
+                {isEditing ? (
+                  <div className="flex gap-2 w-full">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setIsEditing(false);
+                        if (isNew) {
+                          setIsSheetOpen(false);
+                          setFormData(null);
+                        }
+                      }}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleSave}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Save className="h-4 w-4 mr-2" />
+                      {isNew ? "Create" : "Save"}
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    onClick={() => setIsEditing(true)}
+                    className="w-full bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Edit className="h-4 w-4 mr-2" />
+                    Edit Customer
+                  </Button>
+                )}
+              </SheetFooter>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </MainLayout>
   );
 }

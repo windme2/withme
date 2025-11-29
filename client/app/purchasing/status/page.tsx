@@ -51,7 +51,8 @@ export default function PurchasingStatusPage() {
   const [userRole, setUserRole] = useState<string>("user");
   const [approveDialog, setApproveDialog] = useState(false);
   const [rejectDialog, setRejectDialog] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<PurchaseRequisition | null>(null);
+  const [selectedRequest, setSelectedRequest] =
+    useState<PurchaseRequisition | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -113,7 +114,16 @@ export default function PurchasingStatusPage() {
 
   const confirmBulkApprove = async () => {
     try {
-      await Promise.all(selectedIds.map(id => purchasingApi.updateStatus(id, "approved")));
+      const userStr = localStorage.getItem("user");
+      const currentUser = userStr ? JSON.parse(userStr) : null;
+      const approverId = currentUser?.id;
+
+      await Promise.all(
+        selectedIds.map((id) => {
+          const req = requests.find((r) => String(r.id) === String(id));
+          return purchasingApi.updateStatus(id, "approved", req?.supplierId, approverId);
+        })
+      );
       toast.success(`Approved ${selectedIds.length} requests.`);
       fetchRequests();
       setSelectedIds([]);
@@ -125,7 +135,9 @@ export default function PurchasingStatusPage() {
 
   const confirmBulkReject = async () => {
     try {
-      await Promise.all(selectedIds.map(id => purchasingApi.updateStatus(id, "rejected")));
+      await Promise.all(
+        selectedIds.map((id) => purchasingApi.updateStatus(id, "rejected"))
+      );
       toast.success(`Rejected ${selectedIds.length} requests.`);
       fetchRequests();
       setSelectedIds([]);
@@ -138,7 +150,10 @@ export default function PurchasingStatusPage() {
   // Helper to process data for table view
   const processedRequests = requests.map((req) => {
     const itemsSummary = (req.itemsList || []).map((i) => i.name).join(", ");
-    const totalQty = (req.itemsList || []).reduce((sum, i) => sum + (i.qty || i.quantity || 0), 0);
+    const totalQty = (req.itemsList || []).reduce(
+      (sum, i) => sum + (i.qty || i.quantity || 0),
+      0
+    );
     return { ...req, itemsSummary, totalQty };
   });
 
@@ -146,7 +161,9 @@ export default function PurchasingStatusPage() {
   const filteredRequests = processedRequests.filter((req) => {
     const matchesSearch =
       String(req.id).toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (req.itemsSummary || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (req.itemsSummary || "")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
       (req.requester || "").toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = filterStatus === "all" || req.status === filterStatus;
     return matchesSearch && matchesStatus;
@@ -172,7 +189,11 @@ export default function PurchasingStatusPage() {
   const confirmApprove = async () => {
     if (!selectedRequest) return;
     try {
-      await purchasingApi.updateStatus(String(selectedRequest.id), "approved");
+      const userStr = localStorage.getItem("user");
+      const currentUser = userStr ? JSON.parse(userStr) : null;
+      const approverId = currentUser?.id;
+
+      await purchasingApi.updateStatus(String(selectedRequest.id), "approved", (selectedRequest as any).supplierId, approverId);
       toast.success(`Approved PR ${selectedRequest.id}.`);
       fetchRequests();
       setApproveDialog(false);
@@ -260,7 +281,10 @@ export default function PurchasingStatusPage() {
             {/* Bulk Action Bar */}
             {selectedIds.length > 0 && (
               <div className="flex items-center gap-3 mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <Badge variant="secondary" className="bg-blue-100 text-blue-700">
+                <Badge
+                  variant="secondary"
+                  className="bg-blue-100 text-blue-700"
+                >
                   {selectedIds.length} selected
                 </Badge>
                 <Button
@@ -279,13 +303,6 @@ export default function PurchasingStatusPage() {
                   <XCircle className="h-4 w-4 mr-2" />
                   Reject Selected
                 </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setSelectedIds([])}
-                >
-                  Clear Selection
-                </Button>
               </div>
             )}
 
@@ -298,11 +315,13 @@ export default function PurchasingStatusPage() {
                     <TableHead className="w-[50px] pl-6 h-12">
                       <Checkbox
                         checked={
-                          paginatedRequests.filter((r) => r.status === "Pending")
-                            .length > 0 &&
+                          paginatedRequests.filter(
+                            (r) => r.status === "Pending"
+                          ).length > 0 &&
                           selectedIds.length ===
-                          paginatedRequests.filter((r) => r.status === "Pending")
-                            .length
+                            paginatedRequests.filter(
+                              (r) => r.status === "Pending"
+                            ).length
                         }
                         onCheckedChange={handleSelectAll}
                         aria-label="Select all pending items"
@@ -337,10 +356,15 @@ export default function PurchasingStatusPage() {
                       onClick={() => handleRowClick(req)}
                     >
                       {/* Checkbox Column */}
-                      <TableCell className="pl-6 py-4" onClick={(e) => e.stopPropagation()}>
+                      <TableCell
+                        className="pl-6 py-4"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         <Checkbox
                           checked={selectedIds.includes(String(req.id))}
-                          onCheckedChange={() => handleSelectOne(String(req.id))}
+                          onCheckedChange={() =>
+                            handleSelectOne(String(req.id))
+                          }
                           disabled={req.status !== "Pending"}
                           aria-label={`Select ${req.id}`}
                         />
@@ -441,9 +465,11 @@ export default function PurchasingStatusPage() {
               <SheetHeader className="mb-6 border-b pb-4">
                 <SheetTitle className="text-xl flex items-center gap-2">
                   <FileText className="h-5 w-5 text-blue-600" />
-                  Request Details
+                  PR Status
                 </SheetTitle>
-                <SheetDescription>Review details.</SheetDescription>
+                <SheetDescription>
+                  Review details for {selectedRequest.id}
+                </SheetDescription>
               </SheetHeader>
 
               <div className="space-y-6">
@@ -469,9 +495,6 @@ export default function PurchasingStatusPage() {
 
                 {/* Items List (Read Only) */}
                 <div>
-                  <h4 className="font-medium text-slate-900 mb-3 flex items-center gap-2">
-                    <PackageOpen className="h-4 w-4" /> Requested Items
-                  </h4>
                   <div className="border rounded-lg overflow-hidden">
                     <div className="bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b grid grid-cols-12 gap-2">
                       <div className="col-span-6">Item</div>
@@ -502,7 +525,11 @@ export default function PurchasingStatusPage() {
 
                             {/* Column 3: Total Price */}
                             <div className="col-span-4 text-right font-medium text-slate-900">
-                              ฿{((item.price || 0) * (item.qty || item.quantity || 0)).toLocaleString()}
+                              ฿
+                              {(
+                                (item.price || 0) *
+                                (item.qty || item.quantity || 0)
+                              ).toLocaleString()}
                             </div>
                           </div>
                         )
@@ -542,7 +569,7 @@ export default function PurchasingStatusPage() {
 
               <SheetFooter className="mt-8 border-t pt-4">
                 {userRole === "admin" &&
-                  selectedRequest.status === "Pending" ? (
+                selectedRequest.status === "Pending" ? (
                   <div className="flex gap-3 w-full">
                     <Button
                       variant="outline"

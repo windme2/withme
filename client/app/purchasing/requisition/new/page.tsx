@@ -39,7 +39,7 @@ import {
   Info,
 } from "lucide-react";
 import { toast } from "sonner";
-import { inventoryApi, purchasingApi } from "@/lib/api";
+import { inventoryApi, purchasingApi, suppliersApi } from "@/lib/api";
 
 export default function NewPurchaseRequisitionPage() {
   const router = useRouter();
@@ -51,6 +51,10 @@ export default function NewPurchaseRequisitionPage() {
   const [requester, setRequester] = useState("");
   const [priority, setPriority] = useState("medium");
   const [notes, setNotes] = useState("");
+  const [supplierId, setSupplierId] = useState<string>("");
+  const [suppliers, setSuppliers] = useState<any[]>([]);
+
+  // Requester field is now manual input (not auto-locked)
 
   const [items, setItems] = useState([
     { id: 1, productId: "", name: "", sku: "", quantity: 0, unitPrice: 0, total: 0 },
@@ -67,6 +71,15 @@ export default function NewPurchaseRequisitionPage() {
       }
     };
     fetchProducts();
+    const fetchSuppliers = async () => {
+      try {
+        const data = await suppliersApi.getAll();
+        setSuppliers(data);
+      } catch (error) {
+        // non-fatal
+      }
+    };
+    fetchSuppliers();
   }, []);
 
   // --- Event Handlers ---
@@ -134,16 +147,15 @@ export default function NewPurchaseRequisitionPage() {
     try {
       await purchasingApi.create({
         date,
-        requester, // Note: Backend currently uses hardcoded userId, but we can pass this in notes or update backend to use it if needed.
-        // Actually, backend uses hardcoded userId for `requested_by`.
-        // Let's pass requester name in notes for now or just rely on the hardcoded user.
+        requester,
         priority,
+        supplierId: supplierId || null,
         notes: `${notes} (Requested by: ${requester})`,
-        items: items.map(i => ({
+        items: items.map((i) => ({
           productId: i.productId,
           quantity: i.quantity,
-          unitPrice: i.unitPrice
-        }))
+          unitPrice: i.unitPrice,
+        })),
       });
       toast.success("Purchase Requisition created successfully!");
       setTimeout(() => router.push("/purchasing/requisition"), 1000);
@@ -223,6 +235,7 @@ export default function NewPurchaseRequisitionPage() {
                       placeholder="Enter requester name"
                       value={requester}
                       onChange={(e) => setRequester(e.target.value)}
+                      className="bg-white"
                     />
                   </div>
                   {/* PRIORITY */}
@@ -244,6 +257,21 @@ export default function NewPurchaseRequisitionPage() {
 
                 {/* Notes */}
                 <div className="space-y-2">
+                  <Label htmlFor="supplier">Supplier</Label>
+                  <Select value={supplierId} onValueChange={(v) => setSupplierId(v)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Supplier (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {suppliers.map((s) => (
+                        <SelectItem key={s.id} value={s.id}>
+                          {s.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="notes">Notes</Label>
                   <Textarea
                     id="notes"
@@ -254,6 +282,8 @@ export default function NewPurchaseRequisitionPage() {
                     onChange={(e) => setNotes(e.target.value)}
                   />
                 </div>
+                
+                {/* Intentionally left summary/submit area to the right column (matches New PO layout) */}
               </CardContent>
             </Card>
           </div>
@@ -270,26 +300,17 @@ export default function NewPurchaseRequisitionPage() {
                 <div className="space-y-3">
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Total Items</span>
-                    <span className="font-medium text-slate-900">
-                      {totalItems}
-                    </span>
+                    <span className="font-medium text-slate-900">{totalItems}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-slate-500">Total Quantity</span>
-                    <span className="font-medium text-slate-900">
-                      {totalQuantity}
-                    </span>
+                    <span className="font-medium text-slate-900">{totalQuantity}</span>
                   </div>
                   <div className="border-t border-slate-100 my-2"></div>
 
-                  {/* Estimated Total */}
                   <div className="flex justify-between items-end pt-2">
-                    <span className="text-base font-bold text-slate-800">
-                      Estimated Total
-                    </span>
-                    <span className="text-2xl font-bold text-blue-600">
-                      ฿{totalAmount.toLocaleString()}
-                    </span>
+                    <span className="text-base font-bold text-slate-800">Estimated Total</span>
+                    <span className="text-2xl font-bold text-blue-600">฿{totalAmount.toLocaleString()}</span>
                   </div>
                 </div>
 
@@ -305,8 +326,7 @@ export default function NewPurchaseRequisitionPage() {
                   <div className="flex items-start gap-2 text-xs text-slate-400 px-1">
                     <Info className="h-3 w-3 mt-0.5 flex-shrink-0" />
                     <span>
-                      Final price is subject to approval, vendor quotation,
-                      taxes, and shipping fees.
+                      Final price is subject to approval, vendor quotation, taxes, and shipping fees.
                     </span>
                   </div>
                 </div>

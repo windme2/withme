@@ -77,13 +77,20 @@ export default function NewPurchaseOrderPage() {
       try {
         setIsLoading(true);
         const [prsData, suppliersData, productsData] = await Promise.all([
-          purchasingApi.getAll("approved"),
+          // fetch all PRs (include approved/pending) to avoid missing items created elsewhere
+          purchasingApi.getAll(),
           suppliersApi.getAll(),
           inventoryApi.getAll(),
         ]);
+        // normalize product price field names so client code can rely on `unit_price`
+        const normalizedProducts = productsData.map((p: any) => ({
+          ...p,
+          unit_price: p.unit_price ?? p.unitPrice ?? p.price ?? p.unitPrice,
+        }));
+
         setApprovedPRs(prsData);
         setSuppliers(suppliersData);
-        setProducts(productsData);
+        setProducts(normalizedProducts);
       } catch (error) {
         toast.error("Failed to load data");
       } finally {
@@ -94,25 +101,70 @@ export default function NewPurchaseOrderPage() {
   }, []);
 
   const handlePrSelect = async (prId: string) => {
+    if (!prId || prId === "" || prId === "none") {
+      setSelectedPRId(null);
+      setGeneralInfo((prev) => ({ ...prev, prRef: "" }));
+      return;
+    }
+
     setSelectedPRId(prId);
-    setGeneralInfo({ ...generalInfo, prRef: prId });
 
     try {
       const pr = await purchasingApi.getOne(prId);
+      console.log('🔍 PR Data received:', pr);
+
       if (pr && pr.itemsList) {
-        const newItems: ItemType[] = pr.itemsList.map((item: any, index: number) => ({
-          id: index + 1,
-          productId: item.productId || "",
-          name: item.name,
-          sku: item.sku,
-          quantity: item.qty || item.quantity,
-          unitPrice: 0,
-          total: 0,
-        }));
+        const newItems: ItemType[] = pr.itemsList.map((item: any, index: number) => {
+          const qty = item.qty || item.quantity || 0;
+          // try to find product details from loaded products list
+          const prod = products.find((p) => p.id === item.productId);
+          // prefer PR supplied price (item.price), else product unit price, else 0
+          const unitPrice = item.price ? Number(item.price) : prod?.unit_price ? Number(prod.unit_price) : 0;
+          const total = unitPrice * qty;
+
+          return {
+            id: index + 1,
+            productId: item.productId || "",
+            name: item.name,
+            sku: item.sku,
+            quantity: qty,
+            unitPrice,
+            total,
+          };
+        });
         setItems(newItems);
         toast.info(`Loaded ${newItems.length} items from ${prId}`);
       }
+
+      // Auto-fill supplier if PR contains supplier information
+      if (pr) {
+        const supplierId = pr.supplierId || "";
+        const supplierName = pr.supplierName || "";
+        const sup = suppliers.find((s) => s.id === supplierId);
+
+        console.log('🔍 Supplier info from PR:', { supplierId, supplierName, foundInList: !!sup });
+
+        if (supplierId && sup) {
+          // supplier exists in our suppliers list — select it
+          setGeneralInfo((prev) => ({
+            ...prev,
+            prRef: prId,
+            supplierId: supplierId,
+            supplierName: supplierName,
+          }));
+        } else {
+          // supplierId missing or supplier not in list — set PR ref and fallback name only
+          setGeneralInfo((prev) => ({
+            ...prev,
+            prRef: prId,
+            supplierName: supplierName,
+          }));
+        }
+      } else {
+        setGeneralInfo((prev) => ({ ...prev, prRef: prId }));
+      }
     } catch (error) {
+      console.error("Failed to load PR details:", error);
       toast.error("Failed to load PR details");
     }
   };
@@ -195,6 +247,7 @@ export default function NewPurchaseOrderPage() {
       toast.success("Purchase Order issued successfully!");
       setTimeout(() => router.push("/purchasing/orders"), 1000);
     } catch (error) {
+      console.error("Failed to create purchase order:", error);
       toast.error("Failed to create purchase order");
     }
   };
@@ -248,31 +301,6 @@ export default function NewPurchaseOrderPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-5">
-                {/* PR Selection */}
-                <div className="space-y-2 pb-3 border-b border-slate-100">
-                  <Label
-                    htmlFor="pr-selection"
-                    className="flex items-center gap-1 font-semibold text-blue-600"
-                  >
-                    <ListOrdered className="h-4 w-4" /> Load from Approved PR
-                  </Label>
-                  <Select
-                    onValueChange={handlePrSelect}
-                    value={selectedPRId || ""}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an Approved PR No. to load items" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {approvedPRs.map((pr) => (
-                        <SelectItem key={pr.id} value={pr.id}>
-                          {pr.id} - {pr.requester}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 {/* PO Number / Date */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-2">
@@ -305,11 +333,11 @@ export default function NewPurchaseOrderPage() {
                     <Select
                       onValueChange={(val) => {
                         const supplier = suppliers.find((s) => s.id === val);
-                        setGeneralInfo({
-                          ...generalInfo,
+                        setGeneralInfo((prev) => ({
+                          ...prev,
                           supplierId: val,
                           supplierName: supplier?.name || "",
-                        });
+                        }));
                       }}
                       value={generalInfo.supplierId}
                     >
@@ -324,16 +352,34 @@ export default function NewPurchaseOrderPage() {
                         ))}
                       </SelectContent>
                     </Select>
+                    {/* If supplier was auto-filled from PR but not present in suppliers list,
+                        show the supplier name as a fallback so the user can see it. */}
+                    {generalInfo.supplierId &&
+                      !suppliers.find((s) => s.id === generalInfo.supplierId) && (
+                        <div className="mt-2 text-sm text-slate-700">
+                          {generalInfo.supplierName || generalInfo.supplierId}
+                        </div>
+                      )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="pr-ref">Reference PR No.</Label>
-                    <Input
-                      id="pr-ref"
-                      placeholder="Linked PR automatically fills this field"
-                      disabled
-                      value={generalInfo.prRef}
-                      className="bg-slate-50 text-slate-600"
-                    />
+                    <Label htmlFor="pr-ref">
+                      Reference PR
+                    </Label>
+                    <Select
+                      onValueChange={handlePrSelect}
+                      value={generalInfo.prRef || ""}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select approved PR (optional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {approvedPRs.map((pr) => (
+                          <SelectItem key={pr.id} value={pr.id}>
+                            {pr.id}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
@@ -345,7 +391,7 @@ export default function NewPurchaseOrderPage() {
                     type="date"
                     value={generalInfo.expectedDate}
                     onChange={(e) =>
-                      setGeneralInfo({ ...generalInfo, expectedDate: e.target.value })
+                      setGeneralInfo((prev) => ({ ...prev, expectedDate: e.target.value }))
                     }
                   />
                 </div>
@@ -360,7 +406,7 @@ export default function NewPurchaseOrderPage() {
                     className="resize-none min-h-[80px]"
                     value={generalInfo.notes}
                     onChange={(e) =>
-                      setGeneralInfo({ ...generalInfo, notes: e.target.value })
+                      setGeneralInfo((prev) => ({ ...prev, notes: e.target.value }))
                     }
                   />
                 </div>
@@ -435,10 +481,9 @@ export default function NewPurchaseOrderPage() {
                 variant="outline"
                 size="sm"
                 className="text-blue-600 border-blue-200 hover:bg-blue-50"
-                disabled={!!selectedPRId}
               >
                 <Plus className="h-4 w-4 mr-2" />
-                {selectedPRId ? "Items Loaded" : "Add Item"}
+                Add Item
               </Button>
             </CardHeader>
             <CardContent className="p-0">

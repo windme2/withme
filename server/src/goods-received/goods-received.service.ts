@@ -185,6 +185,20 @@ export class GoodsReceivedService {
         });
     }
 
+    async createWithNotification(data: any, notificationsService: any) {
+        const grn = await this.create(data);
+        
+        // Send notification
+        await notificationsService.create({
+            title: 'New Goods Received',
+            message: `GRN ${grn.grn_number} received successfully`,
+            type: 'info',
+            link: '/inventory/goods-received'
+        });
+        
+        return grn;
+    }
+
     private mapStatus(status: string): string {
         const statusMap: Record<string, string> = {
             pending: 'Pending',

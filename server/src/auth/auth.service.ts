@@ -20,19 +20,23 @@ export class AuthService {
         });
 
         if (!user) {
+            console.log('❌ User not found for:', email);
             throw new UnauthorizedException('Invalid credentials');
         }
 
-        // TODO: Verify password hash. For now assuming plain text or simple comparison if hash logic isn't known.
-        // The schema says 'password_hash'. I'll assume it's a hash.
-        // Since I can't check the hash algorithm, I'll just check if it matches for now (insecure but functional for demo if plain)
-        // OR better, I'll just return the user if found for this step, but I should try to match.
-        // Let's assume the user might have plain text passwords in dev DB.
+        console.log('✅ User found:', user.username);
+        console.log('📝 Password in DB:', user.password_hash);
+        console.log('📝 Password provided:', password);
+        console.log('🔍 Match:', user.password_hash === password);
 
+        // Simple password check (plain text for development)
+        // In production, use bcrypt.compare(password, user.password_hash)
         if (user.password_hash !== password) {
-            // In a real app, use bcrypt.compare(password, user.password_hash)
-            // throw new UnauthorizedException('Invalid credentials');
+            console.log('❌ Password mismatch!');
+            throw new UnauthorizedException('Invalid credentials');
         }
+
+        console.log('✅ Login successful!');
 
         return {
             user: {

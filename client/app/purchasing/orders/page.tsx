@@ -89,7 +89,8 @@ export default function PurchaseOrderPage() {
     const matchesSearch =
       order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       order.supplier.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (order.prRef && order.prRef.toLowerCase().includes(searchTerm.toLowerCase()));
+      (order.prRef &&
+        order.prRef.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus =
       filterStatus === "all" || order.status === filterStatus;
     return matchesSearch && matchesStatus;
@@ -139,17 +140,16 @@ export default function PurchaseOrderPage() {
         `<p><strong>Date:</strong> ${selectedOrder.date}</p>`
       );
       printWindow.document.write(
-        `<p><strong>PR Ref.:</strong> ${selectedOrder.prRef || '-'}</p>`
+        `<p><strong>PR Ref.:</strong> ${selectedOrder.prRef || "-"}</p>`
       );
       printWindow.document.write(
         '<br/><table><thead><tr><th>Item</th><th>Qty</th><th class="text-right">Total</th></tr></thead><tbody>'
       );
       selectedOrder.items.forEach((item: any) => {
         printWindow.document.write(
-          `<tr><td>${item.productName}</td><td>${item.quantity
-          }</td><td class="text-right">฿${(
-            item.totalPrice
-          ).toLocaleString()}</td></tr>`
+          `<tr><td>${item.productName}</td><td>${
+            item.quantity
+          }</td><td class="text-right">฿${item.totalPrice.toLocaleString()}</td></tr>`
         );
       });
       printWindow.document.write("</tbody></table>");
@@ -196,7 +196,7 @@ export default function PurchaseOrderPage() {
             onClick={() => router.push("/purchasing/orders/new")}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Create New PO
+            New PO
           </Button>
         </div>
 
@@ -225,7 +225,9 @@ export default function PurchaseOrderPage() {
           />
           <StatCard
             title="Total Value"
-            value={`฿${(orders.reduce((sum, o) => sum + o.amount, 0) / 1000).toFixed(1)}k`}
+            value={`฿${(
+              orders.reduce((sum, o) => sum + o.amount, 0) / 1000
+            ).toFixed(1)}k`}
             icon={FileText}
             color="text-purple-600"
             bg="bg-purple-50"
@@ -266,7 +268,9 @@ export default function PurchaseOrderPage() {
                     <SelectItem value="all">All Status</SelectItem>
                     <SelectItem value="Draft">Draft</SelectItem>
                     <SelectItem value="Sent">Sent</SelectItem>
-                    <SelectItem value="Partially Received">Partially Received</SelectItem>
+                    <SelectItem value="Partially Received">
+                      Partially Received
+                    </SelectItem>
                     <SelectItem value="Completed">Completed</SelectItem>
                     <SelectItem value="Cancelled">Cancelled</SelectItem>
                   </SelectContent>
@@ -308,13 +312,19 @@ export default function PurchaseOrderPage() {
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                      <TableCell
+                        colSpan={6}
+                        className="text-center py-8 text-slate-500"
+                      >
                         Loading orders...
                       </TableCell>
                     </TableRow>
                   ) : paginatedOrders.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-slate-500">
+                      <TableCell
+                        colSpan={6}
+                        className="text-center py-8 text-slate-500"
+                      >
                         No orders found.
                       </TableCell>
                     </TableRow>
@@ -410,9 +420,11 @@ export default function PurchaseOrderPage() {
               <SheetHeader className="mb-6 border-b pb-4">
                 <SheetTitle className="text-xl flex items-center gap-2">
                   <FileText className="h-5 w-5 text-blue-600" />
-                  Order Details
+                  Purchase Orders (PO)
                 </SheetTitle>
-                <SheetDescription>Purchase Order Information</SheetDescription>
+                <SheetDescription>
+                  Review details for {selectedOrder.id}
+                </SheetDescription>
               </SheetHeader>
 
               <div className="space-y-6">
@@ -426,7 +438,7 @@ export default function PurchaseOrderPage() {
                   <div className="flex justify-between">
                     <span className="text-slate-500 text-sm">PR Reference</span>
                     <span className="font-medium text-slate-900">
-                      {selectedOrder.prRef || '-'}
+                      {selectedOrder.prRef || "-"}
                     </span>
                   </div>
                   <div className="flex justify-between">
@@ -442,25 +454,19 @@ export default function PurchaseOrderPage() {
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-slate-900 mb-3">
-                    Supplier Information
-                  </h4>
                   <div className="p-3 border rounded-lg">
                     <div className="font-medium text-lg">
                       {selectedOrder.supplier.name}
                     </div>
                     <div className="text-sm text-slate-500 mt-1">
-                      {selectedOrder.supplier.address || 'No address provided'}
+                      {selectedOrder.supplier.address || "No address provided"}
                       <br />
-                      Tax ID: {selectedOrder.supplier.tax_id || '-'}
+                      Tax ID: {selectedOrder.supplier.tax_id || "-"}
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-slate-900 mb-3 flex items-center gap-2">
-                    <PackageOpen className="h-4 w-4" /> Ordered Items
-                  </h4>
                   <div className="border rounded-lg overflow-hidden">
                     <div className="bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b grid grid-cols-12 gap-2">
                       <div className="col-span-6">Item</div>

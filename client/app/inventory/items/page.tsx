@@ -49,28 +49,12 @@ interface InventoryItem {
   id: string;
   name: string;
   sku: string;
-  // Map backend 'categories' relation to string if needed, or adjust UI
   category: string | null;
-  stock: number; // backend might use 'quantity' or different field? Schema says 'products' table has 'unit' but maybe not stock? 
-  // Wait, schema has 'inventory_levels' table for quantity. 'products' table has 'minimum_stock'.
-  // Let's check schema again. 'products' has no quantity field? 
-  // Ah, schema says 'inventory_levels' has quantity.
-  // But for now let's assume the API returns a flattened structure or we need to adjust the service.
-  // Let's check the service implementation.
-  // Service returns prisma.products.findMany().
-  // Products table: id, sku, name, description, category_id, unit, minimum_stock...
-  // It does NOT have quantity. Quantity is in inventory_levels.
-  // I need to update the service to include inventory_levels.
-  price: number; // Products table doesn't seem to have price? 
-  // Schema: products table has no price. 
-  // goods_received_items has unit_price.
-  // This is an ERP. Price might be dynamic or cost price.
-  // Let's check schema for price.
-  // 'products' table: id, sku, name... no price.
-  // I should probably add a price field to products or use a related table.
-  // For this demo, I might need to mock it or add it to schema.
-  // Let's look at the schema again.
-
+  stock: number;
+  unitPrice: number;
+  amount: number;
+  minStock: number;
+  maxStock: number;
   status: string;
 }
 
@@ -127,7 +111,7 @@ export default function InventoryItemsPage() {
     (item) => item.status === "Out of Stock"
   ).length;
   const totalValue = items.reduce(
-    (sum, item) => sum + item.price * item.stock,
+    (sum, item) => sum + item.amount,
     0
   );
 
@@ -164,7 +148,11 @@ export default function InventoryItemsPage() {
     if (!editingItem) return;
 
     try {
-      await inventoryApi.update(editingItem.id, editingItem);
+      await inventoryApi.update(editingItem.id, {
+        categoryId: editingItem.category,
+        minStock: editingItem.minStock,
+        maxStock: editingItem.maxStock,
+      });
       toast.success(`Updated ${editingItem.name} successfully!`);
 
       // Refresh list
@@ -307,20 +295,20 @@ export default function InventoryItemsPage() {
                 <Table>
                   <TableHeader className="bg-slate-50">
                     <TableRow>
-                      <TableHead className="w-[100px] font-semibold text-slate-700 pl-6 pr-4">
+                      <TableHead className="w-[120px] font-semibold text-slate-700 pl-6 pr-4">
                         SKU No.
                       </TableHead>
-                      <TableHead className="font-semibold text-slate-700">
+                      <TableHead className="min-w-[250px] font-semibold text-slate-700 pl-4">
                         Item Description
                       </TableHead>
-                      <TableHead className="font-semibold text-slate-700">
+                      <TableHead className="w-[150px] font-semibold text-slate-700 pl-4">
                         Category
                       </TableHead>
                       <TableHead className="text-right font-semibold text-slate-700">
                         Quantity
                       </TableHead>
                       <TableHead className="text-right font-semibold text-slate-700">
-                        Price
+                        Unit Price
                       </TableHead>
                       <TableHead className="text-right font-semibold text-slate-700">
                         Amount
@@ -328,7 +316,6 @@ export default function InventoryItemsPage() {
                       <TableHead className="text-center font-semibold text-slate-700 pr-6">
                         Status
                       </TableHead>
-                      {/* Removed: Action TableHead */}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -339,38 +326,37 @@ export default function InventoryItemsPage() {
                         onClick={() => handleEditClick(item)} // Use Row Click for details
                       >
                         {/* SKU No. - Changed text color to blue-700 */}
-                        <TableCell className="font-medium text-blue-700 pl-6 py-4">
+                        <TableCell className="font-medium text-blue-700 pl-6 pr-4 py-4">
                           {item.sku}
                         </TableCell>
                         {/* Item Description */}
-                        <TableCell className="py-4">
+                        <TableCell className="py-4 pl-4">
                           <span className="font-medium text-slate-900">
                             {item.name}
                           </span>
                         </TableCell>
                         {/* Category */}
-                        <TableCell className="py-4">
+                        <TableCell className="py-4 pl-4">
                           <span className="text-slate-500">
                             {item.category}
                           </span>
                         </TableCell>
                         {/* Quantity */}
-                        <TableCell className="text-right font-medium text-slate-700 py-4">
-                          {item.stock}
+                        <TableCell className="text-right font-semibold text-slate-900 py-4">
+                          {item.stock.toLocaleString()}
                         </TableCell>
-                        {/* Price */}
-                        <TableCell className="text-right text-slate-600 py-4">
-                          ฿{item.price.toLocaleString()}
+                        {/* Unit Price */}
+                        <TableCell className="text-right font-medium text-slate-700 py-4">
+                          ฿{item.unitPrice.toLocaleString()}
                         </TableCell>
                         {/* Amount */}
-                        <TableCell className="text-right font-medium text-slate-900 py-4">
-                          ฿{(item.price * item.stock).toLocaleString()}
+                        <TableCell className="text-right text-slate-600 py-4">
+                          ฿{item.amount.toLocaleString()}
                         </TableCell>
                         {/* Status */}
                         <TableCell className="text-center py-4 pr-6">
                           <StatusBadge status={item.status} />
                         </TableCell>
-                        {/* Removed: Action TableCell */}
                       </TableRow>
                     ))}
                   </TableBody>
@@ -423,41 +409,31 @@ export default function InventoryItemsPage() {
           <SheetHeader className="mb-6 border-b pb-4">
             <SheetTitle className="text-xl flex items-center gap-2">
               <Edit className="h-5 w-5 text-blue-600" />
-              แก้ไขสินค้า
+              Items Management
             </SheetTitle>
             <SheetDescription>
-              ปรับปรุงข้อมูลสินค้า **{editingItem?.name}**
-              กดบันทึกเมื่อเสร็จสิ้น
+            Review Details for {editingItem?.sku}
             </SheetDescription>
           </SheetHeader>
           {editingItem && (
             <form onSubmit={handleSaveEdit}>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="name"
-                    className="text-sm font-medium text-slate-700"
-                  >
-                    ชื่อสินค้า
+                  <Label className="text-sm font-medium text-slate-700">
+                    Product Name
                   </Label>
                   <Input
-                    id="name"
-                    defaultValue={editingItem.name}
-                    onChange={(e) =>
-                      setEditingItem({ ...editingItem, name: e.target.value })
-                    }
+                    value={editingItem.name}
+                    className="bg-slate-50"
+                    disabled
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label
-                    htmlFor="sku"
-                    className="text-sm font-medium text-slate-700"
-                  >
+                  <Label className="text-sm font-medium text-slate-700">
                     SKU
                   </Label>
                   <Input
-                    id="sku"
-                    defaultValue={editingItem.sku}
+                    value={editingItem.sku}
                     className="bg-slate-50"
                     disabled
                   />
@@ -467,7 +443,7 @@ export default function InventoryItemsPage() {
                     htmlFor="category"
                     className="text-sm font-medium text-slate-700"
                   >
-                    หมวดหมู่
+                    Category
                   </Label>
                   <Select
                     defaultValue={editingItem.category}
@@ -476,7 +452,7 @@ export default function InventoryItemsPage() {
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="เลือกหมวดหมู่" />
+                      <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
                       {categories
@@ -489,48 +465,49 @@ export default function InventoryItemsPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="price"
-                    className="text-sm font-medium text-slate-700"
-                  >
-                    ราคา (บาท)
-                  </Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    defaultValue={editingItem.price}
-                    onChange={(e) =>
-                      setEditingItem({
-                        ...editingItem,
-                        price: parseFloat(e.target.value),
-                      })
-                    }
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="minStock"
+                      className="text-sm font-medium text-slate-700"
+                    >
+                      Min Stock
+                    </Label>
+                    <Input
+                      id="minStock"
+                      type="number"
+                      value={editingItem.minStock}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          minStock: parseInt(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="maxStock"
+                      className="text-sm font-medium text-slate-700"
+                    >
+                      Max Stock
+                    </Label>
+                    <Input
+                      id="maxStock"
+                      type="number"
+                      value={editingItem.maxStock}
+                      onChange={(e) =>
+                        setEditingItem({
+                          ...editingItem,
+                          maxStock: parseInt(e.target.value) || 0,
+                        })
+                      }
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label
-                    htmlFor="stock"
-                    className="text-sm font-medium text-slate-700"
-                  >
-                    จำนวนคงเหลือ
-                  </Label>
-                  <Input
-                    id="stock"
-                    type="number"
-                    defaultValue={editingItem.stock}
-                    onChange={(e) =>
-                      setEditingItem({
-                        ...editingItem,
-                        stock: parseInt(e.target.value),
-                      })
-                    }
-                  />
-                  <p className="text-xs text-amber-600 mt-1">
-                    หมายเหตุ: แนะนำให้ใช้ Stock Adjustment
-                    สำหรับการปรับยอดสินค้า
-                  </p>
-                </div>
+                <p className="text-xs text-amber-600">
+                  Note: Use Stock Adjustment for inventory quantity changes
+                </p>
               </div>
               <SheetFooter className="mt-6 border-t pt-4">
                 <div className="flex gap-2 w-full">
@@ -540,13 +517,13 @@ export default function InventoryItemsPage() {
                     className="flex-1"
                     onClick={() => setIsEditOpen(false)}
                   >
-                    ยกเลิก
+                    Cancel
                   </Button>
                   <Button
                     type="submit"
                     className="flex-1 bg-blue-600 hover:bg-blue-700"
                   >
-                    บันทึกการแก้ไข
+                    Save Changes
                   </Button>
                 </div>
               </SheetFooter>

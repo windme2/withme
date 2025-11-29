@@ -49,25 +49,37 @@ export class SalesOrdersService {
 
         if (!order) return null;
 
+        const items = order.sales_order_items.map(item => ({
+            id: item.id,
+            productId: item.product_id,
+            name: item.products.name,
+            sku: item.products.sku,
+            qty: item.quantity,
+            quantity: item.quantity,
+            price: Number(item.unit_price),
+            unitPrice: Number(item.unit_price),
+            totalPrice: Number(item.total_price),
+            unit: item.products.unit || 'pcs',
+        }));
+
         return {
             id: order.so_number,
             soNumber: order.so_number,
             customerName: order.customer_name,
+            customer: order.customer_name,
             contactPerson: order.contact_person,
             customerEmail: order.customer_email,
             customerPhone: order.customer_phone,
             orderDate: order.order_date,
+            date: order.order_date.toISOString().split('T')[0],
             dueDate: order.due_date ? order.due_date.toISOString().split('T')[0] : null,
             status: this.mapStatus(order.status),
             notes: order.notes,
-            salesOrderItems: order.sales_order_items.map(item => ({
-                id: item.id,
-                productId: item.product_id,
-                quantity: item.quantity,
-                unitPrice: Number(item.unit_price),
-                totalPrice: Number(item.total_price),
-                products: item.products
-            })),
+            items: items,
+            salesOrderItems: items,
+            totalQty: items.reduce((sum, item) => sum + item.quantity, 0),
+            totalQuantity: items.reduce((sum, item) => sum + item.quantity, 0),
+            totalValue: Number(order.total_amount),
             totalAmount: Number(order.total_amount),
         };
     }
@@ -110,6 +122,20 @@ export class SalesOrdersService {
             }
             return order;
         });
+    }
+
+    async createWithNotification(data: any, notificationsService: any) {
+        const order = await this.create(data);
+        
+        // Send notification
+        await notificationsService.create({
+            title: 'New Sales Order',
+            message: `Sales Order ${order.so_number} created for ${data.customerName}`,
+            type: 'info',
+            link: '/sales/orders'
+        });
+        
+        return order;
     }
 
     async updateStatus(id: string, status: string) {

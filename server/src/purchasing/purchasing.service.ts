@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 import { NotificationsService } from '../notifications/notifications.service';
@@ -29,6 +29,7 @@ export class PurchasingService {
             where,
             include: {
                 users_purchase_requisitions_requested_byTousers: true,
+                suppliers: true,
                 purchase_requisition_items: {
                     include: {
                         products: true,
@@ -40,19 +41,27 @@ export class PurchasingService {
             },
         });
 
-        return prs.map((pr) => ({
-            id: pr.pr_number,
-            itemsList: pr.purchase_requisition_items.map((item) => ({
+        return prs.map((pr) => {
+            const itemsList = pr.purchase_requisition_items.map((item) => ({
+                productId: item.product_id,
                 name: item.products.name,
                 sku: item.products.sku,
                 qty: item.quantity,
-                price: 0,
-            })),
-            total: 0,
-            status: this.mapStatus(pr.status),
-            date: pr.created_at.toISOString().split('T')[0],
-            requester: `${pr.users_purchase_requisitions_requested_byTousers.first_name} ${pr.users_purchase_requisitions_requested_byTousers.last_name}`,
-        }));
+                price: item.estimated_unit_price ? Number(item.estimated_unit_price) : 0,
+            }));
+            const total = itemsList.reduce((sum, item) => sum + (item.qty * item.price), 0);
+            
+            return {
+                id: pr.pr_number,
+                itemsList,
+                total,
+                status: this.mapStatus(pr.status),
+                date: pr.created_at.toISOString().split('T')[0],
+                requester: `${pr.users_purchase_requisitions_requested_byTousers.first_name} ${pr.users_purchase_requisitions_requested_byTousers.last_name}`,
+                supplierId: pr.supplier_id || null,
+                supplierName: pr.suppliers ? pr.suppliers.name : null,
+            };
+        });
     }
 
     async findOne(id: string) {
@@ -60,6 +69,7 @@ export class PurchasingService {
             where: { pr_number: id },
             include: {
                 users_purchase_requisitions_requested_byTousers: true,
+                suppliers: true,
                 purchase_requisition_items: {
                     include: {
                         products: true,
@@ -70,23 +80,29 @@ export class PurchasingService {
 
         if (!pr) return null;
 
+        const itemsList = pr.purchase_requisition_items.map((item) => ({
+            productId: item.product_id,
+            name: item.products.name,
+            sku: item.products.sku,
+            qty: item.quantity,
+            price: item.estimated_unit_price ? Number(item.estimated_unit_price) : 0,
+        }));
+        const total = itemsList.reduce((sum, item) => sum + (item.qty * item.price), 0);
+
         return {
             id: pr.pr_number,
-            itemsList: pr.purchase_requisition_items.map((item) => ({
-                name: item.products.name,
-                sku: item.products.sku,
-                qty: item.quantity,
-                price: 0,
-            })),
-            total: 0,
+            itemsList,
+            total,
             status: this.mapStatus(pr.status),
             date: pr.created_at.toISOString().split('T')[0],
             requester: `${pr.users_purchase_requisitions_requested_byTousers.first_name} ${pr.users_purchase_requisitions_requested_byTousers.last_name}`,
+            supplierId: pr.supplier_id || null,
+            supplierName: pr.suppliers ? pr.suppliers.name : null,
         };
     }
 
     async create(data: any) {
-        const { items, notes, userId, priority } = data;
+        const { items, notes, userId, priority, supplierId } = data;
 
         const result = await this.prisma.$transaction(async (tx) => {
             const pr = await tx.purchase_requisitions.create({
@@ -94,6 +110,7 @@ export class PurchasingService {
                     id: `pr-${Date.now()}`,
                     pr_number: `PR-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
                     requested_by: userId,
+                    supplier_id: supplierId || null,
                     department: 'General',
                     status: 'pending',
                     requested_date: new Date(),
@@ -109,6 +126,7 @@ export class PurchasingService {
                         pr_id: pr.id,
                         product_id: item.productId,
                         quantity: Number(item.quantity),
+                        estimated_unit_price: item.unitPrice ? Number(item.unitPrice) : null,
                         status: 'pending',
                     },
                 });
@@ -122,19 +140,39 @@ export class PurchasingService {
             title: 'New Purchase Requisition',
             message: `PR ${result.pr_number} created by user and is pending approval.`,
             type: 'approval',
-            link: `/purchasing/requisition/${result.pr_number}`
+            link: `/purchasing/requisition`
         });
 
         return result;
     }
 
-    async updateStatus(id: string, status: string) {
+    async updateStatus(id: string, status: string, approverId?: string, supplierId?: string) {
+        const data: any = {
+            status: status as any,
+            updated_at: new Date(),
+        };
+
+        if (status === 'approved') {
+            // Approver must be provided and must be an admin
+            if (!approverId) {
+                throw new BadRequestException('approverId is required to approve a PR');
+            }
+
+            const user = await this.prisma.users.findUnique({ where: { id: approverId } });
+            if (!user || user.role !== 'admin') {
+                throw new ForbiddenException('Only admin users can approve purchase requisitions');
+            }
+
+            data.approved_by = approverId;
+            data.approved_date = new Date();
+            if (supplierId) {
+                data.supplier_id = supplierId;
+            }
+        }
+
         return await this.prisma.purchase_requisitions.update({
             where: { pr_number: id },
-            data: {
-                status: status as any,
-                updated_at: new Date(),
-            },
+            data,
         });
     }
 

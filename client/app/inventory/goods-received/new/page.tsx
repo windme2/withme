@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { suppliersApi, inventoryApi, goodsReceivedApi } from "@/lib/api";
+import { suppliersApi, inventoryApi, goodsReceivedApi, purchaseOrdersApi } from "@/lib/api";
 import { MainLayout } from "@/components/layout/main-layout";
 import {
   Card,
@@ -37,6 +37,7 @@ export default function NewGoodsReceivedPage() {
   const router = useRouter();
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
+  const [purchaseOrders, setPurchaseOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   // Form State
@@ -53,18 +54,60 @@ export default function NewGoodsReceivedPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [suppliersData, productsData] = await Promise.all([
+        const [suppliersData, productsData, posData] = await Promise.all([
           suppliersApi.getAll(),
           inventoryApi.getAll(),
+          purchaseOrdersApi.getAll("", ""), // Get all POs
         ]);
         setSuppliers(suppliersData);
         setProducts(productsData);
+        // Filter POs with status sent or pending
+        const activePOs = posData.filter((po: any) => 
+          po.status === "Sent" || po.status === "Pending" || po.status === "sent" || po.status === "pending"
+        );
+        setPurchaseOrders(activePOs);
       } catch (error) {
         toast.error("Failed to load data");
       }
     };
     fetchData();
   }, []);
+
+  // Handle PO selection
+  const handlePoSelect = async (poId: string) => {
+    if (!poId || poId === "" || poId === "none") {
+      setPoRef("");
+      // Reset to empty items when no PO selected
+      setItems([{ id: 1, productId: "", name: "", sku: "", quantity: 0, unitPrice: 0, total: 0 }]);
+      return;
+    }
+    
+    try {
+      const po = await purchaseOrdersApi.getOne(poId);
+      if (po) {
+        setPoRef(poId);
+        setSupplierId(po.supplierId || "");
+        
+        // Auto-fill items from PO
+        if (po.items && po.items.length > 0) {
+          const newItems = po.items.map((item: any, index: number) => ({
+            id: index + 1,
+            productId: item.productId || "",
+            name: item.productName || item.name || "",
+            sku: item.sku || "",
+            quantity: item.quantity || item.qty || 0,
+            unitPrice: item.unitPrice || item.price || 0,
+            total: (item.quantity || item.qty || 0) * (item.unitPrice || item.price || 0),
+          }));
+          setItems(newItems);
+          toast.success(`Loaded ${newItems.length} items from PO ${poId}`);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load PO details:", error);
+      toast.error("Failed to load PO details");
+    }
+  };
 
   // --- Event Handlers ---
   const addItem = () => {
@@ -225,13 +268,21 @@ export default function NewGoodsReceivedPage() {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="po-number">PO Reference</Label>
-                    <Input
-                      id="po-number"
-                      placeholder="e.g. PO-2024-001"
-                      value={poRef}
-                      onChange={(e) => setPoRef(e.target.value)}
-                    />
+                    <Label htmlFor="po-number">
+                      Reference PO
+                    </Label>
+                    <Select value={poRef} onValueChange={handlePoSelect}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select PO (optional)" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {purchaseOrders.map((po) => (
+                          <SelectItem key={po.id} value={po.id}>
+                            {po.poNumber || po.id}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
@@ -331,7 +382,8 @@ export default function NewGoodsReceivedPage() {
           <Card className="border-slate-200 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div className="space-y-1">
-                <CardTitle className="text-lg font-semibold">
+                <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                  <Package className="h-5 w-5 text-blue-600" />
                   Received Items
                 </CardTitle>
                 <CardDescription>List of items being received.</CardDescription>

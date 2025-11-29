@@ -23,27 +23,44 @@ export class DashboardService {
             return qty <= (p.minimum_stock || 0);
         }).length;
 
-        // 3. Pending Orders (Purchase Requisitions)
+        // 3. Purchase Requisition Status Counts
         const pendingOrders = await this.prisma.purchase_requisitions.count({
             where: { status: 'pending' },
+        });
+        
+        const approvedOrders = await this.prisma.purchase_requisitions.count({
+            where: { status: 'approved' },
+        });
+        
+        const rejectedOrders = await this.prisma.purchase_requisitions.count({
+            where: { status: 'rejected' },
         });
 
         // 4. Inventory Value (Estimated)
         // Get latest price for each product from GRN items
         // This is expensive, for now let's do a simplified version or just sum quantities
-        // Real implementation would need a 'cost_price' on product or weighted average logic
+        // Calculate total inventory value using unit_price from products table
         let totalValue = 0;
         for (const p of products) {
             const qty = p.inventory_levels?.quantity || 0;
-            if (qty > 0) {
-                // Find last GRN price
-                const lastGrnItem = await this.prisma.goods_received_items.findFirst({
-                    where: { product_id: p.id },
-                    orderBy: { goods_received: { received_date: 'desc' } },
-                    select: { unit_price: true }
-                });
-                const price = lastGrnItem?.unit_price ? Number(lastGrnItem.unit_price) : 0;
-                totalValue += qty * price;
+            const unitPrice = p.unit_price ? Number(p.unit_price) : 0;
+            totalValue += qty * unitPrice;
+        }
+
+        // 5. Total Revenue from Completed Sales Orders
+        const completedSalesOrders = await this.prisma.sales_orders.findMany({
+            where: { status: 'completed' },
+            include: {
+                sales_order_items: true,
+            },
+        });
+
+        let totalRevenue = 0;
+        for (const order of completedSalesOrders) {
+            for (const item of order.sales_order_items) {
+                const qty = item.quantity || 0;
+                const price = item.unit_price ? Number(item.unit_price) : 0;
+                totalRevenue += qty * price;
             }
         }
 
@@ -51,7 +68,10 @@ export class DashboardService {
             totalItems,
             lowStockCount,
             pendingOrders,
+            approvedOrders,
+            rejectedOrders,
             totalValue,
+            totalRevenue,
         };
     }
 

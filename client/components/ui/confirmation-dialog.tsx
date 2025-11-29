@@ -29,8 +29,8 @@ export function ConfirmationDialog({
   title,
   description,
   onConfirm,
-  confirmText = "ยืนยัน",
-  cancelText = "ยกเลิก",
+  confirmText = "Confirm",
+  cancelText = "Cancel",
   variant = "default",
 }: ConfirmationDialogProps) {
   return (

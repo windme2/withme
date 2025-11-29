@@ -33,6 +33,9 @@ import {
   User,
   MapPin,
   Trash2,
+  Building2,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { suppliersApi } from "@/lib/api";
@@ -42,6 +45,11 @@ export default function SuppliersPage() {
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+
+  // Stats
+  const totalSuppliers = suppliers.length;
+  const activeSuppliers = suppliers.filter((s) => s.is_active).length;
+  const inactiveSuppliers = suppliers.filter((s) => !s.is_active).length;
 
   // Sheet & Edit State
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -220,6 +228,31 @@ export default function SuppliersPage() {
           </Button>
         </div>
 
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <StatCard
+            title="Total Suppliers"
+            value={totalSuppliers}
+            icon={Building2}
+            color="text-blue-600"
+            bg="bg-blue-50"
+          />
+          <StatCard
+            title="Active"
+            value={activeSuppliers}
+            icon={CheckCircle2}
+            color="text-emerald-600"
+            bg="bg-emerald-50"
+          />
+          <StatCard
+            title="Inactive"
+            value={inactiveSuppliers}
+            icon={XCircle}
+            color="text-slate-600"
+            bg="bg-slate-50"
+          />
+        </div>
+
         {/* Content */}
         <Card className="border-slate-200 shadow-sm">
           <CardContent className="p-6">
@@ -329,7 +362,7 @@ export default function SuppliersPage() {
                 <SheetDescription>
                   {isNew
                     ? "Add a new vendor to your list."
-                    : "View or edit supplier information."}
+                    : "View or edit supplier information"}
                 </SheetDescription>
               </SheetHeader>
 
@@ -526,5 +559,21 @@ export default function SuppliersPage() {
         </SheetContent>
       </Sheet>
     </MainLayout>
+  );
+}
+
+function StatCard({ title, value, icon: Icon, color, bg }: any) {
+  return (
+    <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all">
+      <CardContent className="p-6 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-slate-500 mb-1">{title}</p>
+          <h3 className="text-2xl font-bold text-slate-900">{value}</h3>
+        </div>
+        <div className={`p-3 rounded-xl ${bg}`}>
+          <Icon className={`h-6 w-6 ${color}`} />
+        </div>
+      </CardContent>
+    </Card>
   );
 }

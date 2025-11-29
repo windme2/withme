@@ -57,12 +57,10 @@ export function CustomLoadingScreen() {
     <div
       className={`
         fixed inset-0 z-[9999] flex items-center justify-center 
-        transition-opacity duration-700 ease-in-out
+        transition-opacity duration-700 ease-in-out bg-white
         ${isVisible ? "opacity-100" : "opacity-0"}
       `}
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-800 via-slate-900 to-slate-950" />
-
       <div
         className={`relative z-10 transition-transform duration-700 ${
           isVisible ? "scale-100" : "scale-95"

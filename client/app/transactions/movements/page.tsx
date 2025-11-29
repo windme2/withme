@@ -29,7 +29,21 @@ import {
   ArrowDownLeft,
   ListOrdered,
   Loader2,
+  TrendingUp,
+  TrendingDown,
+  RefreshCw,
+  Package,
+  FileText,
+  Calendar,
+  User,
 } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { transactionsApi } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -41,6 +55,13 @@ export default function InventoryMovementLogPage() {
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [selectedTransaction, setSelectedTransaction] = useState<any | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  // Stats
+  const receiptCount = transactions.filter((t) => t.transaction_type === "Receipt" || t.transaction_type === "Return").length;
+  const issueCount = transactions.filter((t) => t.transaction_type === "Issue").length;
+  const adjustmentCount = transactions.filter((t) => t.transaction_type === "Adjustment").length;
 
   const itemsPerPage = 10;
 
@@ -72,6 +93,11 @@ export default function InventoryMovementLogPage() {
 
     return () => clearTimeout(timeoutId);
   }, [currentPage, filterType, searchTerm]);
+
+  const handleRowClick = (transaction: any) => {
+    setSelectedTransaction(transaction);
+    setIsSheetOpen(true);
+  };
 
   // Define Movement Type Icons and colors
   const getMovementStyle = (type: string, qty: number) => {
@@ -116,13 +142,44 @@ export default function InventoryMovementLogPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight flex items-center gap-3">
-              <ClipboardList className="h-7 w-7 text-blue-600" />
-              ประวัติการเคลื่อนไหวสินค้าคงคลัง (Movement Log)
+              History of Movements
             </h1>
             <p className="text-slate-500 mt-1">
-              แสดงบันทึกธุรกรรมทั้งหมดที่ส่งผลต่อจำนวนสินค้าคงคลัง
+              บันทึกการเคลื่อนไหวสินค้าคงคลังทั้งหมด
             </p>
           </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <StatCard
+            title="Total Movements"
+            value={totalItems}
+            icon={ClipboardList}
+            color="text-blue-600"
+            bg="bg-blue-50"
+          />
+          <StatCard
+            title="Receipts"
+            value={receiptCount}
+            icon={TrendingUp}
+            color="text-emerald-600"
+            bg="bg-emerald-50"
+          />
+          <StatCard
+            title="Issues"
+            value={issueCount}
+            icon={TrendingDown}
+            color="text-red-600"
+            bg="bg-red-50"
+          />
+          <StatCard
+            title="Adjustments"
+            value={adjustmentCount}
+            icon={RefreshCw}
+            color="text-amber-600"
+            bg="bg-amber-50"
+          />
         </div>
 
         {/* --- Main Content: Table --- */}
@@ -189,10 +246,10 @@ export default function InventoryMovementLogPage() {
                         Item
                       </TableHead>
                       <TableHead className="text-right w-[140px] font-semibold text-slate-700 h-12">
-                        Qty Change
+                        Qty.
                       </TableHead>
                       <TableHead className="font-semibold text-slate-700 pr-6 h-12">
-                        Source / Destination
+                        Reason
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -216,7 +273,8 @@ export default function InventoryMovementLogPage() {
                         return (
                           <TableRow
                             key={log.id}
-                            className="hover:bg-slate-50/60 transition-colors"
+                            className="hover:bg-slate-50/60 transition-colors cursor-pointer"
+                            onClick={() => handleRowClick(log)}
                           >
                             {/* Date/Time */}
                             <TableCell className="pl-6 py-4 text-sm text-slate-600 whitespace-nowrap">
@@ -302,6 +360,118 @@ export default function InventoryMovementLogPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Transaction Detail Sheet */}
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+        <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+          {selectedTransaction && (
+            <>
+              <SheetHeader className="mb-6 border-b pb-4">
+                <SheetTitle className="text-xl flex items-center gap-2">
+                  <ClipboardList className="h-5 w-5 text-blue-600" />
+                  History of Movements
+                </SheetTitle>
+                <SheetDescription>
+                  Review details for {selectedTransaction.refNo}
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="space-y-6">
+                {/* Transaction Information */}
+                <div className="bg-slate-50 rounded-lg p-4 space-y-3">
+                  <InfoRow label="Reference No." value={selectedTransaction.refNo || '-'} />
+                  <InfoRow label="Date/Time" value={selectedTransaction.dateTime || '-'} />
+                  <InfoRow 
+                    label="Type" 
+                    value={
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        getMovementStyle(selectedTransaction.type, selectedTransaction.qtyChange).bg
+                      } ${getMovementStyle(selectedTransaction.type, selectedTransaction.qtyChange).color}`}>
+                        {selectedTransaction.type}
+                      </span>
+                    } 
+                  />
+                </div>
+
+                {/* Item Information */}
+                <div className="bg-slate-50 rounded-lg p-4 space-y-3">
+                  <InfoRow label="Item Name" value={selectedTransaction.item || '-'} />
+                  <InfoRow 
+                    label="Quantity Change" 
+                    value={
+                      <span className={`font-bold ${getMovementStyle(selectedTransaction.type, selectedTransaction.qtyChange).color}`}>
+                        {getMovementStyle(selectedTransaction.type, selectedTransaction.qtyChange).sign}
+                        {selectedTransaction.qtyChange?.toLocaleString() || 0}
+                      </span>
+                    }
+                    valueColor={getMovementStyle(selectedTransaction.type, selectedTransaction.qtyChange).color}
+                  />
+                  <InfoRow label="Reason" value={selectedTransaction.source || '-'} />
+                </div>
+
+                {/* Additional Details */}
+                {(selectedTransaction.notes || selectedTransaction.user) && (
+                  <div className="bg-slate-50 rounded-lg p-4 space-y-3">
+                    <h4 className="font-semibold text-slate-900 flex items-center gap-2">
+                      <Calendar className="h-4 w-4" /> Additional Details
+                    </h4>
+                    {selectedTransaction.user && (
+                      <InfoRow 
+                        label="User" 
+                        value={
+                          <span className="flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            {selectedTransaction.user}
+                          </span>
+                        } 
+                      />
+                    )}
+                    {selectedTransaction.notes && (
+                      <div className="flex flex-col gap-1 text-sm">
+                        <span className="text-slate-600 font-medium">Notes:</span>
+                        <span className="text-slate-900 font-medium pl-0">{selectedTransaction.notes}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </MainLayout>
+  );
+}
+
+function StatCard({ title, value, icon: Icon, color, bg }: any) {
+  return (
+    <Card className="border-slate-200 shadow-sm hover:shadow-md transition-all">
+      <CardContent className="p-6 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-slate-500 mb-1">{title}</p>
+          <h3 className="text-2xl font-bold text-slate-900">{value}</h3>
+        </div>
+        <div className={`p-3 rounded-xl ${bg}`}>
+          <Icon className={`h-6 w-6 ${color}`} />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function InfoRow({
+  label,
+  value,
+  valueColor = "text-slate-900",
+}: {
+  label: string;
+  value: React.ReactNode;
+  valueColor?: string;
+}) {
+  return (
+    <div className="flex justify-between items-start text-sm">
+      <span className="text-slate-600 font-medium">{label}:</span>
+      <span className={`font-medium ${valueColor}`}>{value}</span>
+    </div>
   );
 }

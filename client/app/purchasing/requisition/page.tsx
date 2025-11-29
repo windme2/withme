@@ -3,7 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { MainLayout } from "@/components/layout/main-layout";
-import { Card, CardContent, CardHeader, CardDescription, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardDescription,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   Clock,
@@ -134,7 +140,7 @@ export default function PurchaseRequisitionPage() {
             onClick={() => router.push("/purchasing/requisition/new")}
           >
             <Plus className="h-4 w-4 mr-2" />
-            New Request
+            New PR
           </Button>
         </div>
 
@@ -244,7 +250,10 @@ export default function PurchaseRequisitionPage() {
                   <TableBody>
                     {paginatedRequests.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={6} className="text-center py-12 text-slate-500">
+                        <TableCell
+                          colSpan={6}
+                          className="text-center py-12 text-slate-500"
+                        >
                           No purchase requisitions found.
                         </TableCell>
                       </TableRow>
@@ -308,7 +317,10 @@ export default function PurchaseRequisitionPage() {
               <div className="flex flex-col sm:flex-row items-center justify-between mt-4 pt-4 gap-4 border-t border-slate-100">
                 <div className="text-sm text-slate-500">
                   Showing {startIndex + 1} -{" "}
-                  {Math.min(startIndex + itemsPerPage, processedRequests.length)}{" "}
+                  {Math.min(
+                    startIndex + itemsPerPage,
+                    processedRequests.length
+                  )}{" "}
                   of {processedRequests.length} entries
                 </div>
                 <div className="flex items-center gap-2">
@@ -350,9 +362,11 @@ export default function PurchaseRequisitionPage() {
               <SheetHeader className="mb-6 border-b pb-4">
                 <SheetTitle className="text-xl flex items-center gap-2">
                   <FileText className="h-5 w-5 text-blue-600" />
-                  Request Details
+                  Purchase Requisitions (PR)
                 </SheetTitle>
-                <SheetDescription>Review details.</SheetDescription>
+                <SheetDescription>
+                  Review details for {selectedRequest.id}
+                </SheetDescription>
               </SheetHeader>
 
               <div className="space-y-6">
@@ -378,9 +392,6 @@ export default function PurchaseRequisitionPage() {
 
                 {/* Items List */}
                 <div>
-                  <h4 className="font-medium text-slate-900 mb-3 flex items-center gap-2">
-                    <PackageOpen className="h-4 w-4" /> Requested Items
-                  </h4>
                   <div className="border rounded-lg overflow-hidden">
                     <div className="bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider border-b grid grid-cols-12 gap-2">
                       <div className="col-span-6">Item / SKU</div>

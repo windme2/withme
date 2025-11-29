@@ -48,7 +48,9 @@ export class PurchaseOrdersService {
         if (!po) return null;
         return {
             id: po.po_number,
+            supplierId: po.supplier_id,
             supplier: po.suppliers,
+            supplierName: po.suppliers.name,
             date: po.order_date.toISOString().split('T')[0],
             expectedDate: po.expected_date ? po.expected_date.toISOString().split('T')[0] : null,
             status: this.mapStatus(po.status),
@@ -102,6 +104,20 @@ export class PurchaseOrdersService {
             }
             return po;
         });
+    }
+
+    async createWithNotification(data: any, notificationsService: any) {
+        const po = await this.create(data);
+        
+        // Send notification
+        await notificationsService.create({
+            title: 'New Purchase Order',
+            message: `PO ${po.po_number} created successfully`,
+            type: 'info',
+            link: '/purchasing/orders'
+        });
+        
+        return po;
     }
 
     private mapStatus(status: string): string {

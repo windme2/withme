@@ -30,7 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Trash2, Save, ArrowLeft, ClipboardList } from "lucide-react";
+import { Plus, Trash2, Save, ArrowLeft, ClipboardList, Package } from "lucide-react";
 import { toast } from "sonner";
 
 export default function NewAdjustmentPage() {
@@ -44,7 +44,7 @@ export default function NewAdjustmentPage() {
   const [notes, setNotes] = useState("");
 
   const [items, setItems] = useState([
-    { id: 1, productId: "", name: "", sku: "", quantity: 0, reason: "" },
+    { id: 1, productId: "", name: "", sku: "", quantity: 0, unitPrice: 0, reason: "" },
   ]);
 
   // Fetch Data
@@ -70,6 +70,7 @@ export default function NewAdjustmentPage() {
         name: "",
         sku: "",
         quantity: 0,
+        unitPrice: 0,
         reason: "",
       },
     ]);
@@ -93,6 +94,7 @@ export default function NewAdjustmentPage() {
             if (product) {
               updated.name = product.name;
               updated.sku = product.sku;
+              updated.unitPrice = product.unit_price || product.unitPrice || 0;
             }
           }
           return updated;
@@ -117,6 +119,7 @@ export default function NewAdjustmentPage() {
         items: items.map(i => ({
           productId: i.productId,
           quantity: i.quantity,
+          unitPrice: i.unitPrice,
           reason: i.reason
         }))
       });
@@ -259,7 +262,8 @@ export default function NewAdjustmentPage() {
           <Card className="border-slate-200 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div className="space-y-1">
-                <CardTitle className="text-lg font-semibold">
+                <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                  <Package className="h-5 w-5 text-blue-600" /> 
                   Adjustment Items
                 </CardTitle>
                 <CardDescription>List of items to adjust.</CardDescription>
@@ -283,11 +287,14 @@ export default function NewAdjustmentPage() {
                         #
                       </TableHead>
                       <TableHead className="w-[250px]">Product</TableHead>
-                      <TableHead className="w-[150px]">SKU</TableHead>
+                      <TableHead className="w-[120px]">SKU</TableHead>
                       <TableHead className="w-[100px] text-right">
                         Qty
                       </TableHead>
-                      <TableHead className="min-w-[200px]">
+                      <TableHead className="w-[120px] text-right">
+                        Unit Price
+                      </TableHead>
+                      <TableHead className="min-w-[180px]">
                         Reason
                       </TableHead>
                       <TableHead className="w-[50px] pr-6 text-right">
@@ -334,6 +341,22 @@ export default function NewAdjustmentPage() {
                               updateItem(
                                 item.id,
                                 "quantity",
+                                Number(e.target.value)
+                              )
+                            }
+                          />
+                        </TableCell>
+                        <TableCell className="py-3">
+                          <Input
+                            type="number"
+                            placeholder="0.00"
+                            step="0.01"
+                            className="text-right border-slate-200 focus:border-blue-500 h-9"
+                            value={item.unitPrice}
+                            onChange={(e) =>
+                              updateItem(
+                                item.id,
+                                "unitPrice",
                                 Number(e.target.value)
                               )
                             }

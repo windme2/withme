@@ -116,6 +116,7 @@ model products {
   description                String?
   category_id                String?
   unit                       String
+  unit_price                 Decimal?                     @db.Decimal(10, 2)
   minimum_stock              Int                          @default(0)
   maximum_stock              Int?
   reorder_point              Int?
@@ -138,6 +139,7 @@ model purchase_requisition_items {
   pr_id                 String
   product_id            String
   quantity              Int
+  estimated_unit_price  Decimal?                      @db.Decimal(10, 2)
   required_date         DateTime?                     @db.Date
   status                PurchaseRequisitionItemStatus
   notes                 String?
@@ -149,6 +151,7 @@ model purchase_requisitions {
   id                                              String                       @id
   pr_number                                       String                       @unique
   requested_by                                    String
+  supplier_id                                     String?
   department                                      String
   status                                          PurchaseRequisitionStatus
   requested_date                                  DateTime
@@ -158,6 +161,7 @@ model purchase_requisitions {
   created_at                                      DateTime                     @default(now())
   updated_at                                      DateTime
   purchase_requisition_items                      purchase_requisition_items[]
+  suppliers                                       suppliers?                   @relation("PurchaseRequisitionSupplier", fields: [supplier_id], references: [id])
   users_purchase_requisitions_approved_byTousers  users?                       @relation("purchase_requisitions_approved_byTousers", fields: [approved_by], references: [id])
   users_purchase_requisitions_requested_byTousers users                        @relation("purchase_requisitions_requested_byTousers", fields: [requested_by], references: [id])
 }
@@ -191,18 +195,19 @@ model shipment_items {
 }
 
 model suppliers {
-  id             String           @id
-  name           String
-  contact_person String?
-  email          String?
-  phone          String?
-  address        String?
-  tax_id         String?
-  payment_terms  Int?
-  created_at     DateTime         @default(now())
-  updated_at     DateTime
-  goods_received goods_received[]
-  purchase_orders purchase_orders[]
+  id                    String                  @id
+  name                  String
+  contact_person        String?
+  email                 String?
+  phone                 String?
+  address               String?
+  tax_id                String?
+  payment_terms         Int?
+  created_at            DateTime                @default(now())
+  updated_at            DateTime
+  goods_received        goods_received[]
+  purchase_orders       purchase_orders[]
+  purchase_requisitions purchase_requisitions[] @relation("PurchaseRequisitionSupplier")
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
@@ -290,8 +295,7 @@ enum PurchaseRequisitionStatus {
 
 enum Role {
   admin
-  manager
-  staff
+  user
 }
 
 enum SalesShipmentStatus {
@@ -309,29 +313,29 @@ enum TransactionType {
 }
 
 model purchase_orders {
-  id              String   @id
-  po_number       String   @unique
-  supplier_id     String
-  pr_number       String?
-  status          PurchaseOrderStatus
-  order_date      DateTime @default(now())
-  expected_date   DateTime?
-  total_amount    Decimal  @db.Decimal(10, 2)
-  notes           String?
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  id            String              @id
+  po_number     String              @unique
+  supplier_id   String
+  pr_number     String?
+  status        PurchaseOrderStatus
+  order_date    DateTime            @default(now())
+  expected_date DateTime?
+  total_amount  Decimal             @db.Decimal(10, 2)
+  notes         String?
+  created_at    DateTime            @default(now())
+  updated_at    DateTime            @updatedAt
 
-  suppliers       suppliers @relation(fields: [supplier_id], references: [id])
+  suppliers            suppliers              @relation(fields: [supplier_id], references: [id])
   purchase_order_items purchase_order_items[]
 }
 
 model purchase_order_items {
-  id              String   @id
-  po_id           String
-  product_id      String
-  quantity        Int
-  unit_price      Decimal  @db.Decimal(10, 2)
-  total_price     Decimal  @db.Decimal(10, 2)
+  id          String  @id
+  po_id       String
+  product_id  String
+  quantity    Int
+  unit_price  Decimal @db.Decimal(10, 2)
+  total_price Decimal @db.Decimal(10, 2)
 
   purchase_orders purchase_orders @relation(fields: [po_id], references: [id])
   products        products        @relation(fields: [product_id], references: [id])
@@ -346,35 +350,35 @@ enum PurchaseOrderStatus {
 }
 
 model sales_orders {
-  id              String   @id
-  so_number       String   @unique
-  customer_name   String
-  contact_person  String?
-  customer_email  String?
-  customer_phone  String?
-  status          SalesOrderStatus
-  order_date      DateTime @default(now())
-  due_date        DateTime?
-  total_amount    Decimal  @db.Decimal(10, 2)
-  notes           String?
-  created_by      String
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  id             String           @id
+  so_number      String           @unique
+  customer_name  String
+  contact_person String?
+  customer_email String?
+  customer_phone String?
+  status         SalesOrderStatus
+  order_date     DateTime         @default(now())
+  due_date       DateTime?
+  total_amount   Decimal          @db.Decimal(10, 2)
+  notes          String?
+  created_by     String
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @updatedAt
 
-  users              users @relation(fields: [created_by], references: [id])
-  sales_order_items  sales_order_items[]
+  users             users               @relation(fields: [created_by], references: [id])
+  sales_order_items sales_order_items[]
 }
 
 model sales_order_items {
-  id              String   @id
-  so_id           String
-  product_id      String
-  quantity        Int
-  unit_price      Decimal  @db.Decimal(10, 2)
-  total_price     Decimal  @db.Decimal(10, 2)
+  id          String  @id
+  so_id       String
+  product_id  String
+  quantity    Int
+  unit_price  Decimal @db.Decimal(10, 2)
+  total_price Decimal @db.Decimal(10, 2)
 
-  sales_orders    sales_orders @relation(fields: [so_id], references: [id])
-  products        products     @relation(fields: [product_id], references: [id])
+  sales_orders sales_orders @relation(fields: [so_id], references: [id])
+  products     products     @relation(fields: [product_id], references: [id])
 }
 
 enum SalesOrderStatus {
@@ -386,51 +390,51 @@ enum SalesOrderStatus {
 }
 
 model customers {
-  id              String   @id
-  customer_code   String   @unique
-  name            String
-  contact_person  String?
-  email           String?
-  phone           String?
-  address         String?
-  tax_id          String?
-  credit_limit    Decimal? @db.Decimal(10, 2)
-  payment_terms   Int?
-  is_active       Boolean  @default(true)
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  id             String   @id
+  customer_code  String   @unique
+  name           String
+  contact_person String?
+  email          String?
+  phone          String?
+  address        String?
+  tax_id         String?
+  credit_limit   Decimal? @db.Decimal(10, 2)
+  payment_terms  Int?
+  is_active      Boolean  @default(true)
+  created_at     DateTime @default(now())
+  updated_at     DateTime @updatedAt
 }
 
 model sales_returns {
-  id              String   @id
-  return_number   String   @unique
-  so_number       String?
-  customer_name   String
-  return_date     DateTime @default(now())
-  status          ReturnStatus
-  reason          String?
-  total_amount    Decimal  @db.Decimal(10, 2)
-  refund_method   String?
-  handled_by      String
-  notes           String?
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
-  
-  users           users @relation(fields: [handled_by], references: [id])
-  return_items    return_items[]
+  id            String       @id
+  return_number String       @unique
+  so_number     String?
+  customer_name String
+  return_date   DateTime     @default(now())
+  status        ReturnStatus
+  reason        String?
+  total_amount  Decimal      @db.Decimal(10, 2)
+  refund_method String?
+  handled_by    String
+  notes         String?
+  created_at    DateTime     @default(now())
+  updated_at    DateTime     @updatedAt
+
+  users        users          @relation(fields: [handled_by], references: [id])
+  return_items return_items[]
 }
 
 model return_items {
-  id              String   @id
-  return_id       String
-  product_id      String
-  quantity        Int
-  unit_price      Decimal  @db.Decimal(10, 2)
-  total_price     Decimal  @db.Decimal(10, 2)
-  condition       String?
-  
-  sales_returns   sales_returns @relation(fields: [return_id], references: [id])
-  products        products      @relation(fields: [product_id], references: [id])
+  id          String  @id
+  return_id   String
+  product_id  String
+  quantity    Int
+  unit_price  Decimal @db.Decimal(10, 2)
+  total_price Decimal @db.Decimal(10, 2)
+  condition   String?
+
+  sales_returns sales_returns @relation(fields: [return_id], references: [id])
+  products      products      @relation(fields: [product_id], references: [id])
 }
 
 enum ReturnStatus {
@@ -441,14 +445,14 @@ enum ReturnStatus {
 }
 
 model notifications {
-  id          String   @id
-  user_id     String?
-  title       String
-  message     String
-  type        String
-  is_read     Boolean  @default(false)
-  link        String?
-  created_at  DateTime @default(now())
-  
-  users       users?   @relation(fields: [user_id], references: [id])
+  id         String   @id
+  user_id    String?
+  title      String
+  message    String
+  type       String
+  is_read    Boolean  @default(false)
+  link       String?
+  created_at DateTime @default(now())
+
+  users users? @relation(fields: [user_id], references: [id])
 }

@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
 // Path Mapping (Breadcrumb display names)
 // -----------------------------
 const pathNameMap: Record<string, string> = {
-  dashboard: "DASHBOARD",
+  dashboard: "Dashboard",
   inventory: "INVENTORY",
   items: "Items Management",
   "goods-received": "Goods Received Note (GRN)",
@@ -43,7 +43,6 @@ const pathNameMap: Record<string, string> = {
   movements: "History of Movements",
   admin: "ADMIN",
   "user-management": "User Management",
-  "activity-log": "Activity Log",
   settings: "Settings",
   profile: "Profile",
   new: "New",
@@ -71,7 +70,6 @@ const pathModuleMap: Record<string, string> = {
   history: "TRANSACTIONS",
   admin: "ADMIN",
   "user-management": "ADMIN",
-  "activity-log": "ADMIN",
 };
 
 export function Header() {
@@ -216,17 +214,6 @@ export function Header() {
           </PopoverContent>
         </Popover> */}
 
-        {/* Settings */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="hover:bg-blue-50 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700"
-          onClick={() => router.push("/settings")}
-          title="ตั้งค่าระบบ"
-        >
-          <Settings className="h-5 w-5" />
-        </Button>
-
         {/* User Profile */}
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
@@ -241,7 +228,8 @@ export function Header() {
 
           <DropdownMenuContent align="end" className="w-48" sideOffset={8}>
             <DropdownMenuItem onClick={() => router.push("/profile/edit")}>
-              แก้ไข Profile
+              <User className="h-4 w-4 mr-2" />
+              Profile
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout} className="text-red-600">

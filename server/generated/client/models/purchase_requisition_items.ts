@@ -28,10 +28,12 @@ export type AggregatePurchase_requisition_items = {
 
 export type Purchase_requisition_itemsAvgAggregateOutputType = {
   quantity: number | null
+  estimated_unit_price: runtime.Decimal | null
 }
 
 export type Purchase_requisition_itemsSumAggregateOutputType = {
   quantity: number | null
+  estimated_unit_price: runtime.Decimal | null
 }
 
 export type Purchase_requisition_itemsMinAggregateOutputType = {
@@ -39,6 +41,7 @@ export type Purchase_requisition_itemsMinAggregateOutputType = {
   pr_id: string | null
   product_id: string | null
   quantity: number | null
+  estimated_unit_price: runtime.Decimal | null
   required_date: Date | null
   status: $Enums.PurchaseRequisitionItemStatus | null
   notes: string | null
@@ -49,6 +52,7 @@ export type Purchase_requisition_itemsMaxAggregateOutputType = {
   pr_id: string | null
   product_id: string | null
   quantity: number | null
+  estimated_unit_price: runtime.Decimal | null
   required_date: Date | null
   status: $Enums.PurchaseRequisitionItemStatus | null
   notes: string | null
@@ -59,6 +63,7 @@ export type Purchase_requisition_itemsCountAggregateOutputType = {
   pr_id: number
   product_id: number
   quantity: number
+  estimated_unit_price: number
   required_date: number
   status: number
   notes: number
@@ -68,10 +73,12 @@ export type Purchase_requisition_itemsCountAggregateOutputType = {
 
 export type Purchase_requisition_itemsAvgAggregateInputType = {
   quantity?: true
+  estimated_unit_price?: true
 }
 
 export type Purchase_requisition_itemsSumAggregateInputType = {
   quantity?: true
+  estimated_unit_price?: true
 }
 
 export type Purchase_requisition_itemsMinAggregateInputType = {
@@ -79,6 +86,7 @@ export type Purchase_requisition_itemsMinAggregateInputType = {
   pr_id?: true
   product_id?: true
   quantity?: true
+  estimated_unit_price?: true
   required_date?: true
   status?: true
   notes?: true
@@ -89,6 +97,7 @@ export type Purchase_requisition_itemsMaxAggregateInputType = {
   pr_id?: true
   product_id?: true
   quantity?: true
+  estimated_unit_price?: true
   required_date?: true
   status?: true
   notes?: true
@@ -99,6 +108,7 @@ export type Purchase_requisition_itemsCountAggregateInputType = {
   pr_id?: true
   product_id?: true
   quantity?: true
+  estimated_unit_price?: true
   required_date?: true
   status?: true
   notes?: true
@@ -196,6 +206,7 @@ export type Purchase_requisition_itemsGroupByOutputType = {
   pr_id: string
   product_id: string
   quantity: number
+  estimated_unit_price: runtime.Decimal | null
   required_date: Date | null
   status: $Enums.PurchaseRequisitionItemStatus
   notes: string | null
@@ -229,6 +240,7 @@ export type purchase_requisition_itemsWhereInput = {
   pr_id?: Prisma.StringFilter<"purchase_requisition_items"> | string
   product_id?: Prisma.StringFilter<"purchase_requisition_items"> | string
   quantity?: Prisma.IntFilter<"purchase_requisition_items"> | number
+  estimated_unit_price?: Prisma.DecimalNullableFilter<"purchase_requisition_items"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Prisma.DateTimeNullableFilter<"purchase_requisition_items"> | Date | string | null
   status?: Prisma.EnumPurchaseRequisitionItemStatusFilter<"purchase_requisition_items"> | $Enums.PurchaseRequisitionItemStatus
   notes?: Prisma.StringNullableFilter<"purchase_requisition_items"> | string | null
@@ -241,6 +253,7 @@ export type purchase_requisition_itemsOrderByWithRelationInput = {
   pr_id?: Prisma.SortOrder
   product_id?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  estimated_unit_price?: Prisma.SortOrderInput | Prisma.SortOrder
   required_date?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -256,6 +269,7 @@ export type purchase_requisition_itemsWhereUniqueInput = Prisma.AtLeast<{
   pr_id?: Prisma.StringFilter<"purchase_requisition_items"> | string
   product_id?: Prisma.StringFilter<"purchase_requisition_items"> | string
   quantity?: Prisma.IntFilter<"purchase_requisition_items"> | number
+  estimated_unit_price?: Prisma.DecimalNullableFilter<"purchase_requisition_items"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Prisma.DateTimeNullableFilter<"purchase_requisition_items"> | Date | string | null
   status?: Prisma.EnumPurchaseRequisitionItemStatusFilter<"purchase_requisition_items"> | $Enums.PurchaseRequisitionItemStatus
   notes?: Prisma.StringNullableFilter<"purchase_requisition_items"> | string | null
@@ -268,6 +282,7 @@ export type purchase_requisition_itemsOrderByWithAggregationInput = {
   pr_id?: Prisma.SortOrder
   product_id?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  estimated_unit_price?: Prisma.SortOrderInput | Prisma.SortOrder
   required_date?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -286,6 +301,7 @@ export type purchase_requisition_itemsScalarWhereWithAggregatesInput = {
   pr_id?: Prisma.StringWithAggregatesFilter<"purchase_requisition_items"> | string
   product_id?: Prisma.StringWithAggregatesFilter<"purchase_requisition_items"> | string
   quantity?: Prisma.IntWithAggregatesFilter<"purchase_requisition_items"> | number
+  estimated_unit_price?: Prisma.DecimalNullableWithAggregatesFilter<"purchase_requisition_items"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Prisma.DateTimeNullableWithAggregatesFilter<"purchase_requisition_items"> | Date | string | null
   status?: Prisma.EnumPurchaseRequisitionItemStatusWithAggregatesFilter<"purchase_requisition_items"> | $Enums.PurchaseRequisitionItemStatus
   notes?: Prisma.StringNullableWithAggregatesFilter<"purchase_requisition_items"> | string | null
@@ -294,6 +310,7 @@ export type purchase_requisition_itemsScalarWhereWithAggregatesInput = {
 export type purchase_requisition_itemsCreateInput = {
   id: string
   quantity: number
+  estimated_unit_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Date | string | null
   status: $Enums.PurchaseRequisitionItemStatus
   notes?: string | null
@@ -306,6 +323,7 @@ export type purchase_requisition_itemsUncheckedCreateInput = {
   pr_id: string
   product_id: string
   quantity: number
+  estimated_unit_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Date | string | null
   status: $Enums.PurchaseRequisitionItemStatus
   notes?: string | null
@@ -314,6 +332,7 @@ export type purchase_requisition_itemsUncheckedCreateInput = {
 export type purchase_requisition_itemsUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  estimated_unit_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPurchaseRequisitionItemStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionItemStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -326,6 +345,7 @@ export type purchase_requisition_itemsUncheckedUpdateInput = {
   pr_id?: Prisma.StringFieldUpdateOperationsInput | string
   product_id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  estimated_unit_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPurchaseRequisitionItemStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionItemStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -336,6 +356,7 @@ export type purchase_requisition_itemsCreateManyInput = {
   pr_id: string
   product_id: string
   quantity: number
+  estimated_unit_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Date | string | null
   status: $Enums.PurchaseRequisitionItemStatus
   notes?: string | null
@@ -344,6 +365,7 @@ export type purchase_requisition_itemsCreateManyInput = {
 export type purchase_requisition_itemsUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  estimated_unit_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPurchaseRequisitionItemStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionItemStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -354,6 +376,7 @@ export type purchase_requisition_itemsUncheckedUpdateManyInput = {
   pr_id?: Prisma.StringFieldUpdateOperationsInput | string
   product_id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  estimated_unit_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPurchaseRequisitionItemStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionItemStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -374,6 +397,7 @@ export type purchase_requisition_itemsCountOrderByAggregateInput = {
   pr_id?: Prisma.SortOrder
   product_id?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  estimated_unit_price?: Prisma.SortOrder
   required_date?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
@@ -381,6 +405,7 @@ export type purchase_requisition_itemsCountOrderByAggregateInput = {
 
 export type purchase_requisition_itemsAvgOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
+  estimated_unit_price?: Prisma.SortOrder
 }
 
 export type purchase_requisition_itemsMaxOrderByAggregateInput = {
@@ -388,6 +413,7 @@ export type purchase_requisition_itemsMaxOrderByAggregateInput = {
   pr_id?: Prisma.SortOrder
   product_id?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  estimated_unit_price?: Prisma.SortOrder
   required_date?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
@@ -398,6 +424,7 @@ export type purchase_requisition_itemsMinOrderByAggregateInput = {
   pr_id?: Prisma.SortOrder
   product_id?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  estimated_unit_price?: Prisma.SortOrder
   required_date?: Prisma.SortOrder
   status?: Prisma.SortOrder
   notes?: Prisma.SortOrder
@@ -405,6 +432,7 @@ export type purchase_requisition_itemsMinOrderByAggregateInput = {
 
 export type purchase_requisition_itemsSumOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
+  estimated_unit_price?: Prisma.SortOrder
 }
 
 export type purchase_requisition_itemsCreateNestedManyWithoutProductsInput = {
@@ -498,6 +526,7 @@ export type purchase_requisition_itemsUncheckedUpdateManyWithoutPurchase_requisi
 export type purchase_requisition_itemsCreateWithoutProductsInput = {
   id: string
   quantity: number
+  estimated_unit_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Date | string | null
   status: $Enums.PurchaseRequisitionItemStatus
   notes?: string | null
@@ -508,6 +537,7 @@ export type purchase_requisition_itemsUncheckedCreateWithoutProductsInput = {
   id: string
   pr_id: string
   quantity: number
+  estimated_unit_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Date | string | null
   status: $Enums.PurchaseRequisitionItemStatus
   notes?: string | null
@@ -547,6 +577,7 @@ export type purchase_requisition_itemsScalarWhereInput = {
   pr_id?: Prisma.StringFilter<"purchase_requisition_items"> | string
   product_id?: Prisma.StringFilter<"purchase_requisition_items"> | string
   quantity?: Prisma.IntFilter<"purchase_requisition_items"> | number
+  estimated_unit_price?: Prisma.DecimalNullableFilter<"purchase_requisition_items"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Prisma.DateTimeNullableFilter<"purchase_requisition_items"> | Date | string | null
   status?: Prisma.EnumPurchaseRequisitionItemStatusFilter<"purchase_requisition_items"> | $Enums.PurchaseRequisitionItemStatus
   notes?: Prisma.StringNullableFilter<"purchase_requisition_items"> | string | null
@@ -555,6 +586,7 @@ export type purchase_requisition_itemsScalarWhereInput = {
 export type purchase_requisition_itemsCreateWithoutPurchase_requisitionsInput = {
   id: string
   quantity: number
+  estimated_unit_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Date | string | null
   status: $Enums.PurchaseRequisitionItemStatus
   notes?: string | null
@@ -565,6 +597,7 @@ export type purchase_requisition_itemsUncheckedCreateWithoutPurchase_requisition
   id: string
   product_id: string
   quantity: number
+  estimated_unit_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Date | string | null
   status: $Enums.PurchaseRequisitionItemStatus
   notes?: string | null
@@ -600,6 +633,7 @@ export type purchase_requisition_itemsCreateManyProductsInput = {
   id: string
   pr_id: string
   quantity: number
+  estimated_unit_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Date | string | null
   status: $Enums.PurchaseRequisitionItemStatus
   notes?: string | null
@@ -608,6 +642,7 @@ export type purchase_requisition_itemsCreateManyProductsInput = {
 export type purchase_requisition_itemsUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  estimated_unit_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPurchaseRequisitionItemStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionItemStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -618,6 +653,7 @@ export type purchase_requisition_itemsUncheckedUpdateWithoutProductsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   pr_id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  estimated_unit_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPurchaseRequisitionItemStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionItemStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -627,6 +663,7 @@ export type purchase_requisition_itemsUncheckedUpdateManyWithoutProductsInput = 
   id?: Prisma.StringFieldUpdateOperationsInput | string
   pr_id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  estimated_unit_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPurchaseRequisitionItemStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionItemStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -636,6 +673,7 @@ export type purchase_requisition_itemsCreateManyPurchase_requisitionsInput = {
   id: string
   product_id: string
   quantity: number
+  estimated_unit_price?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Date | string | null
   status: $Enums.PurchaseRequisitionItemStatus
   notes?: string | null
@@ -644,6 +682,7 @@ export type purchase_requisition_itemsCreateManyPurchase_requisitionsInput = {
 export type purchase_requisition_itemsUpdateWithoutPurchase_requisitionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  estimated_unit_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPurchaseRequisitionItemStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionItemStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -654,6 +693,7 @@ export type purchase_requisition_itemsUncheckedUpdateWithoutPurchase_requisition
   id?: Prisma.StringFieldUpdateOperationsInput | string
   product_id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  estimated_unit_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPurchaseRequisitionItemStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionItemStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -663,6 +703,7 @@ export type purchase_requisition_itemsUncheckedUpdateManyWithoutPurchase_requisi
   id?: Prisma.StringFieldUpdateOperationsInput | string
   product_id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  estimated_unit_price?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   required_date?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumPurchaseRequisitionItemStatusFieldUpdateOperationsInput | $Enums.PurchaseRequisitionItemStatus
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -675,6 +716,7 @@ export type purchase_requisition_itemsSelect<ExtArgs extends runtime.Types.Exten
   pr_id?: boolean
   product_id?: boolean
   quantity?: boolean
+  estimated_unit_price?: boolean
   required_date?: boolean
   status?: boolean
   notes?: boolean
@@ -687,6 +729,7 @@ export type purchase_requisition_itemsSelectCreateManyAndReturn<ExtArgs extends 
   pr_id?: boolean
   product_id?: boolean
   quantity?: boolean
+  estimated_unit_price?: boolean
   required_date?: boolean
   status?: boolean
   notes?: boolean
@@ -699,6 +742,7 @@ export type purchase_requisition_itemsSelectUpdateManyAndReturn<ExtArgs extends 
   pr_id?: boolean
   product_id?: boolean
   quantity?: boolean
+  estimated_unit_price?: boolean
   required_date?: boolean
   status?: boolean
   notes?: boolean
@@ -711,12 +755,13 @@ export type purchase_requisition_itemsSelectScalar = {
   pr_id?: boolean
   product_id?: boolean
   quantity?: boolean
+  estimated_unit_price?: boolean
   required_date?: boolean
   status?: boolean
   notes?: boolean
 }
 
-export type purchase_requisition_itemsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "pr_id" | "product_id" | "quantity" | "required_date" | "status" | "notes", ExtArgs["result"]["purchase_requisition_items"]>
+export type purchase_requisition_itemsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "pr_id" | "product_id" | "quantity" | "estimated_unit_price" | "required_date" | "status" | "notes", ExtArgs["result"]["purchase_requisition_items"]>
 export type purchase_requisition_itemsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   purchase_requisitions?: boolean | Prisma.purchase_requisitionsDefaultArgs<ExtArgs>
   products?: boolean | Prisma.productsDefaultArgs<ExtArgs>
@@ -741,6 +786,7 @@ export type $purchase_requisition_itemsPayload<ExtArgs extends runtime.Types.Ext
     pr_id: string
     product_id: string
     quantity: number
+    estimated_unit_price: runtime.Decimal | null
     required_date: Date | null
     status: $Enums.PurchaseRequisitionItemStatus
     notes: string | null
@@ -1173,6 +1219,7 @@ export interface purchase_requisition_itemsFieldRefs {
   readonly pr_id: Prisma.FieldRef<"purchase_requisition_items", 'String'>
   readonly product_id: Prisma.FieldRef<"purchase_requisition_items", 'String'>
   readonly quantity: Prisma.FieldRef<"purchase_requisition_items", 'Int'>
+  readonly estimated_unit_price: Prisma.FieldRef<"purchase_requisition_items", 'Decimal'>
   readonly required_date: Prisma.FieldRef<"purchase_requisition_items", 'DateTime'>
   readonly status: Prisma.FieldRef<"purchase_requisition_items", 'PurchaseRequisitionItemStatus'>
   readonly notes: Prisma.FieldRef<"purchase_requisition_items", 'String'>

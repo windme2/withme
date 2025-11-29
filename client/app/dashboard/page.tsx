@@ -97,43 +97,43 @@ export default function DashboardPage() {
 
   const approvalStatusData = [
     { name: "รออนุมัติ (Pending)", value: stats?.pendingOrders || 0, color: "#f59e0b" },
-    { name: "อนุมัติแล้ว (Approved)", value: 45, color: "#10b981" }, // Mock
-    { name: "ไม่อนุมัติ (Rejected)", value: 3, color: "#ef4444" }, // Mock
+    { name: "อนุมัติแล้ว (Approved)", value: stats?.approvedOrders || 0, color: "#10b981" },
+    { name: "ไม่อนุมัติ (Rejected)", value: stats?.rejectedOrders || 0, color: "#ef4444" },
   ];
 
   const statCards = [
     {
-      title: "มูลค่าสินค้าคงคลัง",
+      title: "Total Value",
       value: stats ? `฿${stats.totalValue.toLocaleString()}` : "Loading...",
       icon: DollarSign,
-      description: "มูลค่ารวมทั้งหมด (Estimated)",
+      description: "มูลค่ารวมสินค้าคงคลัง",
       color: "bg-blue-500",
       change: "+12%", // Mock change
       isPositive: true,
     },
     {
-      title: "สินค้าทั้งหมด",
+      title: "Total Items",
       value: stats ? stats.totalItems : "Loading...",
       icon: Package,
-      description: "รายการ (SKU)",
+      description: "จำนวนสินค้าทั้งหมด (SKU)",
       color: "bg-indigo-500",
       change: "+8 Items", // Mock change
       isPositive: true,
     },
     {
-      title: "คำสั่งซื้อรออนุมัติ",
+      title: "Pending Orders",
       value: stats ? stats.pendingOrders : "Loading...",
       icon: ShoppingCart,
-      description: "Pending Orders",
+      description: "คำสั่งซื้อรออนุมัติ",
       color: "bg-amber-500",
       change: "รอจัดการ",
       isPositive: null,
     },
     {
-      title: "สินค้าต้องเติม (Low Stock)",
+      title: "Low Stock",
       value: stats ? stats.lowStockCount : "Loading...",
       icon: AlertTriangle,
-      description: "ต่ำกว่าเกณฑ์",
+      description: "สินค้าต่ำกว่าเกณฑ์ขั้นต่ำ",
       color: "bg-red-500",
       change: "-2 Items", // Mock change
       isPositive: false,
@@ -149,7 +149,7 @@ export default function DashboardPage() {
             Dashboard
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-1">
-            ภาพรวมสถานะคลังสินค้าและยอดขายประจำวัน
+            ภาพรวมระบบและกิจกรรมล่าสุด
           </p>
         </div>
 
@@ -218,7 +218,7 @@ export default function DashboardPage() {
                 Stock Movement
               </CardTitle>
               <CardDescription>
-                เปรียบเทียบสินค้านำเข้า (Inbound) และส่งออก (Outbound)
+                เปรียบเทียบสินค้ารับเข้า (Inbound) และส่งออก (Outbound)
               </CardDescription>
             </CardHeader>
             <CardContent className="pl-0">
@@ -300,10 +300,7 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-                  ฿19,950{" "}
-                  <span className="text-xs font-normal text-emerald-600 bg-emerald-100 px-2 py-1 rounded-full ml-2">
-                    +15%
-                  </span>
+                  ฿{stats ? stats.totalRevenue.toLocaleString() : '0'}{" "}
                 </div>
                 <ResponsiveContainer width="100%" height={120}>
                   <BarChart data={salesData}>
@@ -373,52 +370,6 @@ export default function DashboardPage() {
             </Card>
           </div>
         </div>
-
-        {/* Quick Actions */}
-        <Card className="border-slate-200 dark:border-slate-800 shadow-sm">
-          <CardHeader>
-            <CardTitle className="text-lg font-semibold">
-              Quick Actions
-            </CardTitle>
-            <CardDescription>ทำงานที่ใช้บ่อยได้อย่างรวดเร็ว</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <Button
-                variant="outline"
-                className="h-24 flex-col gap-2 hover:bg-blue-50 hover:border-blue-300"
-                onClick={() => router.push("/purchasing/requisition/new")}
-              >
-                <Plus className="h-6 w-6 text-blue-600" />
-                <span className="text-sm font-medium">New PR</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-24 flex-col gap-2 hover:bg-emerald-50 hover:border-emerald-300"
-                onClick={() => router.push("/sales/orders/new")}
-              >
-                <ShoppingCart className="h-6 w-6 text-emerald-600" />
-                <span className="text-sm font-medium">New SO</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-24 flex-col gap-2 hover:bg-purple-50 hover:border-purple-300"
-                onClick={() => router.push("/inventory/goods-received/new")}
-              >
-                <Truck className="h-6 w-6 text-purple-600" />
-                <span className="text-sm font-medium">Receive Goods</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-24 flex-col gap-2 hover:bg-amber-50 hover:border-amber-300"
-                onClick={() => router.push("/inventory/adjustments/new")}
-              >
-                <RotateCcw className="h-6 w-6 text-amber-600" />
-                <span className="text-sm font-medium">Adjust Stock</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Bottom Section: Tables */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">

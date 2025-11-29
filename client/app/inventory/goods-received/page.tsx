@@ -27,6 +27,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetFooter,
+  SheetDescription,
 } from "@/components/ui/sheet";
 import {
   Plus,
@@ -51,7 +52,7 @@ export default function GoodsReceivedPage() {
     total: 0,
     thisMonth: 0,
     pending: 0,
-    totalValue: 0
+    totalValue: 0,
   });
   const [selectedGRN, setSelectedGRN] = useState<any | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -75,7 +76,7 @@ export default function GoodsReceivedPage() {
         setGrnList(data);
         setStats(statsData);
       } catch (error) {
-        console.error('Error fetching goods received data:', error);
+        console.error("Error fetching goods received data:", error);
       } finally {
         setIsLoading(false);
       }
@@ -108,7 +109,7 @@ export default function GoodsReceivedPage() {
       setSelectedGRN(detailData);
       setIsSheetOpen(true);
     } catch (error) {
-      console.error('Error fetching GRN details:', error);
+      console.error("Error fetching GRN details:", error);
     }
   };
 
@@ -122,7 +123,7 @@ export default function GoodsReceivedPage() {
               Goods Received Notes (GRN)
             </h1>
             <p className="text-slate-500 mt-1">
-              รายการรับสินค้าเข้าคลังและตรวจสอบประวัติย้อนหลัง
+              รายการสินค้ารับเข้าคลังทั้งหมด
             </p>
           </div>
           <Button
@@ -130,7 +131,7 @@ export default function GoodsReceivedPage() {
             onClick={() => router.push("/inventory/goods-received/new")}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Create New GRN
+            New GRN
           </Button>
         </div>
 
@@ -279,14 +280,16 @@ export default function GoodsReceivedPage() {
                   <div className="flex flex-col sm:flex-row items-center justify-between mt-4 pt-4 gap-4 border-t border-slate-100">
                     <div className="text-sm text-slate-500">
                       Showing {startIndex + 1} -{" "}
-                      {Math.min(startIndex + itemsPerPage, filteredData.length)} of{" "}
-                      {filteredData.length} entries
+                      {Math.min(startIndex + itemsPerPage, filteredData.length)}{" "}
+                      of {filteredData.length} entries
                     </div>
                     <div className="flex items-center gap-2">
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                        onClick={() =>
+                          setCurrentPage((p) => Math.max(1, p - 1))
+                        }
                         disabled={currentPage === 1}
                         className="border-slate-200"
                       >
@@ -345,10 +348,10 @@ function GRNDetailSheetContent({
     grn.details && grn.details.length > 0
       ? grn.details
       : [
-        { name: "Notebook A4", qty: 100, price: 45, unit: "เล่ม" },
-        { name: "Stapler Heavy Duty", qty: 10, price: 150, unit: "ชิ้น" },
-        { name: "A4 Paper 80gsm", qty: 50, price: 25, unit: "รีม" },
-      ];
+          { name: "Notebook A4", qty: 100, price: 45, unit: "เล่ม" },
+          { name: "Stapler Heavy Duty", qty: 10, price: 150, unit: "ชิ้น" },
+          { name: "A4 Paper 80gsm", qty: 50, price: 25, unit: "รีม" },
+        ];
 
   return (
     <>
@@ -356,9 +359,10 @@ function GRNDetailSheetContent({
         <div className="flex justify-between items-start w-full">
           <SheetTitle className="text-2xl font-bold flex items-center gap-2">
             <Truck className="h-6 w-6 text-blue-600" />
-            {grn.id}
+            Goods Received Note
           </SheetTitle>
         </div>
+        <SheetDescription>Review Details for {grn.id}</SheetDescription>
       </SheetHeader>
 
       <div className="space-y-6">
@@ -371,11 +375,7 @@ function GRNDetailSheetContent({
 
         {/* Received Items List */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <h4 className="font-medium text-slate-900 flex items-center gap-2">
-              <PackageOpen className="h-4 w-4" /> Received Items
-            </h4>
-          </div>
+          <div className="flex items-center justify-between mb-3"></div>
           <div className="divide-y border rounded-lg overflow-hidden">
             {detailItems.map((item: any, idx: number) => (
               <div
@@ -393,7 +393,7 @@ function GRNDetailSheetContent({
                     {item.qty.toLocaleString()} {item.unit}
                   </div>
                   <div className="text-xs text-slate-500">
-                    รวม ฿{(item.qty * item.price).toLocaleString()}
+                    ฿{(item.qty * item.price).toLocaleString()}
                   </div>
                 </div>
               </div>
@@ -403,10 +403,6 @@ function GRNDetailSheetContent({
 
         {/* Financial Summary */}
         <div className="space-y-3 pt-2">
-          <h4 className="font-medium text-slate-900 text-sm tracking-wide mb-2 flex items-center gap-2">
-            <FileText className="h-4 w-4 text-slate-600" /> Summary
-          </h4>
-
           <div className="divide-y border rounded-lg overflow-hidden">
             <div className="px-4 py-2 flex justify-between items-center text-sm">
               <span className="text-slate-500">Subtotal</span>

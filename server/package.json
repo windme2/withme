@@ -1,10 +1,8 @@
 {
-  "name": "server",
-  "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "name": "withme-server",
+  "version": "1.0.0",
+  "description": "Withme Inventory Management System - Server",
   "private": true,
-  "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -20,7 +18,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "prisma": {
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed-full.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

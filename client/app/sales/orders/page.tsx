@@ -38,7 +38,6 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
-  Truck,
   ChevronLeft,
   ChevronRight,
   FileText,
@@ -117,6 +116,7 @@ export default function SalesOrdersPage() {
       setSelectedOrder(details);
       setIsSheetOpen(true);
     } catch (error) {
+      console.error("Failed to fetch order details:", error);
       toast.error("Failed to fetch order details");
     }
   };
@@ -125,7 +125,7 @@ export default function SalesOrdersPage() {
     if (selectedOrder?.status === "Draft") {
       try {
         await salesOrdersApi.updateStatus(selectedOrder.id, "confirmed");
-        toast.success(`ยืนยัน Sales Order ${selectedOrder.id} เรียบร้อย!`);
+        toast.success(`Confirmed Sales Order ${selectedOrder.id}`);
         setIsSheetOpen(false);
         fetchOrders();
       } catch (error) {
@@ -138,24 +138,11 @@ export default function SalesOrdersPage() {
     if (selectedOrder) {
       try {
         await salesOrdersApi.updateStatus(selectedOrder.id, "cancelled");
-        toast.error(`ยกเลิก Sales Order ${selectedOrder.id}`);
+        toast.error(`Cancelled Sales Order ${selectedOrder.id}`);
         setIsSheetOpen(false);
         fetchOrders();
       } catch (error) {
         toast.error("Failed to cancel order");
-      }
-    }
-  };
-
-  const handleShipOrder = async () => {
-    if (selectedOrder?.status === "Confirmed") {
-      try {
-        await salesOrdersApi.updateStatus(selectedOrder.id, "shipped");
-        toast.success("เตรียมจัดส่งสินค้า");
-        setIsSheetOpen(false);
-        fetchOrders();
-      } catch (error) {
-        toast.error("Failed to ship order");
       }
     }
   };
@@ -178,7 +165,7 @@ export default function SalesOrdersPage() {
             onClick={() => router.push("/sales/orders/new")}
           >
             <Plus className="h-4 w-4 mr-2" />
-            New Sales Order
+            New Order
           </Button>
         </div>
 
@@ -238,8 +225,6 @@ export default function SalesOrdersPage() {
                     <SelectItem value="all">All</SelectItem>
                     <SelectItem value="Draft">Draft</SelectItem>
                     <SelectItem value="Confirmed">Confirmed</SelectItem>
-                    <SelectItem value="Shipped">Shipped</SelectItem>
-                    <SelectItem value="Completed">Completed</SelectItem>
                     <SelectItem value="Cancelled">Cancelled</SelectItem>
                   </SelectContent>
                 </Select>
@@ -305,13 +290,9 @@ export default function SalesOrdersPage() {
                         onClick={() => handleRowClick(order)}
                       >
                         <TableCell className="font-medium pl-6 py-4">
-                          <Link
-                            href={`/sales/orders/${order.id}`}
-                            className="text-blue-600 hover:underline"
-                            onClick={(e) => e.stopPropagation()}
-                          >
+                          <span className="text-blue-600 font-medium">
                             {order.soNumber || order.id}
-                          </Link>
+                          </span>
                         </TableCell>
                         <TableCell className="text-slate-500 text-sm py-4">
                           {order.date}
@@ -383,22 +364,19 @@ export default function SalesOrdersPage() {
               <SheetHeader className="mb-6 border-b pb-4">
                 <SheetTitle className="text-xl flex items-center gap-2">
                   <ShoppingCart className="h-5 w-5 text-blue-600" />
-                  Sales Order Details: {selectedOrder.id}
+                  Sales Orders
                 </SheetTitle>
                 <SheetDescription>
-                  Ordered on {selectedOrder.date} • Due {selectedOrder.dueDate || 'N/A'}
+                  Review Details for {selectedOrder?.soNumber || selectedOrder?.id || 'N/A'}
                 </SheetDescription>
               </SheetHeader>
 
               <div className="space-y-6">
                 {/* Order Information */}
                 <div className="bg-slate-50 rounded-lg p-4 space-y-3">
-                  <h4 className="font-semibold text-slate-900 flex items-center gap-2">
-                    <FileText className="h-4 w-4" /> Order Information
-                  </h4>
-                  <InfoRow label="SO No." value={selectedOrder.id} />
-                  <InfoRow label="Order Date" value={selectedOrder.date} />
-                  <InfoRow label="Due Date" value={selectedOrder.dueDate || 'N/A'} />
+                  <InfoRow label="SO No." value={selectedOrder?.soNumber || selectedOrder?.id || '-'} />
+                  <InfoRow label="Order Date" value={selectedOrder?.orderDate || selectedOrder?.date || '-'} />
+                  <InfoRow label="Due Date" value={selectedOrder?.dueDate || 'N/A'} />
                   <InfoRow
                     label="Status"
                     value={<StatusBadge status={selectedOrder.status} />}
@@ -407,38 +385,29 @@ export default function SalesOrdersPage() {
 
                 {/* Customer Information */}
                 <div className="bg-slate-50 rounded-lg p-4 space-y-3">
-                  <h4 className="font-semibold text-slate-900 flex items-center gap-2">
-                    <User className="h-4 w-4" /> Customer Information
-                  </h4>
-                  <InfoRow label="Company Name" value={selectedOrder.customer} />
-                  <InfoRow label="Contact Person" value={selectedOrder.contactPerson || '-'} />
-                  {selectedOrder.email && <InfoRow label="Email" value={selectedOrder.email} />}
-                  {selectedOrder.phone && <InfoRow label="Phone" value={selectedOrder.phone} />}
+                  <InfoRow label="Company Name" value={selectedOrder?.customerName || selectedOrder?.customer || '-'} />
+                  <InfoRow label="Contact Person" value={selectedOrder?.contactPerson || '-'} />
+                  {selectedOrder?.customerEmail && <InfoRow label="Email" value={selectedOrder.customerEmail} />}
+                  {selectedOrder?.customerPhone && <InfoRow label="Phone" value={selectedOrder.customerPhone} />}
                 </div>
 
                 {/* Financial Summary */}
                 <div className="bg-slate-50 rounded-lg p-4 space-y-3">
-                  <h4 className="font-semibold text-slate-900 flex items-center gap-2">
-                    <DollarSign className="h-4 w-4" /> Financial Summary
-                  </h4>
                   <InfoRow
                     label="Total Quantity"
-                    value={`${selectedOrder.totalQty} items`}
+                    value={`${selectedOrder?.totalQty || selectedOrder?.totalQuantity || 0} items`}
                   />
                   <InfoRow
                     label="Total Value"
-                    value={`฿${selectedOrder.totalValue.toLocaleString()}`}
+                    value={`฿${(selectedOrder?.totalValue || selectedOrder?.totalAmount || 0).toLocaleString()}`}
                     valueColor="text-blue-600 font-bold text-lg"
                   />
                 </div>
 
                 {/* Order Items List */}
                 <div>
-                  <h4 className="font-medium text-slate-900 mb-3 flex items-center gap-2">
-                    <PackageOpen className="h-4 w-4" /> รายการสินค้า
-                  </h4>
                   <div className="border rounded-lg overflow-hidden divide-y">
-                    {selectedOrder.items && selectedOrder.items.map((item: any, idx: number) => (
+                    {selectedOrder?.items && selectedOrder.items.length > 0 ? selectedOrder.items.map((item: any, idx: number) => (
                       <div
                         key={idx}
                         className="px-4 py-3 hover:bg-slate-50 transition-colors"
@@ -457,12 +426,16 @@ export default function SalesOrdersPage() {
                               {item.qty} {item.unit}
                             </div>
                             <div className="text-xs text-slate-500">
-                              รวม ฿{(item.qty * item.price).toLocaleString()}
+                              ฿{(item.qty * item.price).toLocaleString()}
                             </div>
                           </div>
                         </div>
                       </div>
-                    ))}
+                    )) : (
+                      <div className="px-4 py-8 text-center text-slate-500">
+                        No items found
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -476,32 +449,20 @@ export default function SalesOrdersPage() {
                       onClick={handleCancelOrder}
                     >
                       <XCircle className="h-4 w-4 mr-2" />
-                      ยกเลิก
+                      Cancel
                     </Button>
                     <Button
                       className="flex-1 bg-emerald-600 hover:bg-emerald-700"
                       onClick={handleConfirmOrder}
                     >
                       <CheckCircle2 className="h-4 w-4 mr-2" />
-                      ยืนยันคำสั่งซื้อ
+                      Confirm Order
                     </Button>
                   </div>
-                ) : selectedOrder.status === "Confirmed" ? (
-                  <Button
-                    className="w-full bg-blue-600 hover:bg-blue-700"
-                    onClick={handleShipOrder}
-                  >
-                    <Truck className="h-4 w-4 mr-2" />
-                    จัดส่งสินค้า
-                  </Button>
                 ) : (
                   <div className="w-full text-center text-slate-400 text-sm italic flex items-center justify-center gap-2">
                     <CheckCircle2 className="h-4 w-4" />
-                    {selectedOrder.status === "Completed"
-                      ? "สำเร็จแล้ว"
-                      : selectedOrder.status === "Shipped"
-                        ? "จัดส่งแล้ว"
-                        : "ยกเลิกแล้ว"}
+                    {selectedOrder.status === "Cancelled" ? "Cancelled" : "Confirmed"}
                   </div>
                 )}
               </SheetFooter>
@@ -540,9 +501,7 @@ function StatCard({ title, value, icon: Icon, color, bg }: {
 function StatusBadge({ status }: { status: string }) {
   const statusConfig: Record<string, { bg: string; text: string; icon: React.ElementType }> = {
     Draft: { bg: "bg-slate-50", text: "text-slate-700", icon: Clock },
-    Confirmed: { bg: "bg-blue-50", text: "text-blue-700", icon: CheckCircle2 },
-    Shipped: { bg: "bg-purple-50", text: "text-purple-700", icon: Truck },
-    Completed: { bg: "bg-emerald-50", text: "text-emerald-700", icon: CheckCircle2 },
+    Confirmed: { bg: "bg-emerald-50", text: "text-emerald-700", icon: CheckCircle2 },
     Cancelled: { bg: "bg-red-50", text: "text-red-700", icon: XCircle },
   };
 
