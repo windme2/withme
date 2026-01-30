@@ -8,8 +8,7 @@ interface User {
   id: string;
   username: string;
   email: string;
-  first_name: string;
-  last_name: string;
+  name: string;
   role: string;
 }
 
@@ -30,28 +29,42 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
   useEffect(() => {
-    try {
-      const token = localStorage.getItem("token");
-      const userStr = localStorage.getItem("user");
-      if (token && userStr) {
-        setIsAuthenticated(true);
-        setUser(JSON.parse(userStr));
+    const initAuth = async () => {
+      try {
+        const accessToken = localStorage.getItem("accessToken");
+        const userStr = localStorage.getItem("user");
+        
+        if (accessToken && userStr) {
+          // Verify token is still valid by fetching profile
+          try {
+            const profileResponse = await authApi.getProfile();
+            setIsAuthenticated(true);
+            setUser(profileResponse.user);
+          } catch (error) {
+            // Token invalid, clear storage
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("user");
+          }
+        }
+      } catch (error) {
+        console.log("Auth initialization error:", error);
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.log("Running on server side");
-    }
-    setLoading(false);
+    };
+
+    initAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
     try {
       const response = await authApi.login({ email, password });
       
-      if (response && response.token) {
-        localStorage.setItem("token", response.token);
+      if (response && response.accessToken) {
+        localStorage.setItem("accessToken", response.accessToken);
+        localStorage.setItem("refreshToken", response.refreshToken);
         localStorage.setItem("user", JSON.stringify(response.user));
-        localStorage.setItem("isAuthenticated", "true");
-        localStorage.setItem("userRole", response.user.role);
         
         setIsAuthenticated(true);
         setUser(response.user);
@@ -63,10 +76,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
     localStorage.removeItem("user");
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("userRole");
     setIsAuthenticated(false);
     setUser(null);
     router.push("/login");

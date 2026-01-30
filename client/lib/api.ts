@@ -9,17 +9,66 @@ export const api = axios.create({
     },
 });
 
+// Request interceptor - Add JWT token
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+    if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
     }
     return config;
 });
 
+// Response interceptor - Handle token refresh
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+
+        // If error is 401 and we haven't tried to refresh yet
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+
+            try {
+                const refreshToken = localStorage.getItem('refreshToken');
+                if (refreshToken) {
+                    const response = await axios.post(`${API_URL}/auth/refresh`, {
+                        refreshToken,
+                    });
+
+                    const { accessToken } = response.data;
+                    localStorage.setItem('accessToken', accessToken);
+
+                    // Retry original request with new token
+                    originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+                    return api(originalRequest);
+                }
+            } catch (refreshError) {
+                // Refresh failed, logout user
+                localStorage.removeItem('accessToken');
+                localStorage.removeItem('refreshToken');
+                localStorage.removeItem('user');
+                window.location.href = '/login';
+                return Promise.reject(refreshError);
+            }
+        }
+
+        return Promise.reject(error);
+    }
+);
+
 export const authApi = {
     login: async (credentials: any) => {
         const response = await api.post('/auth/login', credentials);
+        return response.data;
+    },
+    getProfile: async () => {
+        const response = await api.get('/auth/me');
+        return response.data;
+    },
+    refreshToken: async (refreshToken: string) => {
+        const response = await api.post('/auth/refresh', { refreshToken });
         return response.data;
     },
 };

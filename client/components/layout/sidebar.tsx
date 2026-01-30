@@ -87,16 +87,16 @@ const getSidebarModules = (userRole: string): SidebarModule[] => [
     ],
     defaultOpen: true,
   },
-  {
-    label: "Admin",
-    icon: Users,
-    emoji: "👥",
-    items: [
-      { name: "จัดการผู้ใช้", path: "/admin/user-management" },
-    ],
-    defaultOpen: true,
-    adminOnly: true,
-  },
+  // {
+  //   label: "Admin",
+  //   icon: Users,
+  //   emoji: "👥",
+  //   items: [
+  //     { name: "จัดการผู้ใช้", path: "/admin/user-management" },
+  //   ],
+  //   defaultOpen: true,
+  //   adminOnly: true,
+  // },
 ];
 
 export function Sidebar() {
