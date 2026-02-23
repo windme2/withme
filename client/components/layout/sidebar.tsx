@@ -87,16 +87,16 @@ const getSidebarModules = (userRole: string): SidebarModule[] => [
     ],
     defaultOpen: true,
   },
-  {
-    label: "Admin",
-    icon: Users,
-    emoji: "👥",
-    items: [
-      { name: "จัดการผู้ใช้", path: "/admin/user-management" },
-    ],
-    defaultOpen: true,
-    adminOnly: true,
-  },
+  // {
+  //   label: "Admin",
+  //   icon: Users,
+  //   emoji: "👥",
+  //   items: [
+  //     { name: "จัดการผู้ใช้", path: "/admin/user-management" },
+  //   ],
+  //   defaultOpen: true,
+  //   adminOnly: true,
+  // },
 ];
 
 export function Sidebar() {
@@ -200,7 +200,7 @@ export function Sidebar() {
               {/* Text */}
               <div className="text-left flex flex-col min-w-0">
                 <span className="text-lg font-bold text-white leading-none tracking-tight">
-                  Withme
+                  IMS
                 </span>
                 <span
                   className={cn(

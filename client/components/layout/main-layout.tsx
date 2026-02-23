@@ -69,7 +69,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
           <footer className="mt-auto py-4 border-t border-gray-200/50 dark:border-gray-700/50 bg-white dark:bg-gray-900">
             <div className="text-center">
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                © 2025 Withme All rights reserved.
+                © 2025 IMS All rights reserved.
               </p>
             </div>
           </footer>

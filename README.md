@@ -1,4 +1,4 @@
-# 📦 Withme Inventory Management System
+# 📦 Inventory Management System
 
 A modern inventory management system built with Next.js 15, TypeScript, and Tailwind CSS — designed for streamlined stock control, purchasing, sales orders, and real-time tracking.
 
@@ -87,8 +87,8 @@ A modern inventory management system built with Next.js 15, TypeScript, and Tail
 1. **Clone the repository**
 
    ```bash
-   git clone <https://github.com/windme2/withme>
-   cd withme
+   git clone <https://github.com/windme2/inventory-mangement-system>
+   cd inventory-mangement-system
    ```
 
 2. **Install dependencies**

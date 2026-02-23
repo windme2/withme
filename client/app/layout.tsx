@@ -8,7 +8,7 @@ import ErrorBoundary from "@/components/error-boundary";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Withme - Inventory Management System",
+  title: "IMS - Inventory Management System",
   description: "A comprehensive inventory management system",
 };
 

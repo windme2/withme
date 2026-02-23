@@ -1,6 +1,6 @@
 // Application Constants
 
-export const APP_NAME = "Withme Inventory System";
+export const APP_NAME = "IMS - Inventory Management System";
 export const APP_VERSION = "1.0.0";
 export const APP_DESCRIPTION = "A comprehensive inventory management system";
 

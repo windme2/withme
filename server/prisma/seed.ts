@@ -19,7 +19,7 @@ async function main() {
         update: {},
         create: {
             id: 'user-admin-001',
-            email: 'admin@withme.com',
+            email: 'admin@ims.com',
             username: 'admin',
             password_hash: 'admin123',
             first_name: 'Admin',
@@ -34,7 +34,7 @@ async function main() {
         update: {},
         create: {
             id: 'user-admin-002',
-            email: 'jame@withme.com',
+            email: 'jame@ims.com',
             username: 'jame',
             password_hash: 'admin123',
             first_name: 'Thinnakrit',
@@ -49,7 +49,7 @@ async function main() {
         update: {},
         create: {
             id: 'user-admin-003',
-            email: 'wind@withme.com',
+            email: 'wind@ims.com',
             username: 'wind',
             password_hash: 'admin123',
             first_name: 'Intouch',
@@ -64,7 +64,7 @@ async function main() {
         update: {},
         create: {
             id: 'user-regular-001',
-            email: 'user@withme.com',
+            email: 'user@ims.com',
             username: 'user',
             password_hash: 'user123',
             first_name: 'Regular',

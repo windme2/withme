@@ -1,7 +1,7 @@
 {
-  "name": "withme-server",
+  "name": "ims-server",
   "version": "1.0.0",
-  "description": "Withme Inventory Management System - Server",
+  "description": "Inventory Management System - Server",
   "private": true,
   "scripts": {
     "build": "nest build",

@@ -1,4 +1,4 @@
-// Core Types for Withme Inventory System
+// Core Types for Inventory Management System
 import type React from "react";
 
 export interface User {

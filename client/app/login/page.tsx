@@ -76,7 +76,7 @@ export default function LoginPage() {
             </div>
 
             <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-1">
-              Withme
+              IMS
             </h1>
             <p className="text-slate-600 text-sm font-light tracking-wide uppercase">
               Inventory Management System
@@ -180,7 +180,7 @@ export default function LoginPage() {
           {/* --- Footer --- */}
           <div className="mt-8 text-center">
             <p className="text-slate-600 text-xs font-medium tracking-wide">
-              © 2025 Withme | All rights reserved.
+              © 2025 IMS | All rights reserved.
             </p>
           </div>
         </div>
