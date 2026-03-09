@@ -18,8 +18,6 @@ import {
   Clock,
   ChevronLeft,
   ChevronRight,
-  PackageOpen,
-  AlertCircle,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
@@ -49,12 +47,50 @@ import { toast } from "sonner";
 import { purchaseOrdersApi } from "@/lib/api";
 import type { StatCardProps } from "@/lib/types";
 
+interface OrderItem {
+  id: string;
+  productId: string;
+  name: string;
+  productName: string;
+  sku: string;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+}
+
+interface Supplier {
+  name: string;
+  address?: string;
+  tax_id?: string;
+}
+
+// For list/table view
+interface PurchaseOrderListItem {
+  id: string;
+  poNumber: string;
+  prRef?: string;
+  supplier: string; // String in list view
+  supplierName: string;
+  date: string;
+  expectedDate?: string;
+  status: string;
+  totalAmount: number;
+  amount: number;
+  notes?: string;
+}
+
+// For detail view
+interface PurchaseOrderDetail extends Omit<PurchaseOrderListItem, 'supplier'> {
+  supplier: Supplier; // Object in detail view
+  items?: OrderItem[];
+}
+
 export default function PurchaseOrderPage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [orders, setOrders] = useState<any[]>([]);
-  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [orders, setOrders] = useState<PurchaseOrderListItem[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<PurchaseOrderDetail | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -68,6 +104,7 @@ export default function PurchaseOrderPage() {
       const data = await purchaseOrdersApi.getAll();
       setOrders(data);
     } catch (error) {
+      console.error('Failed to fetch orders:', error);
       toast.error("Failed to fetch purchase orders");
     } finally {
       setIsLoading(false);
@@ -110,13 +147,12 @@ export default function PurchaseOrderPage() {
     setCurrentPage(1);
   };
 
-  const handleRowClick = async (order: any) => {
+  const handleRowClick = async (order: PurchaseOrderListItem) => {
     try {
       const details = await purchaseOrdersApi.getOne(order.id);
       setSelectedOrder(details);
       setIsSheetOpen(true);
-    } catch (error) {
-      toast.error("Failed to fetch order details");
+    } catch (error) {      console.error('Failed to fetch order details:', error);      toast.error("Failed to fetch order details");
     }
   };
 
@@ -145,7 +181,7 @@ export default function PurchaseOrderPage() {
       printWindow.document.write(
         '<br/><table><thead><tr><th>Item</th><th>Qty</th><th class="text-right">Total</th></tr></thead><tbody>'
       );
-      selectedOrder.items.forEach((item: any) => {
+      selectedOrder.items?.forEach((item: OrderItem) => {
         printWindow.document.write(
           `<tr><td>${item.productName}</td><td>${
             item.quantity
@@ -475,7 +511,7 @@ export default function PurchaseOrderPage() {
                     </div>
                     <div className="divide-y max-h-[300px] overflow-y-auto">
                       {selectedOrder.items &&
-                        selectedOrder.items.map((item: any, idx: number) => (
+                        selectedOrder.items?.map((item: OrderItem, idx: number) => (
                           <div
                             key={idx}
                             className="px-4 py-3 text-sm grid grid-cols-12 gap-2 items-center"
