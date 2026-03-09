@@ -1,6 +1,8 @@
 # 📦 Inventory Management System
 
-A modern inventory management system built with Next.js 15, TypeScript, and Tailwind CSS — designed for streamlined stock control, purchasing, sales orders, and real-time tracking.
+A full-stack inventory management system built with Next.js 15, NestJS, TypeScript, and PostgreSQL — designed for streamlined stock control, purchasing, sales orders, and real-time tracking.
+
+> **Academic Project** - Developed for Computer Science coursework at Maejo University
 
 ## 🌟 Features
 
@@ -42,6 +44,16 @@ A modern inventory management system built with Next.js 15, TypeScript, and Tail
 - Filter by transaction type (Goods Receipt, Adjustment, Sales, Returns)
 - Reference linking to source documents
 - Date and user tracking for all transactions
+- **Export to Excel/PDF** - Download reports in multiple formats
+
+### 🎯 Advanced Features
+
+- **Sequential Document Numbering**: Auto-generated numbers (PR-2025-0001, PO-2025-0001, GRN-2026-0001)
+- **Real-time Notifications**: In-app alerts for important events
+- **Responsive Design**: Mobile-friendly with hamburger menu
+- **Export Functionality**: Transaction history to Excel/PDF
+- **Audit Trail**: Complete activity logging for all user actions
+- **Role-Based Access Control**: Granular permissions per module
 
 ### 👥 User & Access Control
 
@@ -52,76 +64,219 @@ A modern inventory management system built with Next.js 15, TypeScript, and Tail
 
 ## 🛠️ Technology Stack
 
-### Core Framework
+### Frontend
 
 - **Next.js 15.2.4** - React framework with App Router
 - **React 18.3.1** - UI library
 - **TypeScript 5** - Type-safe development
 - **Tailwind CSS 3.4.17** - Utility-first CSS framework
-
-### UI Components & Libraries
-
 - **shadcn/ui** - Re-usable component library based on Radix UI
 - **Radix UI Primitives** - Unstyled, accessible components
-- **Lucide React 0.553+** - Modern icon library
-- **Recharts 3.4+** - Charting library for data visualization
-- **Sonner** - Toast notification system
+- **Lucide React** - Modern icon library
+- **Recharts** - Charting library for data visualization
+- **XLSX + jsPDF** - Export functionality (Excel & PDF)
 
-### Development Tools
+### Backend
+
+- **NestJS 10+** - Progressive Node.js framework
+- **Prisma ORM 6+** - Next-generation ORM for TypeScript
+- **PostgreSQL** - Relational database
+- **Passport JWT** - Authentication strategy
+- **bcrypt** - Password hashing
+- **class-validator** - DTO validation
+
+### DevOps & Tools
 
 - **ESLint** - Code linting
-- **PostCSS & Autoprefixer** - CSS processing
+- **Prettier** - Code formatting
 - **Turbopack** - Fast development server
 
 ## 📁 Project Structure
+
+```
+inventory-management-system/
+├── client/                    # Next.js Frontend
+│   ├── app/                   # App Router pages
+│   │   ├── dashboard/         # Dashboard page
+│   │   ├── inventory/         # Inventory module
+│   │   ├── purchasing/        # Purchasing module
+│   │   ├── sales/             # Sales module
+│   │   ├── transactions/      # Transaction history
+│   │   └── admin/             # User management
+│   ├── components/            # Reusable components
+│   │   ├── layout/            # Layout components (Sidebar, Header)
+│   │   └── ui/                # shadcn/ui components
+│   ├── contexts/              # React contexts (Auth, Sidebar)
+│   ├── hooks/                 # Custom React hooks
+│   └── lib/                   # Utilities (API client, types, constants)
+│
+├── server/                    # NestJS Backend
+│   ├── prisma/                # Prisma schema & migrations
+│   │   ├── schema.prisma      # Database schema (29 tables)
+│   │   ├── seed.ts            # Database seeder
+│   │   └── migrations/        # Database migrations
+│   ├── src/
+│   │   ├── auth/              # Authentication module
+│   │   ├── users/             # User management
+│   │   ├── inventory/         # Inventory items
+│   │   ├── goods-received/    # Goods receipt notes
+│   │   ├── adjustments/       # Stock adjustments
+│   │   ├── purchasing/        # Purchase requisitions & orders
+│   │   ├── sales/             # Sales orders & shipments
+│   │   ├── customers/         # Customer management
+│   │   ├── suppliers/         # Supplier management
+│   │   ├── transactions/      # Transaction history
+│   │   ├── notifications/     # Notification system
+│   │   ├── dashboard/         # Dashboard analytics
+│   │   └── utils/             # Utilities (DocumentNumberGenerator)
+│   └── generated/             # Prisma Client (auto-generated)
+│
+└── docs/                      # Documentation
+    ├── API_BACKEND_SPEC.md    # API documentation
+    ├── CORE_LOGIC_SHOWCASE.md # Core features showcase
+    ├── DATABASE_SCHEMA.dbml   # ER Diagram (dbdiagram.io)
+    ├── SYSTEM_ARCHITECTURE.md # Architecture overview
+    └── HOW_TO_*.md            # Setup guides
+```
+
+## 📚 Documentation
+
+Comprehensive documentation is available in the `/docs` folder:
+
+- **[API_BACKEND_SPEC.md](docs/API_BACKEND_SPEC.md)** - Complete REST API documentation
+- **[CORE_LOGIC_SHOWCASE.md](docs/CORE_LOGIC_SHOWCASE.md)** - Key features & algorithms
+- **[DATABASE_SCHEMA.dbml](docs/DATABASE_SCHEMA.dbml)** - ER Diagram (import to [dbdiagram.io](https://dbdiagram.io))
+- **[HOW_TO_OPEN_PRISMA_STUDIO.md](docs/HOW_TO_OPEN_PRISMA_STUDIO.md)** - Database GUI guide
+- **[SYSTEM_ARCHITECTURE.md](docs/SYSTEM_ARCHITECTURE.md)** - System design overview
+
+### Database Schema
+
+The system uses **29 tables** organized into 5 categories:
+
+- **Core Tables** (5): users, organizations, branches, roles, permissions
+- **Inventory Tables** (4): inventory_items, inventory_levels, categories, units_of_measure
+- **Purchasing Tables** (6): purchase_requisitions, purchase_orders, suppliers, etc.
+- **Sales Tables** (6): sales_orders, shipments, returns, customers, etc.
+- **System Tables** (3): notifications, activity_logs, transaction_history
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
 - **Node.js 18+** or higher
-- **npm**, **yarn**, **pnpm**, or **bun** package manager
+- **PostgreSQL 14+** installed and running
+- **npm** or **yarn** package manager
 
 ### Installation
 
-1. **Clone the repository**
+**1. Clone the repository**
 
-   ```bash
-   git clone <https://github.com/windme2/inventory-mangement-system>
-   cd inventory-mangement-system
-   ```
+```bash
+git clone https://github.com/yourusername/inventory-management-system
+cd inventory-management-system
+```
 
-2. **Install dependencies**
+**2. Setup Backend (Server)**
 
-   ```bash
-   npm install
-   # or
-   yarn install
-   # or
-   pnpm install
-   ```
+```bash
+cd server
+npm install
+```
 
-3. **Run the development server**
+**3. Configure Environment Variables**
 
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   # or
-   pnpm dev
-   ```
+Create `.env` file in `/server` directory:
 
-4. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
+```env
+# Database
+DATABASE_URL="postgresql://username:password@localhost:5432/inventory_db"
+
+# JWT Authentication
+JWT_SECRET="your-secret-key-here"
+JWT_EXPIRES_IN="7d"
+
+# Server Configuration
+PORT=3001
+NODE_ENV="development"
+```
+
+**4. Setup Database**
+
+```bash
+# Generate Prisma Client
+npx prisma generate
+
+# Run migrations
+npx prisma migrate deploy
+
+# (Optional) Seed database with sample data
+npm run seed
+```
+
+**5. Start Backend Server**
+
+```bash
+npm run start:dev
+# Server runs on http://localhost:3001
+```
+
+**6. Setup Frontend (Client)**
+
+Open a new terminal:
+
+```bash
+cd client
+npm install
+```
+
+Create `.env.local` file in `/client` directory:
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:3001
+```
+
+**7. Start Frontend Server**
+
+```bash
+npm run dev
+# Client runs on http://localhost:3000
+```
+
+**8. Access the Application**
+
+- **Frontend**: [http://localhost:3000](http://localhost:3000)
+- **Backend API**: [http://localhost:3001](http://localhost:3001)
+- **Prisma Studio**: Run `npm run studio` in `/server` folder
+
+### Default Login Credentials
+
+```
+Email: admin@example.com
+Password: password123
+```
 
 ### Available Scripts
 
+**Backend (server/)**
+
 ```bash
-npm run dev        # Start development server with Turbopack
-npm run build      # Build for production
-npm run start      # Start production server
-npm run lint       # Run ESLint
-npm run type-check # Run TypeScript type checking
+npm run start:dev    # Start development server with hot-reload
+npm run start:prod   # Start production server
+npm run build        # Build for production
+npm run test         # Run unit tests
+npm run test:e2e     # Run end-to-end tests
+npm run studio       # Open Prisma Studio (Database GUI)
+npm run seed         # Seed database with sample data
+```
+
+**Frontend (client/)**
+
+```bash
+npm run dev          # Start development server with Turbopack
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
+npm run type-check   # Run TypeScript type checking
 ```
 
 ## 📄 Key Pages & Routes
@@ -165,45 +320,82 @@ Built with **shadcn/ui** - a collection of re-usable components:
 
 ### Purchase Requisition to Purchase Order
 
-1. User creates **Purchase Requisition (PR)**
+1. User creates **Purchase Requisition (PR)** with auto-generated number (PR-2025-0001)
 2. PR enters **approval workflow** (status tracking)
 3. Manager **approves PR**
-4. Approved PR converts to **Purchase Order (PO)**
+4. Approved PR converts to **Purchase Order (PO)** with sequential number (PO-2025-0001)
 5. PO sent to supplier
-6. Goods received via **Goods Receipt Note (GRN)**
-7. Stock levels automatically updated
+6. Goods received via **Goods Receipt Note (GRN-2026-0001)**
+7. Stock levels automatically updated in inventory_levels table
 
 ### Sales Order Processing
 
-1. Create **Sales Order** for customer
+1. Create **Sales Order (SO-2025-0001)** for customer
 2. Order status: Draft → Confirmed → Shipped → Completed
-3. Create **Shipment** record with tracking
-4. Update inventory on shipment
-5. Handle **Returns** if needed
+3. Create **Shipment (SH-2025-0001)** record with tracking
+4. Update inventory on shipment confirmation
+5. Handle **Returns (SR-2025-0001)** if needed with automatic stock adjustment
 
-## 📊 Mock Data
+## 📊 Key Technologies & Patterns
 
-The application includes comprehensive mock data for development and demonstration:
+- **Monorepo Structure**: Frontend (client) + Backend (server) in single repository
+- **TypeScript First**: Full type safety across the stack
+- **Prisma Transactions**: Atomic operations for data integrity
+- **JWT Authentication**: Secure token-based auth with password hashing
+- **RESTful API**: Consistent API design with proper HTTP methods
+- **Responsive UI**: Mobile-first design with Tailwind CSS
+- **Component Library**: Reusable shadcn/ui components
 
-- **Products**: 100+ items across multiple categories
-- **Users**: 20 user accounts with various roles
-- **Transactions**: 30+ movement records
-- **Customers**: 20 customer profiles
-- **Suppliers**: 20 supplier profiles
-- **Orders**: Sales and purchase orders with various statuses
+## 🐛 Troubleshooting
+
+**Database connection error**
+
+```bash
+# Verify PostgreSQL is running
+# Check DATABASE_URL in .env file
+# Ensure database exists
+```
+
+**Port already in use**
+
+```bash
+# Frontend: Change port in package.json dev script
+# Backend: Change PORT in .env file
+```
 
 **TypeScript errors**
 
 ```bash
-# Run type check
-npm run type-check
+# Regenerate Prisma Client
+cd server
+npx prisma generate
+
+# Clear Next.js cache
+cd client
+rm -rf .next
+npm run dev
 ```
 
 ## 📝 License
 
-This project is private and proprietary.
+This project is developed for academic purposes at **Maejo University, Faculty of Science**.
 
 ## 👥 Contributors
 
-- **Intouch Charoenphon** - Front-end Development
-- **Thinnakrit Chankate** - Back-end Development
+- **Intouch Charoenphon** - Full-Stack Development
+- **Thinnakrit Chankate** - Full-Stack Development
+
+## 🎓 Academic Context
+
+This Inventory Management System was developed as part of a Computer Science course project at Maejo University. The system demonstrates:
+
+- Modern web development practices
+- Full-stack TypeScript development
+- Database design and optimization
+- RESTful API architecture
+- Responsive UI/UX design
+- Real-world business logic implementation
+
+---
+
+**Developed with ❤️ by Maejo University Computer Science Students**
