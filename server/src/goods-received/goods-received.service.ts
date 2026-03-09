@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { DocumentNumberGenerator } from '../utils/document-number-generator';
 
 @Injectable()
 export class GoodsReceivedService {
-    constructor(private prisma: PrismaService) { }
+    private docNumberGenerator: DocumentNumberGenerator;
+
+    constructor(private prisma: PrismaService) {
+        this.docNumberGenerator = new DocumentNumberGenerator(prisma);
+    }
 
     async findAll(status?: string, search?: string) {
         const where: any = {};
@@ -127,11 +132,14 @@ export class GoodsReceivedService {
         const { supplierId, date, poRef, notes, items, userId } = data;
 
         return this.prisma.$transaction(async (tx) => {
+            // Generate sequential GRN number
+            const grnNumber = await this.docNumberGenerator.generateGRNNumber();
+
             // 1. Create GRN Header
             const grn = await tx.goods_received.create({
                 data: {
                     id: `grn-${Date.now()}`,
-                    grn_number: `GRN-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
+                    grn_number: grnNumber,
                     supplier_id: supplierId,
                     received_date: new Date(date),
                     received_by: userId,

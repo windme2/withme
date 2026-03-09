@@ -1,13 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { DocumentNumberGenerator } from '../utils/document-number-generator';
 
 @Injectable()
 export class SalesShipmentsService {
+    private docNumberGenerator: DocumentNumberGenerator;
+
     constructor(
         private prisma: PrismaService,
         private notificationsService: NotificationsService
-    ) { }
+    ) {
+        this.docNumberGenerator = new DocumentNumberGenerator(prisma);
+    }
 
     async findAll(status?: string, search?: string) {
         const where: any = {};
@@ -76,7 +81,7 @@ export class SalesShipmentsService {
 
     async create(data: any) {
         const result = await this.prisma.$transaction(async (tx) => {
-            const shipmentNumber = `SH-${new Date().getFullYear()}-${Date.now().toString().slice(-3).padStart(3, '0')}`;
+            const shipmentNumber = await this.docNumberGenerator.generateShipmentNumber();
 
             const shipment = await tx.sales_shipments.create({
                 data: {

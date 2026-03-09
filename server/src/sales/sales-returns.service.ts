@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { DocumentNumberGenerator } from '../utils/document-number-generator';
 
 @Injectable()
 export class SalesReturnsService {
-    constructor(private prisma: PrismaService) { }
+    private docNumberGenerator: DocumentNumberGenerator;
+
+    constructor(private prisma: PrismaService) {
+        this.docNumberGenerator = new DocumentNumberGenerator(prisma);
+    }
 
     async findAll(status?: string, search?: string) {
         const where: any = {};
@@ -105,7 +110,7 @@ export class SalesReturnsService {
                     });
                 }
 
-                const returnNumber = `RET-${new Date().getFullYear()}-${Date.now().toString().slice(-3).padStart(3, '0')}`;
+                const returnNumber = await this.docNumberGenerator.generateReturnNumber();
 
                 const salesReturn = await tx.sales_returns.create({
                     data: {

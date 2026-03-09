@@ -1,14 +1,18 @@
 import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-
+import { DocumentNumberGenerator } from '../utils/document-number-generator';
 import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class PurchasingService {
+    private docNumberGenerator: DocumentNumberGenerator;
+
     constructor(
         private prisma: PrismaService,
         private notificationsService: NotificationsService
-    ) { }
+    ) {
+        this.docNumberGenerator = new DocumentNumberGenerator(prisma);
+    }
 
     async findAll(status?: string, search?: string) {
         const where: any = {};
@@ -105,10 +109,13 @@ export class PurchasingService {
         const { items, notes, userId, priority, supplierId } = data;
 
         const result = await this.prisma.$transaction(async (tx) => {
+            // Generate sequential PR number
+            const prNumber = await this.docNumberGenerator.generatePRNumber();
+
             const pr = await tx.purchase_requisitions.create({
                 data: {
                     id: `pr-${Date.now()}`,
-                    pr_number: `PR-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
+                    pr_number: prNumber,
                     requested_by: userId,
                     supplier_id: supplierId || null,
                     department: 'General',

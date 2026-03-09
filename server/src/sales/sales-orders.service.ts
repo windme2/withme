@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { DocumentNumberGenerator } from '../utils/document-number-generator';
 
 @Injectable()
 export class SalesOrdersService {
-    constructor(private prisma: PrismaService) { }
+    private docNumberGenerator: DocumentNumberGenerator;
+
+    constructor(private prisma: PrismaService) {
+        this.docNumberGenerator = new DocumentNumberGenerator(prisma);
+    }
 
     async findAll(status?: string, search?: string) {
         const where: any = {};
@@ -88,7 +93,7 @@ export class SalesOrdersService {
         const { customerName, contactPerson, email, phone, dueDate, items, notes } = data;
 
         return this.prisma.$transaction(async (tx) => {
-            const soNumber = `SO-${new Date().getFullYear()}-${Date.now().toString().slice(-3).padStart(3, '0')}`;
+            const soNumber = await this.docNumberGenerator.generateSONumber();
             const totalAmount = items.reduce((sum: number, item: any) => sum + (item.quantity * item.unitPrice), 0);
 
             const order = await tx.sales_orders.create({

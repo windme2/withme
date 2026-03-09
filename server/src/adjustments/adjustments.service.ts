@@ -1,14 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-
+import { DocumentNumberGenerator } from '../utils/document-number-generator';
 import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class AdjustmentsService {
+    private docNumberGenerator: DocumentNumberGenerator;
+
     constructor(
         private prisma: PrismaService,
         private notificationsService: NotificationsService
-    ) { }
+    ) {
+        this.docNumberGenerator = new DocumentNumberGenerator(prisma);
+    }
 
     async findAll(type?: string, search?: string) {
         const where: any = {};
@@ -122,11 +126,14 @@ export class AdjustmentsService {
         const adjustmentType = typeMap[type] || 'other';
 
         const result = await this.prisma.$transaction(async (tx) => {
+            // Generate sequential adjustment number
+            const adjNumber = await this.docNumberGenerator.generateAdjustmentNumber();
+
             // 1. Create Adjustment Header
             const adjustment = await tx.inventory_adjustments.create({
                 data: {
                     id: `adj-${Date.now()}`,
-                    adjustment_number: `ADJ-${new Date().getFullYear()}-${Date.now().toString().slice(-4)}`,
+                    adjustment_number: adjNumber,
                     adjustment_type: adjustmentType,
                     status: 'approved', // Auto-approve for now
                     adjustment_date: new Date(date),
