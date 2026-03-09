@@ -1,13 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -36,6 +31,7 @@ export function NotificationDropdown() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const fetchNotifications = async () => {
     try {
@@ -53,6 +49,20 @@ export function NotificationDropdown() {
     const interval = setInterval(fetchNotifications, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => document.removeEventListener("mousedown", handleClickOutside);
+    }
+  }, [open]);
 
   const handleMarkAsRead = async (id: string) => {
     try {
@@ -138,25 +148,27 @@ export function NotificationDropdown() {
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative hover:bg-blue-50 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700"
-        >
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <Badge
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs"
-              variant="default"
-            >
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </Badge>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[380px] p-0" align="end">
+    <div className="relative" ref={dropdownRef}>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setOpen(!open)}
+        className="relative hover:bg-blue-50 dark:hover:bg-gray-800 border border-gray-200 dark:border-gray-700"
+      >
+        <Bell className="h-5 w-5" />
+        {unreadCount > 0 && (
+          <Badge
+            className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 text-white text-xs"
+            variant="default"
+          >
+            {unreadCount > 9 ? "9+" : unreadCount}
+          </Badge>
+        )}
+      </Button>
+
+      {/* Custom Dropdown Content */}
+      {open && (
+        <div className="absolute right-0 top-full mt-2 w-[min(95vw,380px)] md:w-[380px] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-[150]">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b bg-slate-50/50">
           <div>
@@ -180,7 +192,7 @@ export function NotificationDropdown() {
         </div>
 
         {/* Notifications List */}
-        <div className="max-h-[400px] overflow-y-auto">
+        <div className="max-h-[400px] md:max-h-[400px] max-h-[60vh] overflow-y-auto">
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-slate-400">
               <Bell className="h-12 w-12 mb-3 opacity-50" />
@@ -234,7 +246,8 @@ export function NotificationDropdown() {
             </div>
           )}
         </div>
-      </PopoverContent>
-    </Popover>
+        </div>
+      )}
+    </div>
   );
 }

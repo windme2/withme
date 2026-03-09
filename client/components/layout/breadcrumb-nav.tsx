@@ -13,6 +13,7 @@ const pathNameMap: Record<string, string> = {
   purchasing: "จัดซื้อ",
   sales: "ขาย",
   transactions: "รายการเคลื่อนไหว",
+  reports: "Reports",
   admin: "จัดการระบบ",
   settings: "ตั้งค่า",
   profile: "โปรไฟล์",
@@ -57,6 +58,9 @@ const pathModuleMap: Record<string, string> = {
   
   // Transactions module paths
   transactions: "รายการเคลื่อนไหว",
+  
+  // Reports module paths
+  reports: "REPORTS",
   
   // Admin module paths
   admin: "จัดการระบบ",

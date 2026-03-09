@@ -41,6 +41,7 @@ const pathNameMap: Record<string, string> = {
   customers: "Customers",
   transactions: "TRANSACTIONS",
   movements: "History of Movements",
+  reports: "Reports",
   admin: "ADMIN",
   "user-management": "User Management",
   settings: "Settings",
@@ -118,13 +119,15 @@ export function Header() {
 
   return (
     <header
-      className={`h-16 flex items-center justify-between px-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 fixed top-0 right-0 z-40 transition-all duration-300 ${
-        collapsed ? "left-20" : "left-64" // Updated to match Sidebar width
-      }`}
+      className={cn(
+        "h-16 flex items-center justify-between px-6 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 transition-all duration-300",
+        "md:fixed md:top-0 md:right-0 md:z-[100]",
+        collapsed ? "md:left-20" : "md:left-64"
+      )}
     >
-      {/* Breadcrumb Section */}
+      {/* Breadcrumb Section - Hidden on Mobile */}
       {showBreadcrumb && (
-        <nav className="flex items-center space-x-1 text-sm">
+        <nav className="hidden md:flex items-center space-x-1 text-sm">
           {/* Home Icon */}
           <Link
             href="/dashboard"
