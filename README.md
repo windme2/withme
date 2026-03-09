@@ -2,7 +2,6 @@
 
 A full-stack inventory management system built with Next.js 15, NestJS, TypeScript, and PostgreSQL — designed for streamlined stock control, purchasing, sales orders, and real-time tracking.
 
-> **Academic Project** - Developed for Computer Science coursework at Maejo University
 
 ## 🌟 Features
 
@@ -91,64 +90,6 @@ A full-stack inventory management system built with Next.js 15, NestJS, TypeScri
 - **Prettier** - Code formatting
 - **Turbopack** - Fast development server
 
-## 📁 Project Structure
-
-```
-inventory-management-system/
-├── client/                    # Next.js Frontend
-│   ├── app/                   # App Router pages
-│   │   ├── dashboard/         # Dashboard page
-│   │   ├── inventory/         # Inventory module
-│   │   ├── purchasing/        # Purchasing module
-│   │   ├── sales/             # Sales module
-│   │   ├── transactions/      # Transaction history
-│   │   └── admin/             # User management
-│   ├── components/            # Reusable components
-│   │   ├── layout/            # Layout components (Sidebar, Header)
-│   │   └── ui/                # shadcn/ui components
-│   ├── contexts/              # React contexts (Auth, Sidebar)
-│   ├── hooks/                 # Custom React hooks
-│   └── lib/                   # Utilities (API client, types, constants)
-│
-├── server/                    # NestJS Backend
-│   ├── prisma/                # Prisma schema & migrations
-│   │   ├── schema.prisma      # Database schema (29 tables)
-│   │   ├── seed.ts            # Database seeder
-│   │   └── migrations/        # Database migrations
-│   ├── src/
-│   │   ├── auth/              # Authentication module
-│   │   ├── users/             # User management
-│   │   ├── inventory/         # Inventory items
-│   │   ├── goods-received/    # Goods receipt notes
-│   │   ├── adjustments/       # Stock adjustments
-│   │   ├── purchasing/        # Purchase requisitions & orders
-│   │   ├── sales/             # Sales orders & shipments
-│   │   ├── customers/         # Customer management
-│   │   ├── suppliers/         # Supplier management
-│   │   ├── transactions/      # Transaction history
-│   │   ├── notifications/     # Notification system
-│   │   ├── dashboard/         # Dashboard analytics
-│   │   └── utils/             # Utilities (DocumentNumberGenerator)
-│   └── generated/             # Prisma Client (auto-generated)
-│
-└── docs/                      # Documentation
-    ├── API_BACKEND_SPEC.md    # API documentation
-    ├── CORE_LOGIC_SHOWCASE.md # Core features showcase
-    ├── DATABASE_SCHEMA.dbml   # ER Diagram (dbdiagram.io)
-    ├── SYSTEM_ARCHITECTURE.md # Architecture overview
-    └── HOW_TO_*.md            # Setup guides
-```
-
-## 📚 Documentation
-
-Comprehensive documentation is available in the `/docs` folder:
-
-- **[API_BACKEND_SPEC.md](docs/API_BACKEND_SPEC.md)** - Complete REST API documentation
-- **[CORE_LOGIC_SHOWCASE.md](docs/CORE_LOGIC_SHOWCASE.md)** - Key features & algorithms
-- **[DATABASE_SCHEMA.dbml](docs/DATABASE_SCHEMA.dbml)** - ER Diagram (import to [dbdiagram.io](https://dbdiagram.io))
-- **[HOW_TO_OPEN_PRISMA_STUDIO.md](docs/HOW_TO_OPEN_PRISMA_STUDIO.md)** - Database GUI guide
-- **[SYSTEM_ARCHITECTURE.md](docs/SYSTEM_ARCHITECTURE.md)** - System design overview
-
 ### Database Schema
 
 The system uses **29 tables** organized into 5 categories:
@@ -172,8 +113,8 @@ The system uses **29 tables** organized into 5 categories:
 **1. Clone the repository**
 
 ```bash
-git clone https://github.com/yourusername/inventory-management-system
-cd inventory-management-system
+git clone https://github.com/windme2/final-project
+cd final-project
 ```
 
 **2. Setup Backend (Server)**
@@ -378,24 +319,10 @@ npm run dev
 
 ## 📝 License
 
-This project is developed for academic purposes at **Maejo University, Faculty of Science**.
+This project is developed for academic purposes at **Attawit Commercial Technology College**.
 
 ## 👥 Contributors
 
 - **Intouch Charoenphon** - Full-Stack Development
 - **Thinnakrit Chankate** - Full-Stack Development
 
-## 🎓 Academic Context
-
-This Inventory Management System was developed as part of a Computer Science course project at Maejo University. The system demonstrates:
-
-- Modern web development practices
-- Full-stack TypeScript development
-- Database design and optimization
-- RESTful API architecture
-- Responsive UI/UX design
-- Real-world business logic implementation
-
----
-
-**Developed with ❤️ by Maejo University Computer Science Students**
